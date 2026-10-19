@@ -26,7 +26,7 @@ Point layers for `cool`, `water`, `bench` with filter chips to toggle each one. 
 
 **Done when:** each layer toggles without errors.
 
-## MAP-5 `/mapa?place=<name>`
+## MAP-5 `/mapa?place=<name>` ✅
 
 When the URL has `place`, the map flies to that place and opens its popup. Used by "Pokaż na mapie" on `/miejsca-chlodu`.
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Map as MapLibre, Popup, type ExpressionSpecification, type MapMouseEvent } from 'maplibre-gl'
-import type { FeatureCollection } from 'geojson'
+import { useSearchParams } from 'react-router'
+import { Map as MapLibre, Popup, type ExpressionSpecification, type LngLatLike, type MapMouseEvent } from 'maplibre-gl'
+import type { FeatureCollection, GeoJsonProperties } from 'geojson'
 import { Alert, Box, Chip, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 
 // Data files carry accuracy and computed_at next to the features (SPEC 5)
@@ -28,7 +29,18 @@ const placeLayers = placeTypes.map(({ type }) => `places-${type}`)
 const days: Record<string, string> = { Mo: 'pn', Tu: 'wt', We: 'śr', Th: 'czw', Fr: 'pt', Sa: 'sob', Su: 'nd' }
 const polishDays = (hours: string) => hours.replace(/Mo|Tu|We|Th|Fr|Sa|Su/g, (d) => days[d])
 
-const sunColor =(hour: number) =>
+const placeLines = (p: NonNullable<GeoJsonProperties>) =>
+  [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', p.verified ? 'Zweryfikowane' : 'Niezweryfikowane', `Źródło: ${p.source}`]
+
+// Text only (no HTML), one line per entry
+function showPopup(map: MapLibre, at: LngLatLike, lines: string[]) {
+  const el = document.createElement('div')
+  el.style.whiteSpace = 'pre-line'
+  el.textContent = lines.filter(Boolean).join('\n')
+  return new Popup().setLngLat(at).setDOMContent(el).addTo(map)
+}
+
+const sunColor = (hour: number) =>
   ['step', ['get', `s${hour}`], steps[0].color, 0.335, steps[1].color, 0.665, steps[2].color] as ExpressionSpecification
 
 // null = missing or broken file, shown as "Brak danych"
@@ -42,6 +54,7 @@ export default function Mapa() {
   const [places, setPlaces] = useState<Data | null>()
   const [hour, setHour] = useState(14)
   const [shown, setShown] = useState<Record<string, boolean>>({ cool: true, water: true, bench: true })
+  const placeName = useSearchParams()[0].get('place')
 
   useEffect(() => {
     const m = new MapLibre({ container: container.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds })
@@ -87,17 +100,21 @@ export default function Mapa() {
       const f = map.queryRenderedFeatures([[x - 6, y - 6], [x + 6, y + 6]], { layers })[0]
       if (!f) return
       const p = f.properties
-      const lines = f.layer.id === 'edges'
-        ? [`Słońce o ${hour}:00: ${pct(p[`s${hour}`])} (${edges?.accuracy})`]
-        : [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', p.verified ? 'Zweryfikowane' : 'Niezweryfikowane', `Źródło: ${p.source}`]
-      const el = document.createElement('div')
-      el.style.whiteSpace = 'pre-line'
-      el.textContent = lines.filter(Boolean).join('\n')
-      new Popup().setLngLat(e.lngLat).setDOMContent(el).addTo(map)
+      showPopup(map, e.lngLat, f.layer.id === 'edges' ? [`Słońce o ${hour}:00: ${pct(p[`s${hour}`])} (${edges?.accuracy})`] : placeLines(p))
     }
     map.on('click', onClick)
     return () => void map.off('click', onClick)
   }, [map, edges, hour])
+
+  // /mapa?place=<name>, linked from /miejsca-chlodu
+  useEffect(() => {
+    const f = places?.features.find((f) => f.properties?.name === placeName)
+    if (!map || f?.geometry.type !== 'Point') return
+    const at = f.geometry.coordinates as [number, number]
+    map.flyTo({ center: at, zoom: 17 })
+    const popup = showPopup(map, at, placeLines(f.properties!))
+    return () => void popup.remove()
+  }, [map, places, placeName])
 
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>

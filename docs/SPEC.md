@@ -86,9 +86,9 @@ Polish text. Works on phone and desktop. Never use colour alone: show a percenta
 
 ## 8. Build order
 
-1. Moderator login on `/panel` and an app shell styled like the mobile app. **Done in this branch.**
+1. Moderator login on `/panel` and an app shell styled like the mobile app. **Done.**
 2. Home page `/` (static, no data dependency).
-3. `/mapa` with a hand-made sample `edges.geojson` and `places.geojson`, replaced when Python delivers.
+3. `/mapa` with a hand-made sample `edges.geojson` and `places.geojson`, replaced when Python delivers. **Done**, tickets in [TICKETS.md](TICKETS.md).
 4. `/miejsca-chlodu` (reuses `places.geojson`).
 5. `/trasa`.
 6. Panel views.
