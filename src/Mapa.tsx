@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Map as MapLibre, Popup, type ExpressionSpecification, type MapLayerMouseEvent } from 'maplibre-gl'
+import { Map as MapLibre, Popup, type ExpressionSpecification, type MapMouseEvent } from 'maplibre-gl'
 import type { FeatureCollection } from 'geojson'
-import { Alert, Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { Alert, Box, Chip, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 
 // Data files carry accuracy and computed_at next to the features (SPEC 5)
 type Data = FeatureCollection & { accuracy: string; computed_at: string }
@@ -17,7 +17,18 @@ const steps = [
   { color: '#e4572e', label: '67–100 %' },
 ]
 
-const sunColor = (hour: number) =>
+const placeTypes = [
+  { type: 'cool', label: 'Miejsca chłodu', color: '#4fb3e8' },
+  { type: 'water', label: 'Woda pitna', color: '#1565c0' },
+  { type: 'bench', label: 'Ławki', color: '#8d6e63' },
+]
+const placeLayers = placeTypes.map(({ type }) => `places-${type}`)
+
+// OSM opening_hours day codes to Polish
+const days: Record<string, string> = { Mo: 'pn', Tu: 'wt', We: 'śr', Th: 'czw', Fr: 'pt', Sa: 'sob', Su: 'nd' }
+const polishDays = (hours: string) => hours.replace(/Mo|Tu|We|Th|Fr|Sa|Su/g, (d) => days[d])
+
+const sunColor =(hour: number) =>
   ['step', ['get', `s${hour}`], steps[0].color, 0.335, steps[1].color, 0.665, steps[2].color] as ExpressionSpecification
 
 // null = missing or broken file, shown as "Brak danych"
@@ -28,7 +39,9 @@ export default function Mapa() {
   const container = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<MapLibre>()
   const [edges, setEdges] = useState<Data | null>()
+  const [places, setPlaces] = useState<Data | null>()
   const [hour, setHour] = useState(14)
+  const [shown, setShown] = useState<Record<string, boolean>>({ cool: true, water: true, bench: true })
 
   useEffect(() => {
     const m = new MapLibre({ container: container.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds })
@@ -38,26 +51,52 @@ export default function Mapa() {
 
   useEffect(() => {
     load('/data/edges.geojson').then(setEdges)
+    load('/data/places.geojson').then(setPlaces)
   }, [])
 
   useEffect(() => {
     if (!map || !edges) return
     if (!map.getSource('edges')) {
       map.addSource('edges', { type: 'geojson', data: edges })
-      map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: { 'line-cap': 'round' }, paint: { 'line-width': 5 } })
+      // Keep segments under the points if places loaded first
+      map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: { 'line-cap': 'round' }, paint: { 'line-width': 5 } }, map.getLayer(placeLayers[0]) ? placeLayers[0] : undefined)
     }
     map.setPaintProperty('edges', 'line-color', sunColor(hour))
   }, [map, edges, hour])
 
-  // Colour is never the only signal: tapping a segment shows its percentage
   useEffect(() => {
-    if (!map || !edges) return
-    const onClick = (e: MapLayerMouseEvent) => {
-      const s = e.features![0].properties[`s${hour}`]
-      new Popup().setLngLat(e.lngLat).setText(`Słońce o ${hour}:00: ${pct(s)} (${edges.accuracy})`).addTo(map)
+    if (!map || !places) return
+    if (!map.getSource('places')) {
+      map.addSource('places', { type: 'geojson', data: places })
+      for (const { type, color } of placeTypes) {
+        map.addLayer({
+          id: `places-${type}`, type: 'circle', source: 'places', filter: ['==', ['get', 'type'], type],
+          paint: { 'circle-radius': type === 'cool' ? 8 : 5, 'circle-color': color, 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' },
+        })
+      }
     }
-    map.on('click', 'edges', onClick)
-    return () => void map.off('click', 'edges', onClick)
+    for (const { type } of placeTypes) map.setLayoutProperty(`places-${type}`, 'visibility', shown[type] ? 'visible' : 'none')
+  }, [map, places, shown])
+
+  // One handler for all layers, so a point over a segment opens one popup. Colour is never the only signal.
+  useEffect(() => {
+    if (!map) return
+    const onClick = (e: MapMouseEvent) => {
+      const { x, y } = e.point
+      const layers = ['edges', ...placeLayers].filter((id) => map.getLayer(id))
+      const f = map.queryRenderedFeatures([[x - 6, y - 6], [x + 6, y + 6]], { layers })[0]
+      if (!f) return
+      const p = f.properties
+      const lines = f.layer.id === 'edges'
+        ? [`Słońce o ${hour}:00: ${pct(p[`s${hour}`])} (${edges?.accuracy})`]
+        : [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', p.verified ? 'Zweryfikowane' : 'Niezweryfikowane', `Źródło: ${p.source}`]
+      const el = document.createElement('div')
+      el.style.whiteSpace = 'pre-line'
+      el.textContent = lines.filter(Boolean).join('\n')
+      new Popup().setLngLat(e.lngLat).setDOMContent(el).addTo(map)
+    }
+    map.on('click', onClick)
+    return () => void map.off('click', onClick)
   }, [map, edges, hour])
 
   return (
@@ -67,6 +106,21 @@ export default function Mapa() {
         <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && setHour(h)} aria-label="Godzina">
           {hours.map((h) => <ToggleButton key={h} value={h}>{h}:00</ToggleButton>)}
         </ToggleButtonGroup>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5, maxWidth: { sm: 400 } }}>
+          {places === null && <Alert severity="warning">Brak danych o miejscach</Alert>}
+          {places && placeTypes.map(({ type, label, color }) => (
+            <Chip
+              key={type}
+              label={label}
+              variant={shown[type] ? 'filled' : 'outlined'}
+              icon={<Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: color, opacity: shown[type] ? 1 : 0.4 }} />}
+              onClick={() => setShown({ ...shown, [type]: !shown[type] })}
+              aria-pressed={shown[type]}
+            />
+          ))}
+          <Chip label="Cisza · w przygotowaniu" variant="outlined" disabled />
+          <Chip label="Powietrze · w przygotowaniu" variant="outlined" disabled />
+        </Box>
       </Paper>
       <Paper sx={{ position: 'absolute', bottom: 32, left: 16, p: 1.5 }}>
         {edges === null ? <Alert severity="warning">Brak danych</Alert> : (
