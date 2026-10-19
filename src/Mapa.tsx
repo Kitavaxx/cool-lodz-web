@@ -1,75 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { Map as MapLibre, Popup, setWorkerUrl, type ExpressionSpecification, type LngLatLike, type MapMouseEvent } from 'maplibre-gl'
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
-import type { FeatureCollection, GeoJsonProperties } from 'geojson'
+import type { MapMouseEvent } from 'maplibre-gl'
 import { Alert, Box, Chip, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { hours, pct, placeLines, placeTypes, showPopup, steps, sunColor, useData, useMap } from './shared'
 
-// MapLibre finds its worker from import.meta.url at runtime, which Vite can't follow, so hand it the URL
-setWorkerUrl(workerUrl)
-
-// Data files carry accuracy and computed_at next to the features (SPEC 5)
-type Data = FeatureCollection & { accuracy: string; computed_at: string }
-
-const bounds: [number, number, number, number] = [19.43, 51.74, 19.48, 51.78]
-const hours = [10, 12, 14, 16, 18]
-const pct = (s: number) => `${Math.round(s * 100)} %`
-
-// Three sun-share steps; cut-offs match Math.round on the percentage labels
-const steps = [
-  { color: '#2c7fb8', label: '0–33 %' },
-  { color: '#f4b942', label: '34–66 %' },
-  { color: '#e4572e', label: '67–100 %' },
-]
-
-const placeTypes = [
-  { type: 'cool', label: 'Miejsca chłodu', color: '#4fb3e8' },
-  { type: 'water', label: 'Woda pitna', color: '#1565c0' },
-  { type: 'bench', label: 'Ławki', color: '#8d6e63' },
-]
 const placeLayers = placeTypes.map(({ type }) => `places-${type}`)
 
-// OSM opening_hours day codes to Polish
-const days: Record<string, string> = { Mo: 'pn', Tu: 'wt', We: 'śr', Th: 'czw', Fr: 'pt', Sa: 'sob', Su: 'nd' }
-const polishDays = (hours: string) => hours.replace(/Mo|Tu|We|Th|Fr|Sa|Su/g, (d) => days[d])
-
-const placeLines = (p: NonNullable<GeoJsonProperties>) =>
-  [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', p.verified ? 'Zweryfikowane' : 'Niezweryfikowane', `Źródło: ${p.source}`]
-
-// Text only (no HTML), one line per entry
-function showPopup(map: MapLibre, at: LngLatLike, lines: string[]) {
-  const el = document.createElement('div')
-  el.style.whiteSpace = 'pre-line'
-  el.textContent = lines.filter(Boolean).join('\n')
-  return new Popup().setLngLat(at).setDOMContent(el).addTo(map)
-}
-
-const sunColor = (hour: number) =>
-  ['step', ['get', `s${hour}`], steps[0].color, 0.335, steps[1].color, 0.665, steps[2].color] as ExpressionSpecification
-
-// null = missing or broken file, shown as "Brak danych"
-const load = (url: string): Promise<Data | null> =>
-  fetch(url).then((r) => r.json()).then((d) => (d?.features ? d : null)).catch(() => null)
-
 export default function Mapa() {
-  const container = useRef<HTMLDivElement>(null)
-  const [map, setMap] = useState<MapLibre>()
-  const [edges, setEdges] = useState<Data | null>()
-  const [places, setPlaces] = useState<Data | null>()
+  const [container, map] = useMap()
+  const edges = useData('/data/edges.geojson')
+  const places = useData('/data/places.geojson')
   const [hour, setHour] = useState(14)
   const [shown, setShown] = useState<Record<string, boolean>>({ cool: true, water: true, bench: true })
   const placeName = useSearchParams()[0].get('place')
-
-  useEffect(() => {
-    const m = new MapLibre({ container: container.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds })
-    m.on('load', () => setMap(m))
-    return () => m.remove()
-  }, [])
-
-  useEffect(() => {
-    load('/data/edges.geojson').then(setEdges)
-    load('/data/places.geojson').then(setPlaces)
-  }, [])
 
   useEffect(() => {
     if (!map || !edges) return
