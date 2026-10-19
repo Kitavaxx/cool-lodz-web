@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { Map as MapLibre, Popup, type ExpressionSpecification, type LngLatLike, type MapMouseEvent } from 'maplibre-gl'
+import { Map as MapLibre, Popup, setWorkerUrl, type ExpressionSpecification, type LngLatLike, type MapMouseEvent } from 'maplibre-gl'
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import type { FeatureCollection, GeoJsonProperties } from 'geojson'
 import { Alert, Box, Chip, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+
+// MapLibre finds its worker from import.meta.url at runtime, which Vite can't follow, so hand it the URL
+setWorkerUrl(workerUrl)
 
 // Data files carry accuracy and computed_at next to the features (SPEC 5)
 type Data = FeatureCollection & { accuracy: string; computed_at: string }
@@ -123,7 +127,7 @@ export default function Mapa() {
         <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && setHour(h)} aria-label="Godzina">
           {hours.map((h) => <ToggleButton key={h} value={h}>{h}:00</ToggleButton>)}
         </ToggleButtonGroup>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5, maxWidth: { sm: 400 } }}>
+        <Box sx={{ display: 'flex', flexWrap: { xs: 'nowrap', sm: 'wrap' }, overflowX: 'auto', scrollbarWidth: 'none', gap: 1, mt: 1.5, maxWidth: { sm: 400 }, '& > *': { flexShrink: 0 } }}>
           {places === null && <Alert severity="warning">Brak danych o miejscach</Alert>}
           {places && placeTypes.map(({ type, label, color }) => (
             <Chip
@@ -139,7 +143,7 @@ export default function Mapa() {
           <Chip label="Powietrze · w przygotowaniu" variant="outlined" disabled />
         </Box>
       </Paper>
-      <Paper sx={{ position: 'absolute', bottom: 32, left: 16, p: 1.5 }}>
+      <Paper sx={{ position: 'absolute', bottom: { xs: 64, sm: 32 }, left: 16, p: 1.5 }}>
         {edges === null ? <Alert severity="warning">Brak danych</Alert> : (
           <Stack spacing={0.5}>
             <Typography variant="subtitle2">Słońce o {hour}:00</Typography>
