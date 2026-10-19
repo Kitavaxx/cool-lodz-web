@@ -1,4 +1,5 @@
 import { NavLink, Route, Routes } from 'react-router'
+import Panel from './Panel'
 
 const pages = [
   ['/', 'Start'],
@@ -19,7 +20,7 @@ export default function App() {
       <main>
         <Routes>
           {pages.map(([path, label]) => (
-            <Route key={path} path={path} element={<h1>{label}</h1>} />
+            <Route key={path} path={path} element={path === '/panel' ? <Panel /> : <h1>{label}</h1>} />
           ))}
         </Routes>
       </main>
