@@ -1,0 +1,77 @@
+# Cool Łódź – web
+
+Hackathon demo website that shows shaded walking routes, cool places and shade gaps in Łódź city centre (Śródmieście).
+
+There is no backend. Shade, routes and panel data are calculated beforehand in Python and saved as static GeoJSON/JSON files in `public/data`. The website only displays them.
+
+## Stack
+
+- React + Vite + TypeScript
+- React Router
+- MapLibre GL JS (map)
+- Firebase Auth (login for the city panel only)
+- Firebase Hosting
+- Python: OSMnx, Shapely, GeoPandas, astral (data calculations)
+
+## Pages
+
+| Path | Page |
+| --- | --- |
+| `/` | Home: about the project, methodology, data sources, APK download |
+| `/mapa` | Map with shade, cool places, water and benches, plus an hour switch |
+| `/trasa` | 4 ready routes, each in 3 variants (shortest, compromise, shaded) |
+| `/miejsca-chlodu` | List of cool places with an "open now" filter |
+| `/panel` | City panel (login required) |
+
+## Getting started
+
+Requires Node.js 22+.
+
+```sh
+npm install
+cp .env.example .env.local   # fill in the Firebase config
+npm run dev
+```
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Type-check and build to `dist/` |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Lint with oxlint |
+| `npm run deploy` | Build and deploy to Firebase Hosting |
+
+## Firebase setup (once)
+
+1. Create a Firebase project (EU region) and enable Email/Password sign-in.
+2. Put the web app config into `.env.local`.
+3. Link the project:
+
+   ```sh
+   npx firebase login
+   npx firebase use --add
+   ```
+
+Never commit `.env.local` or the demo login credentials.
+
+## Data
+
+Python scripts go in `scripts/` and write their output to `public/data/`.
+
+```sh
+python -m venv .venv
+.venv\Scripts\activate        # Windows (macOS/Linux: source .venv/bin/activate)
+pip install -r scripts/requirements.txt
+```
+
+| File | Contents |
+| --- | --- |
+| `edges.geojson` | Walking network segments with sun share for 5 hours |
+| `routes.geojson` | 4 routes × 5 hours × 3 variants |
+| `places.geojson` | Cool places, drinking water, benches |
+| `panel_gaps.json` | Segments with the most sun |
+| `panel_candidates.json` | Ranking of candidates for new cool places |
+
+Map data © OpenStreetMap contributors.
