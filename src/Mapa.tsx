@@ -19,7 +19,7 @@ export default function Mapa() {
     if (!map.getSource('edges')) {
       map.addSource('edges', { type: 'geojson', data: edges })
       // Keep segments under the points if places loaded first
-      map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: { 'line-cap': 'round' }, paint: { 'line-width': 5 } }, map.getLayer(placeLayers[0]) ? placeLayers[0] : undefined)
+      map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: { 'line-cap': 'round' }, paint: { 'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 15, 2.5, 17, 6] } }, map.getLayer(placeLayers[0]) ? placeLayers[0] : undefined)
     }
     map.setPaintProperty('edges', 'line-color', sunColor(hour))
   }, [map, edges, hour])

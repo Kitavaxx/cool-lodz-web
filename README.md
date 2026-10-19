@@ -66,11 +66,12 @@ python -m venv .venv
 .venv\Scripts\activate        # Windows (macOS/Linux: source .venv/bin/activate)
 pip install -r scripts/requirements.txt
 python scripts/places.py      # run from the repo root; OSM downloads are cached in cache/
+python scripts/shade.py       # ~3–5 min: buildings, sun position, sun share per segment
 ```
 
 | File | Contents | Script |
 | --- | --- | --- |
-| `edges.geojson` | Walking network segments with sun share for 5 hours | |
+| `edges.geojson` | Walking network segments (sidewalks included) with sun share for 5 hours, from building shadows | `shade.py` |
 | `routes.geojson` | 4 routes × 5 hours × 3 variants | |
 | `places.geojson` | Cool places (OSM libraries, culture centres, museums, galleries with known opening hours), drinking water, benches | `places.py` |
 | `panel_gaps.json` | Segments with the most sun | |
