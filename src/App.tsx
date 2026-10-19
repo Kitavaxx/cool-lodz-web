@@ -1,12 +1,13 @@
 import { Link, NavLink, Route, Routes } from 'react-router'
-import { AppBar, Box, Button, ButtonBase, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, ButtonBase, Toolbar, Typography } from '@mui/material'
 import { AcUnit, DirectionsWalk, Home, Map } from '@mui/icons-material'
 import Panel from './Panel'
 import Mapa from './Mapa'
+import HomePage from './Home'
 
 // /panel is moderator-only, so it is linked from the home page, not the menu
 const pages = [
-  { to: '/', label: 'Start', icon: <Home /> },
+  { to: '/', label: 'Start', icon: <Home />, element: <HomePage /> },
   { to: '/mapa', label: 'Mapa', icon: <Map />, element: <Mapa /> },
   { to: '/trasa', label: 'Trasa', icon: <DirectionsWalk /> },
   { to: '/miejsca-chlodu', label: 'Chłód', icon: <AcUnit /> },
@@ -77,7 +78,6 @@ export default function App() {
             <Route key={to} path={to} element={element ?? (
               <>
                 <Typography variant="h4" component="h1">{label}</Typography>
-                {to === '/' && <Button component={Link} to="/panel" size="small" sx={{ mt: 4 }}>Panel dla miasta</Button>}
               </>
             )} />
           ))}
