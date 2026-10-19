@@ -21,7 +21,7 @@ There is no backend. Shade, routes and panel data are calculated beforehand in P
 | `/mapa` | Map with shade, cool places, water and benches, plus an hour switch |
 | `/trasa` | 4 ready routes, each in 3 variants (shortest, compromise, shaded) |
 | `/miejsca-chlodu` | List of cool places with an "open now" filter |
-| `/panel` | City panel (login required) |
+| `/panel` | City panel (log in or register with e-mail and password) |
 
 ## Getting started
 
@@ -45,7 +45,7 @@ npm run dev
 
 ## Firebase setup (once)
 
-1. Create a Firebase project (EU region) and enable Email/Password sign-in.
+1. Create a Firebase project (EU region) and enable Email/Password sign-in. Under Authentication → Settings → Authorized domains, make sure `localhost`, `coollodz.web.app` and `coollodz.firebaseapp.com` are listed.
 2. Put the web app config into `.env.local`.
 3. Link the project:
 
@@ -73,5 +73,7 @@ pip install -r scripts/requirements.txt
 | `places.geojson` | Cool places, drinking water, benches |
 | `panel_gaps.json` | Segments with the most sun |
 | `panel_candidates.json` | Ranking of candidates for new cool places |
+
+Design decisions: [docs/SPEC.md](docs/SPEC.md) and [docs/grill.md](docs/grill.md).
 
 Map data © OpenStreetMap contributors.
