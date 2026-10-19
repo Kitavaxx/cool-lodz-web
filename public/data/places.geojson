@@ -1,0 +1,259 @@
+{
+ "type": "FeatureCollection",
+ "accuracy": "szacunek",
+ "computed_at": "2026-10-20",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "cool",
+    "name": "Muzeum Sztuki ms1",
+    "address": "ul. Więckowskiego 36",
+    "hours": "Tu-Su 10:00-18:00",
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.449,
+     51.7728
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "cool",
+    "name": "Łódzki Dom Kultury",
+    "address": "ul. Traugutta 18",
+    "hours": "Mo-Fr 09:00-20:00; Sa 10:00-16:00",
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.464,
+     51.7675
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "cool",
+    "name": "Urząd Miasta Łodzi",
+    "address": "ul. Piotrkowska 104",
+    "hours": "Mo-Fr 08:00-16:00",
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.4573,
+     51.7653
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "cool",
+    "name": "Wojewódzka Biblioteka Publiczna",
+    "address": "ul. Gdańska 102",
+    "hours": "Mo-Fr 09:00-19:00; Sa 09:00-14:00",
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.45,
+     51.7637
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "cool",
+    "name": "Galeria Miejska",
+    "address": "ul. Piotrkowska 113",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.458,
+     51.764
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "water",
+    "name": "Zdrój uliczny",
+    "address": "pl. Wolności",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.4552,
+     51.776
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "water",
+    "name": "Zdrój uliczny",
+    "address": "ul. Piotrkowska 87",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.4568,
+     51.7685
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "water",
+    "name": "Zdrój uliczny",
+    "address": "ul. Piotrkowska 153",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.4588,
+     51.7618
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "bench",
+    "name": "Ławka",
+    "address": "ul. Piotrkowska",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.4557,
+     51.7745
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "bench",
+    "name": "Ławka",
+    "address": "ul. Piotrkowska",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.45666,
+     51.7725
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "bench",
+    "name": "Ławka",
+    "address": "ul. Piotrkowska",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.45697,
+     51.77
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "bench",
+    "name": "Ławka",
+    "address": "ul. Piotrkowska",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.45823,
+     51.767
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "bench",
+    "name": "Ławka",
+    "address": "ul. Piotrkowska",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.45896,
+     51.763
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "type": "bench",
+    "name": "Ławka",
+    "address": "ul. Piotrkowska",
+    "hours": null,
+    "source": "dane przykładowe",
+    "verified": false
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     19.46007,
+     51.7605
+    ]
+   }
+  }
+ ]
+}

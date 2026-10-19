@@ -2,7 +2,7 @@
 
 From [SPEC.md](SPEC.md) section 6. One commit per ticket, in this order.
 
-## MAP-1 Sample data
+## MAP-1 Sample data ✅
 
 Hand-made `public/data/edges.geojson` and `public/data/places.geojson` in Śródmieście, following the data contract (SPEC 5): top-level `accuracy` and `computed_at`, `s10`…`s18` on edges, `type`/`name`/`address`/`hours`/`source`/`verified` on places. Marked `source: "dane przykładowe"`. Replaced when Python delivers.
 

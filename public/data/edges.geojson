@@ -1,0 +1,943 @@
+{
+ "type": "FeatureCollection",
+ "accuracy": "szacunek",
+ "computed_at": "2026-10-20",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "piotrkowska-1",
+    "s10": 0,
+    "s12": 0.72,
+    "s14": 0.6,
+    "s16": 0.08,
+    "s18": 0.46
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4547,
+      51.7766
+     ],
+     [
+      19.45541,
+      51.77409
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "piotrkowska-2",
+    "s10": 0.46,
+    "s12": 0.51,
+    "s14": 0.25,
+    "s16": 0.58,
+    "s18": 0.4
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.45541,
+      51.77409
+     ],
+     [
+      19.45613,
+      51.77157
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "piotrkowska-3",
+    "s10": 0.4,
+    "s12": 0.06,
+    "s14": 0.69,
+    "s16": 0.67,
+    "s18": 0
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.45613,
+      51.77157
+     ],
+     [
+      19.45684,
+      51.76906
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "piotrkowska-4",
+    "s10": 0,
+    "s12": 0.38,
+    "s14": 0.93,
+    "s16": 0.15,
+    "s18": 0.09
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.45684,
+      51.76906
+     ],
+     [
+      19.45756,
+      51.76654
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "piotrkowska-5",
+    "s10": 0.08,
+    "s12": 0.75,
+    "s14": 0.43,
+    "s16": 0.19,
+    "s18": 0.54
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.45756,
+      51.76654
+     ],
+     [
+      19.45827,
+      51.76403
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "piotrkowska-6",
+    "s10": 0.54,
+    "s12": 0.33,
+    "s14": 0.32,
+    "s16": 0.71,
+    "s18": 0.23
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.45827,
+      51.76403
+     ],
+     [
+      19.45899,
+      51.76151
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "piotrkowska-7",
+    "s10": 0.23,
+    "s12": 0.07,
+    "s14": 0.84,
+    "s16": 0.53,
+    "s18": 0
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.45899,
+      51.76151
+     ],
+     [
+      19.4597,
+      51.759
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "kosciuszki-1",
+    "s10": 0,
+    "s12": 0.72,
+    "s14": 0.6,
+    "s16": 0.08,
+    "s18": 0.46
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.451,
+      51.775
+     ],
+     [
+      19.4516,
+      51.772
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "kosciuszki-2",
+    "s10": 0.46,
+    "s12": 0.51,
+    "s14": 0.25,
+    "s16": 0.58,
+    "s18": 0.4
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4516,
+      51.772
+     ],
+     [
+      19.4522,
+      51.769
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "kosciuszki-3",
+    "s10": 0.4,
+    "s12": 0.06,
+    "s14": 0.69,
+    "s16": 0.67,
+    "s18": 0
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4522,
+      51.769
+     ],
+     [
+      19.4528,
+      51.766
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "kosciuszki-4",
+    "s10": 0,
+    "s12": 0.38,
+    "s14": 0.93,
+    "s16": 0.15,
+    "s18": 0.09
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4528,
+      51.766
+     ],
+     [
+      19.4534,
+      51.763
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "kosciuszki-5",
+    "s10": 0.08,
+    "s12": 0.75,
+    "s14": 0.43,
+    "s16": 0.19,
+    "s18": 0.54
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4534,
+      51.763
+     ],
+     [
+      19.454,
+      51.76
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "sienkiewicza-1",
+    "s10": 0,
+    "s12": 0.72,
+    "s14": 0.6,
+    "s16": 0.08,
+    "s18": 0.46
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4625,
+      51.774
+     ],
+     [
+      19.463,
+      51.7712
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "sienkiewicza-2",
+    "s10": 0.46,
+    "s12": 0.51,
+    "s14": 0.25,
+    "s16": 0.58,
+    "s18": 0.4
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.463,
+      51.7712
+     ],
+     [
+      19.4635,
+      51.7684
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "sienkiewicza-3",
+    "s10": 0.4,
+    "s12": 0.06,
+    "s14": 0.69,
+    "s16": 0.67,
+    "s18": 0
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4635,
+      51.7684
+     ],
+     [
+      19.464,
+      51.7656
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "sienkiewicza-4",
+    "s10": 0,
+    "s12": 0.38,
+    "s14": 0.93,
+    "s16": 0.15,
+    "s18": 0.09
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.464,
+      51.7656
+     ],
+     [
+      19.4645,
+      51.7628
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "sienkiewicza-5",
+    "s10": 0.08,
+    "s12": 0.75,
+    "s14": 0.43,
+    "s16": 0.19,
+    "s18": 0.54
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4645,
+      51.7628
+     ],
+     [
+      19.465,
+      51.76
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zielona-narutowicza-1",
+    "s10": 0.11,
+    "s12": 0.86,
+    "s14": 0.7,
+    "s16": 0.22,
+    "s18": 0.64
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.44,
+      51.77
+     ],
+     [
+      19.445,
+      51.77017
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zielona-narutowicza-2",
+    "s10": 0.64,
+    "s12": 0.65,
+    "s14": 0.35,
+    "s16": 0.72,
+    "s18": 0.58
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.445,
+      51.77017
+     ],
+     [
+      19.45,
+      51.77034
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zielona-narutowicza-3",
+    "s10": 0.58,
+    "s12": 0.2,
+    "s14": 0.79,
+    "s16": 0.81,
+    "s18": 0.07
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.45,
+      51.77034
+     ],
+     [
+      19.455,
+      51.77051
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zielona-narutowicza-4",
+    "s10": 0.07,
+    "s12": 0.52,
+    "s14": 1,
+    "s16": 0.29,
+    "s18": 0.27
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.455,
+      51.77051
+     ],
+     [
+      19.46,
+      51.77069
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zielona-narutowicza-5",
+    "s10": 0.26,
+    "s12": 0.89,
+    "s14": 0.53,
+    "s16": 0.33,
+    "s18": 0.72
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.46,
+      51.77069
+     ],
+     [
+      19.465,
+      51.77086
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zielona-narutowicza-6",
+    "s10": 0.72,
+    "s12": 0.47,
+    "s14": 0.42,
+    "s16": 0.85,
+    "s18": 0.41
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.465,
+      51.77086
+     ],
+     [
+      19.47,
+      51.77103
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zielona-narutowicza-7",
+    "s10": 0.41,
+    "s12": 0.21,
+    "s14": 0.94,
+    "s16": 0.67,
+    "s18": 0.03
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.47,
+      51.77103
+     ],
+     [
+      19.475,
+      51.7712
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "traugutta-1",
+    "s10": 0.11,
+    "s12": 0.86,
+    "s14": 0.7,
+    "s16": 0.22,
+    "s18": 0.64
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.455,
+      51.7678
+     ],
+     [
+      19.46,
+      51.76793
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "traugutta-2",
+    "s10": 0.64,
+    "s12": 0.65,
+    "s14": 0.35,
+    "s16": 0.72,
+    "s18": 0.58
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.46,
+      51.76793
+     ],
+     [
+      19.465,
+      51.76807
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "traugutta-3",
+    "s10": 0.58,
+    "s12": 0.2,
+    "s14": 0.79,
+    "s16": 0.81,
+    "s18": 0.07
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.465,
+      51.76807
+     ],
+     [
+      19.47,
+      51.7682
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "struga-1",
+    "s10": 0.11,
+    "s12": 0.86,
+    "s14": 0.7,
+    "s16": 0.22,
+    "s18": 0.64
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.443,
+      51.764
+     ],
+     [
+      19.447,
+      51.764
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "struga-2",
+    "s10": 0.64,
+    "s12": 0.65,
+    "s14": 0.35,
+    "s16": 0.72,
+    "s18": 0.58
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.447,
+      51.764
+     ],
+     [
+      19.451,
+      51.764
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "struga-3",
+    "s10": 0.58,
+    "s12": 0.2,
+    "s14": 0.79,
+    "s16": 0.81,
+    "s18": 0.07
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.451,
+      51.764
+     ],
+     [
+      19.455,
+      51.764
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "struga-4",
+    "s10": 0.07,
+    "s12": 0.52,
+    "s14": 1,
+    "s16": 0.29,
+    "s18": 0.27
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.455,
+      51.764
+     ],
+     [
+      19.459,
+      51.764
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "pilsudskiego-1",
+    "s10": 0.11,
+    "s12": 0.86,
+    "s14": 0.7,
+    "s16": 0.22,
+    "s18": 0.64
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.435,
+      51.7596
+     ],
+     [
+      19.44062,
+      51.75959
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "pilsudskiego-2",
+    "s10": 0.64,
+    "s12": 0.65,
+    "s14": 0.35,
+    "s16": 0.72,
+    "s18": 0.58
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.44062,
+      51.75959
+     ],
+     [
+      19.44625,
+      51.75957
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "pilsudskiego-3",
+    "s10": 0.58,
+    "s12": 0.2,
+    "s14": 0.79,
+    "s16": 0.81,
+    "s18": 0.07
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.44625,
+      51.75957
+     ],
+     [
+      19.45188,
+      51.75956
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "pilsudskiego-4",
+    "s10": 0.07,
+    "s12": 0.52,
+    "s14": 1,
+    "s16": 0.29,
+    "s18": 0.27
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.45188,
+      51.75956
+     ],
+     [
+      19.4575,
+      51.75955
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "pilsudskiego-5",
+    "s10": 0.26,
+    "s12": 0.89,
+    "s14": 0.53,
+    "s16": 0.33,
+    "s18": 0.72
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.4575,
+      51.75955
+     ],
+     [
+      19.46312,
+      51.75954
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "pilsudskiego-6",
+    "s10": 0.72,
+    "s12": 0.47,
+    "s14": 0.42,
+    "s16": 0.85,
+    "s18": 0.41
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.46312,
+      51.75954
+     ],
+     [
+      19.46875,
+      51.75953
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "pilsudskiego-7",
+    "s10": 0.41,
+    "s12": 0.21,
+    "s14": 0.94,
+    "s16": 0.67,
+    "s18": 0.03
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.46875,
+      51.75953
+     ],
+     [
+      19.47438,
+      51.75951
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "pilsudskiego-8",
+    "s10": 0.03,
+    "s12": 0.7,
+    "s14": 0.92,
+    "s16": 0.2,
+    "s18": 0.44
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      19.47438,
+      51.75951
+     ],
+     [
+      19.48,
+      51.7595
+     ]
+    ]
+   }
+  }
+ ]
+}
