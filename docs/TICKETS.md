@@ -8,7 +8,7 @@ Hand-made `public/data/edges.geojson` and `public/data/places.geojson` in Śród
 
 **Done when:** both files load as valid GeoJSON inside bbox `[19.43, 51.74, 19.48, 51.78]`.
 
-## MAP-2 Full-screen map with sun-share segments
+## MAP-2 Full-screen map with sun-share segments ✅
 
 `src/Mapa.tsx` on `/mapa`. MapLibre with OpenFreeMap `positron`, fitted to the bbox, OSM attribution. Line layer from `edges.geojson` coloured in three steps (0–33 %, 34–66 %, 67–100 %). App shell fills the screen height so the map can too. A missing or broken file shows "Brak danych" and nothing crashes.
 

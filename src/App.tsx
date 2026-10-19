@@ -2,16 +2,17 @@ import { Link, NavLink, Route, Routes } from 'react-router'
 import { AppBar, Box, Button, ButtonBase, Toolbar, Typography } from '@mui/material'
 import { AcUnit, DirectionsWalk, Home, Map } from '@mui/icons-material'
 import Panel from './Panel'
+import Mapa from './Mapa'
 
 // /panel is moderator-only, so it is linked from the home page, not the menu
 const pages = [
   { to: '/', label: 'Start', icon: <Home /> },
-  { to: '/mapa', label: 'Mapa', icon: <Map /> },
+  { to: '/mapa', label: 'Mapa', icon: <Map />, element: <Mapa /> },
   { to: '/trasa', label: 'Trasa', icon: <DirectionsWalk /> },
   { to: '/miejsca-chlodu', label: 'Chłód', icon: <AcUnit /> },
 ]
 
-// Phone: fixed bottom bar like the mobile app. Desktop: pills in the top bar.
+// Phone: bottom bar like the mobile app. Desktop: pills in the top bar.
 function Nav() {
   return (
     <Box
@@ -19,10 +20,6 @@ function Nav() {
       sx={{
         display: 'flex',
         gap: { md: 1 },
-        position: { xs: 'fixed', md: 'static' },
-        bottom: 0,
-        left: 0,
-        right: 0,
         zIndex: 'appBar',
         bgcolor: { xs: 'background.paper', md: 'transparent' },
         boxShadow: { xs: '0 -1px 3px rgb(0 0 0 / 0.08)', md: 'none' },
@@ -63,9 +60,10 @@ function Nav() {
 }
 
 export default function App() {
+  // Screen-high column, so pages like /mapa can fill the space between the bars
   return (
-    <>
-      <AppBar position="sticky" color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
+      <AppBar position="static"color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Toolbar sx={{ gap: 2 }}>
           <Typography variant="h6" component={Link} to="/" sx={{ color: 'primary.main', fontWeight: 700, textDecoration: 'none', flexGrow: 1 }}>
             Cool Łódź
@@ -73,20 +71,20 @@ export default function App() {
           <Box sx={{ display: { xs: 'none', md: 'block' } }}><Nav /></Box>
         </Toolbar>
       </AppBar>
-      <Box component="main" sx={{ p: 2, pb: { xs: 12, md: 2 } }}>
+      <Box component="main" sx={{ flex: 1, overflow: 'auto', position: 'relative', p: 2 }}>
         <Routes>
-          {pages.map(({ to, label }) => (
-            <Route key={to} path={to} element={
+          {pages.map(({ to, label, element }) => (
+            <Route key={to} path={to} element={element ?? (
               <>
                 <Typography variant="h4" component="h1">{label}</Typography>
                 {to === '/' && <Button component={Link} to="/panel" size="small" sx={{ mt: 4 }}>Panel dla miasta</Button>}
               </>
-            } />
+            )} />
           ))}
           <Route path="/panel" element={<Panel />} />
         </Routes>
       </Box>
       <Box sx={{ display: { md: 'none' } }}><Nav /></Box>
-    </>
+    </Box>
   )
 }
