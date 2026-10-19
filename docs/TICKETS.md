@@ -14,7 +14,7 @@ Hand-made `public/data/edges.geojson` and `public/data/places.geojson` in Śród
 
 **Done when:** segments show on the map, a missing file shows "Brak danych".
 
-## MAP-3 Hour switch and legend
+## MAP-3 Hour switch and legend ✅
 
 Hour buttons 10–18 (default 14). Changing the hour recolours segments from `s{hour}`. Legend with the three steps as percentages and the `accuracy` label. Tapping a segment shows its sun share in % for the chosen hour (colour is never the only signal).
 
