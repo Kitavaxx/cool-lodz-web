@@ -59,21 +59,22 @@ Never commit `.env.local` or the demo login credentials.
 
 ## Data
 
-Python scripts go in `scripts/` and write their output to `public/data/`.
+Python scripts in `scripts/` download OpenStreetMap data and write the files in `public/data/`. Requires Python 3.12 (with [uv](https://docs.astral.sh/uv/): `uv venv --python 3.12 .venv`).
 
 ```sh
 python -m venv .venv
 .venv\Scripts\activate        # Windows (macOS/Linux: source .venv/bin/activate)
 pip install -r scripts/requirements.txt
+python scripts/places.py      # run from the repo root; OSM downloads are cached in cache/
 ```
 
-| File | Contents |
-| --- | --- |
-| `edges.geojson` | Walking network segments with sun share for 5 hours |
-| `routes.geojson` | 4 routes × 5 hours × 3 variants |
-| `places.geojson` | Cool places, drinking water, benches |
-| `panel_gaps.json` | Segments with the most sun |
-| `panel_candidates.json` | Ranking of candidates for new cool places |
+| File | Contents | Script |
+| --- | --- | --- |
+| `edges.geojson` | Walking network segments with sun share for 5 hours | |
+| `routes.geojson` | 4 routes × 5 hours × 3 variants | |
+| `places.geojson` | Cool places (OSM libraries, culture centres, museums, galleries with known opening hours), drinking water, benches | `places.py` |
+| `panel_gaps.json` | Segments with the most sun | |
+| `panel_candidates.json` | Ranking of candidates for new cool places | |
 
 Design decisions: [docs/SPEC.md](docs/SPEC.md) and [docs/grill.md](docs/grill.md).
 
