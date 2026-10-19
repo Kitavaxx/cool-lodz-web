@@ -154,7 +154,7 @@ export default function Home() {
                 <li>Dla każdej godziny liczymy położenie słońca nad Łodzią 15 lipca.</li>
                 <li>Cień budynku to jego obrys przesunięty od słońca o wysokość / tg(wysokości słońca).</li>
                 <li>Dla każdego odcinka chodnika liczymy, jaka część długości jest poza cieniem. To <b>udział słońca</b>: 0 % to pełny cień, 100 % to pełne słońce.</li>
-                <li>Trasy liczymy z kosztem odcinka <b>długość × (1 + λ × udział słońca)</b>: najkrótsza (λ = 0), kompromis (λ ≈ 1), zacieniona (λ ≈ 3). Czas przy 4,5 km/h.</li>
+                <li>Trasy liczymy z kosztem odcinka <b>długość × (1 + λ × udział słońca)</b>: najkrótsza (λ = 0), kompromis (λ = 0,3), zacieniona (λ = 3). Czas przy 4,5 km/h.</li>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                 Etykieta dokładności: <b>szacunek</b> (tylko budynki) albo <b>model</b> (dokładne wysokości i drzewa).
