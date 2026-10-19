@@ -1,0 +1,85 @@
+"""places.geojson: cool places, drinking water and benches from OpenStreetMap.
+
+Cool places are public indoor places (library, culture centre, museum, gallery) whose opening hours
+fit the SPEC 5 subset, so "open now" works. The same kinds of places without usable hours, plus city
+offices, are candidates for new cool places (panel.py reads them with public_buildings()).
+"""
+import re
+
+from common import BBOX, ox, write
+
+COOL = {"amenity": ["library", "arts_centre"], "tourism": ["museum", "gallery"]}
+OFFICES = {"amenity": ["townhall", "community_centre"], "office": ["government"]}
+DAY = r"(Mo|Tu|We|Th|Fr|Sa|Su)(-(Mo|Tu|We|Th|Fr|Sa|Su))?"
+RULE = re.compile(rf"{DAY}(,{DAY})* \d\d:\d\d-\d\d:\d\d")
+OFF = re.compile(rf"{DAY}(,{DAY})* off")
+
+
+def hours(raw) -> str | None:
+    """OSM opening_hours reduced to the subset 'Mo-Fr 10:00-18:00; Sa 10:00-14:00', else None.
+    'Xx off' rules are dropped (closed is the default); anything else unknown drops the whole value."""
+    if not isinstance(raw, str):
+        return None
+    rules = [r.strip() for r in raw.split(";") if r.strip() and not OFF.fullmatch(r.strip())]
+    return "; ".join(rules) if rules and all(RULE.fullmatch(r) for r in rules) else None
+
+
+assert hours("Mo-Fr 08:30-19:00; Sa 10:00-18:00") == "Mo-Fr 08:30-19:00; Sa 10:00-18:00"
+assert hours("Mo off; Tu-Su 10:00-19:00") == "Tu-Su 10:00-19:00"
+assert hours("Mo,We-Th 10:30-18:00; Tu,Fr 08:30-16:00; Sa-Su off") == "Mo,We-Th 10:30-18:00; Tu,Fr 08:30-16:00"
+assert hours("Mo-Tu 12:00-19:00, We 12:00-16:00, SH Mo off") is None
+assert hours("Mo-Fr 10:00-14:00,15:00-18:00") is None
+assert hours(None) is None
+
+
+def address(row) -> str | None:
+    street, number = row.get("addr:street"), row.get("addr:housenumber")
+    return f"{street} {number}" if isinstance(street, str) and isinstance(number, str) else None
+
+
+def fetch(tags: dict):
+    """OSM features as points (polygons become their centroid)."""
+    gdf = ox.features_from_bbox(BBOX, tags)
+    gdf["geometry"] = gdf.geometry.to_crs(2180).centroid.to_crs(4326)
+    return gdf
+
+
+def public_buildings():
+    """(cool places, candidates): rows with name, address, hours and a point geometry."""
+    gdf = fetch(COOL)
+    gdf = gdf[gdf["name"].notna()].copy()
+    gdf["hours"] = gdf["opening_hours"].map(hours) if "opening_hours" in gdf else None
+    gdf["address"] = gdf.apply(address, axis=1)
+    offices = fetch(OFFICES)
+    offices = offices[offices["name"].notna()].copy()
+    offices["hours"] = offices["opening_hours"].map(hours) if "opening_hours" in offices else None
+    offices["address"] = offices.apply(address, axis=1)
+    cool = gdf[gdf["hours"].notna()]
+    return cool, [gdf[gdf["hours"].isna()], offices]
+
+
+def feature(type_: str, name: str, row) -> dict:
+    text = lambda v: v if isinstance(v, str) else None  # pandas gives NaN for missing values
+    p = row.geometry
+    return {
+        "type": "Feature",
+        "properties": {"type": type_, "name": name, "address": text(row.get("address")), "hours": text(row.get("hours")),
+                       "source": "OpenStreetMap", "verified": False},
+        "geometry": {"type": "Point", "coordinates": [round(p.x, 6), round(p.y, 6)]},
+    }
+
+
+def main():
+    cool, _ = public_buildings()
+    features = [feature("cool", row["name"], row) for _, row in cool.iterrows()]
+    misc = fetch({"amenity": ["drinking_water", "bench"]})
+    for _, row in misc.iterrows():
+        if row["amenity"] == "drinking_water":
+            features.append(feature("water", row.get("name") if isinstance(row.get("name"), str) else "Woda pitna", row))
+        else:
+            features.append(feature("bench", "Ławka", row))
+    write("places.geojson", {"type": "FeatureCollection", "features": features}, accuracy="szacunek")
+
+
+if __name__ == "__main__":
+    main()

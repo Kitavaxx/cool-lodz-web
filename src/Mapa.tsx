@@ -11,7 +11,7 @@ export default function Mapa() {
   const edges = useData('/data/edges.geojson')
   const places = useData('/data/places.geojson')
   const [hour, setHour] = useState(14)
-  const [shown, setShown] = useState<Record<string, boolean>>({ cool: true, water: true, bench: true })
+  const [shown, setShown] = useState<Record<string, boolean>>({ cool: true, water: true, bench: false })  // thousands of benches, opt-in
   const placeName = useSearchParams()[0].get('place')
 
   useEffect(() => {
@@ -31,7 +31,11 @@ export default function Mapa() {
       for (const { type, color } of placeTypes) {
         map.addLayer({
           id: `places-${type}`, type: 'circle', source: 'places', filter: ['==', ['get', 'type'], type],
-          paint: { 'circle-radius': type === 'cool' ? 8 : 5, 'circle-color': color, 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' },
+          // Points grow with zoom so thousands of benches don't cover the city at the start view
+          paint: {
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, { cool: 6, water: 4 }[type] ?? 2.5, 17, { cool: 11, water: 8 }[type] ?? 7],
+            'circle-color': color, 'circle-stroke-width': type === 'cool' ? 2 : 1, 'circle-stroke-color': '#fff',
+          },
         })
       }
     }
