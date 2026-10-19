@@ -8,6 +8,7 @@ There is no backend. Shade, routes and panel data are calculated beforehand in P
 
 - React + Vite + TypeScript
 - React Router
+- MUI (Material UI), styled like the mobile app
 - MapLibre GL JS (map)
 - Firebase Auth (login for the city panel only)
 - Firebase Hosting
@@ -21,7 +22,7 @@ There is no backend. Shade, routes and panel data are calculated beforehand in P
 | `/mapa` | Map with shade, cool places, water and benches, plus an hour switch |
 | `/trasa` | 4 ready routes, each in 3 variants (shortest, compromise, shaded) |
 | `/miejsca-chlodu` | List of cool places with an "open now" filter |
-| `/panel` | City panel (log in or register with e-mail and password) |
+| `/panel` | City panel, moderator login only (linked from `/`, not in the menu) |
 
 ## Getting started
 
@@ -45,7 +46,7 @@ npm run dev
 
 ## Firebase setup (once)
 
-1. Create a Firebase project (EU region) and enable Email/Password sign-in. Under Authentication → Settings → Authorized domains, make sure `localhost`, `coollodz.web.app` and `coollodz.firebaseapp.com` are listed.
+1. Create a Firebase project (EU region) and enable Email/Password sign-in. Under Authentication → Settings → Authorized domains, make sure `localhost`, `coollodz.web.app` and `coollodz.firebaseapp.com` are listed. Under User actions, turn off **Enable create (sign-up)**: moderator accounts are added by hand in Authentication → Users.
 2. Put the web app config into `.env.local`.
 3. Link the project:
 

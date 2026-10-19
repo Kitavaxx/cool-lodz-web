@@ -5,8 +5,8 @@ Stress test of `specyfikacja_strona_webowa` v0.3 (18.10.2026). Self-answered on 
 ## Round 1: foundations
 
 **Q1. Login only, or login plus registration?**
-Spec 7.1 says one moderator account is created by hand. The team now also wants self-registration.
-➡️ **Login and registration with e-mail and password.** Panel data in the demo is static and has no personal data (spec 7.1), so any signed-in user may see the panel. We record this in the limitations list. In the target version, registration creates an account with no role and a moderator grants access.
+Spec 7.1 says one moderator account is created by hand.
+➡️ **Login only, for moderators.** Regular users never sign in: every public page works without an account. Moderator accounts are created by hand in the Firebase console, and sign-up is disabled there (Authentication → Settings → User actions), so nobody can create an account through the API. The panel is not in the main menu. It is linked from the home page, as spec 6.1 says. *(Revised 19.10.2026: the first answer allowed self-registration.)*
 
 **Q2. Where does auth state live?**
 Options: a React context for the whole app, or a listener only in the panel.
@@ -29,11 +29,11 @@ Options: a React context for the whole app, or a listener only in the panel.
 
 ## Round 2: depends on round 1
 
-**Q8. Registration UI (from Q1)?**
-➡️ **One form with a "Log in / Create account" switch.** Password `minLength=6` (Firebase minimum) checked by the browser. No password confirmation field: the user can reset the account by hand in the demo.
+**Q8. Login UI (from Q1)?**
+➡️ **One card with e-mail, password, a "Tylko dla moderatorów" label and a short offer for the city.** No registration and no "forgot password": the team resets moderator passwords in the console.
 
 **Q9. Error messages (from Q1, Q3)?**
-➡️ **Map the few Firebase error codes we expect to Polish:** wrong credentials, e-mail already in use, weak password, too many attempts. Anything else shows a general message. We never show raw Firebase errors.
+➡️ **Map the few Firebase error codes we expect to Polish:** wrong credentials, invalid e-mail, too many attempts. Anything else shows a general message. We never show raw Firebase errors.
 
 **Q10. Authorized domains (from Q1)?**
 ➡️ `localhost`, `coollodz.web.app`, `coollodz.firebaseapp.com`. PR preview channels (`coollodz--pr-*.web.app`) must be added by hand if we test login on a preview.
@@ -53,9 +53,12 @@ Options: a React context for the whole app, or a listener only in the panel.
 ➡️ The page shows "Brak danych" in place of the layer or list and does not crash. No retry logic.
 
 **Q15. Palette (spec A7)?**
-➡️ CSS custom properties in `src/index.css`. Placeholder values until the logo palette arrives. Sun share colour scale: three steps (0–33 %, 34–66 %, 67–100 %), always shown with a percentage label.
+➡️ The MUI theme in `src/main.tsx`, with colours taken from the mobile app (primary teal `#0e5f74`, cool-place blue `#4fb3e8`). Sun share colour scale: three steps (0–33 %, 34–66 %, 67–100 %), always shown with a percentage label.
 
 **Q16. Route start and end points?**
 ➡️ Still open (spec 5.3 marks them for confirmation). Python owns them. The website reads names from `routes.geojson`.
+
+**Q17. Design library?**
+➡️ **MUI (Material UI)** with Material icons. The mobile app uses Material 3 (chips, pill navigation indicator, Material icons), so MUI gives the closest match with the least custom CSS. Navigation copies the app: a bottom bar with a pill around the active icon on phones, and pills in the top bar on desktop. Font: Roboto, as in the app.
 
 Frontier empty. Q16 is an open data task, not a website decision.
