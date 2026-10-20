@@ -64,7 +64,7 @@ Walking time: 4.5 km/h. `extra_min` is the time difference compared with the `sh
 | Path | Build | Done when |
 | --- | --- | --- |
 | `/` | Short start page, one idea per card: headline with "Otwórz mapę" and a live route preview, heat banner ("dane symulowane"), 3 steps linking to the pages, 3 facts with source links, APK and panel cards. The long text lives on `/o-projekcie` | A visitor gets the idea at a glance, details are one click away |
-| `/o-projekcie` | Problem with sources, methodology, limitations (section 9), data sources, AI use. Under "Więcej" in the menu | All sections present, sources and limits described |
+| `/o-projekcie` | Problem with sources, methodology, limitations (section 9), data sources. Under "Więcej" in the menu | All sections present, sources and limits described |
 | `/mapa` | Full-screen MapLibre. Line layer from `edges.geojson`, coloured by `s{hour}`, hidden until the user picks sun-share ranges (Cień / Półcień / Słońce, several at once, or "Wszystkie"). Point layers for cool places, water, benches with toggles. "Cisza" and "Powietrze" are disabled buttons marked "w przygotowaniu". Hour buttons 10–18. Legend with percentages and accuracy label | Layers toggle without errors, changing the hour recolours segments |
 | `/trasa` | Route select and hour buttons. Filter `routes.geojson` by route and hour, draw 3 variants in different colours and dash styles, comparison card. Cool places and water within 200 m of the route | Manufaktura → Piotrkowska shows at least 2 variants with different sun share |
 | `/miejsca-chlodu` | List and mini map of `type=cool`, "Otwarte teraz" checkbox, nearest water, "Pokaż na mapie" link to `/mapa?place=<name>`, verified label | The "open now" filter follows the hours in the data |
@@ -106,4 +106,4 @@ Fallback cuts and extras follow spec section 8.
 - One summer day and 5 hours.
 - 4 precomputed routes, no free A to B.
 - Panel data is static files, readable without logging in by anyone who knows the URL. A database with rules comes in the next steps.
-- Heat banner and ranking use simulated data.
+- Heat banner and ranking use simulated data. Nothing else is simulated: shade, routes and panel views are our calculations on OSM data (`szacunek`), and cool places, water and benches are unverified OSM points. `/o-projekcie` ("Skąd są dane na stronie") explains the three kinds, and map popups for water and benches say what the point is, that it is unverified and that it may be out of date.
