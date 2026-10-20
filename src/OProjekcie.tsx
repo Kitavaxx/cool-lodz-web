@@ -57,7 +57,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 export default function OProjekcie() {
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', pb: 4 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 4 }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>O projekcie</Typography>
       <Typography color="text.secondary" sx={{ mt: 1, fontSize: 18 }}>
         Cool Łódź pokazuje, które chodniki Śródmieścia są w cieniu o danej godzinie, gdzie się schłodzić i napić wody, i jak dojść na miejsce, mniej się grzejąc. Tu opisujemy, skąd bierzemy dane i czego nie wiemy.

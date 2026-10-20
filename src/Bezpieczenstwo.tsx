@@ -20,7 +20,7 @@ const links = [
 
 export default function Bezpieczenstwo() {
   return (
-    <Box sx={{ maxWidth: 1100, mx: 'auto', pb: 4 }}>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', pb: 4 }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>Bezpieczeństwo w upał</Typography>
       <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 720 }}>
         Kilka prostych zasad na upalne dni w mieście. Przed wyjściem sprawdź oficjalne ostrzeżenia.

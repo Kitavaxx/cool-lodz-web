@@ -9,7 +9,7 @@ export default function Ranking() {
   const data = useData<Ranking>('/data/ranking.json')
   const items = [...(data?.items ?? [])].sort((a, b) => b.comfort - a.comfort)
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', pb: 4 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>Ranking dzielnic</Typography>
         <Chip icon={<Science />} label="dane symulowane" color="warning" />

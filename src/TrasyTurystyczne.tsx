@@ -61,7 +61,7 @@ export default function TrasyTurystyczne() {
   }
 
   return (
-    <Box sx={{ maxWidth: 1300, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 1680, mx: 'auto' }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>Trasy turystyczne w cieniu</Typography>
       <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 760 }}>
         Spacery po najciekawszych miejscach Śródmieścia, wyznaczone tak, by iść jak najdłużej w cieniu budynków o najgorętszej porze dnia.

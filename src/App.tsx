@@ -98,7 +98,7 @@ export default function App() {
           <Box sx={{ display: { xs: 'none', md: 'block' } }}><Nav /></Box>
         </Toolbar>
       </AppBar>
-      <Box component="main" sx={{ flex: 1, overflow: 'auto', position: 'relative', p: 2 }}>
+      <Box component="main" sx={{ flex: 1, overflow: 'auto', position: 'relative', p: { xs: 2, md: 3 } }}>
         <Routes>
           {pages.map(({ to, element }) => <Route key={to} path={to} element={element} />)}
           <Route path="/panel" element={<Suspense fallback={<CircularProgress sx={{ display: 'block', mx: 'auto', mt: 8 }} />}><Panel /></Suspense>} />
