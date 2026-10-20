@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { Box, Button, Card, CardContent, Link as MuiLink, Typography } from '@mui/material'
+import { Box, Button, Card, CardContent, Chip, Link as MuiLink, Typography } from '@mui/material'
 import { Map } from '@mui/icons-material'
 
 // The long version of the start page: problem with sources, methodology, limitations, data (SPEC 6, SPEC 9)
@@ -32,9 +32,15 @@ const limits = [
   'Liczymy jeden letni dzień (15.07) i 5 godzin.',
   'Obszar to Śródmieście: od Manufaktury do południowego końca Piotrkowskiej.',
   '4 gotowe trasy, bez wyznaczania trasy z dowolnego punktu A do B.',
-  'Godziny otwarcia miejsc chłodu pochodzą z OpenStreetMap i nie są zweryfikowane.',
+  'Miejsca chłodu z godzinami otwarcia, woda pitna i ławki pochodzą z OpenStreetMap. Nie sprawdzaliśmy ich na miejscu i mogą być nieaktualne.',
   'Baner upału i ranking dzielnic to dane symulowane.',
   'Dane panelu miasta to pliki statyczne. W kolejnych krokach przeniesiemy je do bazy z regułami dostępu.',
+]
+
+const status: { label: string; color: 'default' | 'info' | 'warning'; text: string }[] = [
+  { label: 'OpenStreetMap, niezweryfikowane', color: 'default', text: 'Woda pitna, ławki i miejsca chłodu z godzinami otwarcia. To prawdziwe punkty z mapy tworzonej przez społeczność, ale nie sprawdzaliśmy ich na miejscu.' },
+  { label: 'Szacunek', color: 'info', text: 'Cień, trasy, luki cienia, kandydaci na nowe miejsca chłodu i trasy turystyczne. To nasze obliczenia na danych OpenStreetMap, tylko z budynków i bez drzew.' },
+  { label: 'Dane symulowane', color: 'warning', text: 'Baner upału na stronie głównej i ranking dzielnic. To przykłady wpisane ręcznie. Prawdziwy ranking powstanie w aplikacji.' },
 ]
 
 const sources = [
@@ -92,6 +98,17 @@ export default function OProjekcie() {
               Etykieta dokładności: <b>szacunek</b> (tylko budynki) albo <b>model</b> (dokładne wysokości i drzewa).
             </Typography>
           </CardContent>
+        </Card>
+      </Section>
+
+      <Section title="Skąd są dane na stronie">
+        <Card variant="outlined">
+          {status.map(({ label, color, text }, i) => (
+            <Box key={label} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'flex-start' }, gap: { xs: 1, sm: 2 }, px: 2, py: 1.5, borderTop: i ? 1 : 0, borderColor: 'divider' }}>
+              <Box sx={{ minWidth: 260 }}><Chip label={label} color={color} variant={color === 'default' ? 'outlined' : 'filled'} /></Box>
+              <Typography color="text.secondary">{text}</Typography>
+            </Box>
+          ))}
         </Card>
       </Section>
 
