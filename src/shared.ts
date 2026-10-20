@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Map as MapLibre, Popup, setWorkerUrl, type ExpressionSpecification, type LngLatLike } from 'maplibre-gl'
+import { Map as MapLibre, Popup, setWorkerUrl, type ExpressionSpecification, type LngLatBoundsLike, type LngLatLike } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import type { FeatureCollection, GeoJsonProperties } from 'geojson'
 import { polishDays } from './hours'
@@ -52,13 +52,27 @@ export function useData<T = FeatureCollection>(url: string) {
   return data
 }
 
-// Base map of Śródmieście; the map is returned once its style has loaded
+// Łódź city limits with some margin: maps can't be panned or zoomed out beyond it
+const city: LngLatBoundsLike = [[19.25, 51.64], [19.71, 51.9]]
+
+// Dim everything outside the Łódź boundary (lodz.geojson) and outline the city, under the basemap labels
+async function maskOutsideCity(map: MapLibre) {
+  const d = await fetch('/data/lodz.geojson').then((r) => r.json())
+  const ring = d.features[0].geometry.coordinates[0]
+  const world = [[18, 51], [21, 51], [21, 52.5], [18, 52.5], [18, 51]]
+  const labels = map.getStyle().layers.find((l) => l.type === 'symbol')?.id
+  map.addSource('city', { type: 'geojson', data: { type: 'Polygon', coordinates: [world, ring] } })
+  map.addLayer({ id: 'city-mask', type: 'fill', source: 'city', paint: { 'fill-color': '#e9eef0', 'fill-opacity': 0.88 } }, labels)
+  map.addLayer({ id: 'city-line', type: 'line', source: 'city', paint: { 'line-color': '#0e5f74', 'line-width': 2, 'line-opacity': 0.5 } }, labels)
+}
+
+// Base map of Śródmieście; the map is returned once its style (and the city mask) has loaded
 export function useMap() {
   const ref = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<MapLibre>()
   useEffect(() => {
-    const m = new MapLibre({ container: ref.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds })
-    m.on('load', () => setMap(m))
+    const m = new MapLibre({ container: ref.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds, maxBounds: city })
+    m.on('load', () => maskOutsideCity(m).catch(() => {}).finally(() => setMap(m))) // no mask is fine, no map is not
     return () => m.remove()
   }, [])
   return [ref, map] as const
