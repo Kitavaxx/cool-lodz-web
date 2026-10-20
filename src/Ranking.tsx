@@ -18,7 +18,7 @@ export default function Ranking() {
         Które dzielnice Łodzi są najbardziej przyjazne w upał? Wskaźnik komfortu łączy udział cienia na chodnikach i liczbę miejsc chłodu.
       </Typography>
       <Alert severity="warning" sx={{ mt: 2 }}>
-        To podgląd: <b>wszystkie liczby na tej stronie są symulowane</b>. Prawdziwy ranking powstanie w aplikacji Cool Łódź, a dane cienia liczymy na razie tylko dla Śródmieścia.
+        To podgląd: <b>wszystkie liczby na tej stronie są symulowane</b>.
       </Alert>
 
       {data === undefined && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 6 }} />}

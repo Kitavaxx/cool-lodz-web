@@ -101,6 +101,11 @@ export default function Mapa() {
           <Chip label="Cisza · w przygotowaniu" variant="outlined" disabled />
           <Chip label="Powietrze · w przygotowaniu" variant="outlined" disabled />
         </Box>
+        {places && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, maxWidth: { sm: 400 } }}>
+            Punkty: OpenStreetMap, niezweryfikowane. Dotknij punktu, by zobaczyć szczegóły.
+          </Typography>
+        )}
       </Paper>
       <Paper sx={{ position: 'absolute', bottom: { xs: 64, sm: 32 }, left: 16, right: { xs: 16, sm: 'auto' }, p: 1.5, width: { sm: 340 } }}>
         {edges === null ? <Alert severity="warning">Brak danych</Alert> : (

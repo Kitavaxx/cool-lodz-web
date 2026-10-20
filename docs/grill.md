@@ -6,7 +6,7 @@ Stress test of `specyfikacja_strona_webowa` v0.3 (18.10.2026). Self-answered on 
 
 **Q1. Login only, or login plus registration?**
 Spec 7.1 says one moderator account is created by hand.
-➡️ **Login only, for moderators.** Regular users never sign in: every public page works without an account. Moderator accounts are created by hand in the Firebase console, and sign-up is disabled there (Authentication → Settings → User actions), so nobody can create an account through the API. The panel is not in the main menu. It is linked from the home page, as spec 6.1 says. *(Revised 19.10.2026: the first answer allowed self-registration.)*
+➡️ **Login only, as a demonstration of the access flow.** Regular users never sign in: every public page works without an account. The demo account is created by hand in the Firebase console. The website has no registration screen. The Firebase project is shared with the mobile app, so sign-up is not disabled in the console (that would block the app) and the user pool is shared. Every signed-in account sees the panel. This is a hackathon demo: the real version protects panel data with database rules and a moderator role. The panel is not in the main menu. It is linked from the home page, as spec 6.1 says. *(Revised 20.10.2026: the 19.10 answer disabled sign-up in the console, which does not work with a project shared with the mobile app.)*
 
 **Q2. Where does auth state live?**
 Options: a React context for the whole app, or a listener only in the panel.

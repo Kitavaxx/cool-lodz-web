@@ -64,7 +64,7 @@ Walking time: 4.5 km/h. `extra_min` is the time difference compared with the `sh
 | Path | Build | Done when |
 | --- | --- | --- |
 | `/` | Short start page, one idea per card: headline with "Otwórz mapę" and a live route preview, heat banner ("dane symulowane"), 3 steps linking to the pages, 3 facts with source links, APK and panel cards. The long text lives on `/o-projekcie` | A visitor gets the idea at a glance, details are one click away |
-| `/o-projekcie` | Problem with sources, methodology, limitations (section 9), data sources, AI use. Under "Więcej" in the menu | All sections present, sources and limits described |
+| `/o-projekcie` | Problem with sources, methodology, limitations (section 9), data sources. Under "Więcej" in the menu | All sections present, sources and limits described |
 | `/mapa` | Full-screen MapLibre. Line layer from `edges.geojson`, coloured by `s{hour}`, hidden until the user picks sun-share ranges (Cień / Półcień / Słońce, several at once, or "Wszystkie"). Point layers for cool places, water, benches with toggles. "Cisza" and "Powietrze" are disabled buttons marked "w przygotowaniu". Hour buttons 10–18. Legend with percentages and accuracy label | Layers toggle without errors, changing the hour recolours segments |
 | `/trasa` | Route select and hour buttons. Filter `routes.geojson` by route and hour, draw 3 variants in different colours and dash styles, comparison card. Cool places and water within 200 m of the route | Manufaktura → Piotrkowska shows at least 2 variants with different sun share |
 | `/miejsca-chlodu` | List and mini map of `type=cool`, "Otwarte teraz" checkbox, nearest water, "Pokaż na mapie" link to `/mapa?place=<name>`, verified label | The "open now" filter follows the hours in the data |
@@ -81,10 +81,10 @@ Polish text. Works on phone and desktop. Never use colour alone: show a percenta
 ## 7. Auth
 
 - `onAuthStateChanged` in `Panel.tsx` only. `undefined` means loading, `null` means logged out.
-- `signInWithEmailAndPassword` only. Login is for moderators. Regular users never need an account.
-- Moderator accounts are created by hand in the Firebase console. Sign-up is disabled in the console (Authentication → Settings → User actions), so the API refuses new accounts too.
+- `signInWithEmailAndPassword` only. Login is a demonstration of the access flow. Regular users never need an account.
+- The Firebase project (`coollodz`) is shared with the mobile app, so the user pool is shared too. The demo account is created by hand in the console. Sign-up is not disabled there, because that would block the app. The website has no registration screen.
 - Firebase error codes are mapped to Polish messages. Raw errors are never shown.
-- Every signed-in account is a moderator, so no role check is needed in the demo. When panel data moves to a database, access is limited by security rules for the moderator role (spec 7.1).
+- Every signed-in account sees the panel, so no role check is needed in the demo. The login is not data protection: panel files are public static files. In the real version panel data moves to a database with security rules for the moderator role, and the panel checks the role (spec 7.1).
 - Authorized domains: `localhost`, `coollodz.web.app`, `coollodz.firebaseapp.com`.
 - Out of scope: registration, e-mail verification, password reset in the UI, social login.
 
@@ -106,5 +106,4 @@ Fallback cuts and extras follow spec section 8.
 - One summer day and 5 hours.
 - 4 precomputed routes, no free A to B.
 - Panel data is static files, readable without logging in by anyone who knows the URL. A database with rules comes in the next steps.
-- Heat banner and ranking use simulated data.
-- AI use: Claude Code for code.
+- Heat banner and ranking use simulated data. Nothing else is simulated: shade, routes and panel views are our calculations on OSM data (`szacunek`), and cool places, water and benches are unverified OSM points. `/o-projekcie` ("Skąd są dane na stronie") explains the three kinds, and the map caption says the points are unverified OSM data. Popups for water and benches say what the point is and its source.
