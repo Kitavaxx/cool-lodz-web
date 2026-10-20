@@ -4,13 +4,14 @@ import { AcUnit, DirectionsWalk, Home, Map } from '@mui/icons-material'
 import Panel from './Panel'
 import Mapa from './Mapa'
 import HomePage from './Home'
+import MiejscaChlodu from './MiejscaChlodu'
 
 // /panel is moderator-only, so it is linked from the home page, not the menu
 const pages = [
   { to: '/', label: 'Start', icon: <Home />, element: <HomePage /> },
   { to: '/mapa', label: 'Mapa', icon: <Map />, element: <Mapa /> },
   { to: '/trasa', label: 'Trasa', icon: <DirectionsWalk /> },
-  { to: '/miejsca-chlodu', label: 'Chłód', icon: <AcUnit /> },
+  { to: '/miejsca-chlodu', label: 'Chłód', icon: <AcUnit />, element: <MiejscaChlodu /> },
 ]
 
 // Phone: bottom bar like the mobile app. Desktop: pills in the top bar.
