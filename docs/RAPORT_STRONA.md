@@ -107,7 +107,7 @@ Dla każdego wariantu zapisujemy geometrię, dystans, czas (4,5 km/h), udział s
 ### 5.3. Miejsca
 
 - **Woda i ławki:** z OSM (`amenity=drinking_water`, `amenity=bench`), źródło "OpenStreetMap". W danych: 18 punktów wody i 2777 ławek.
-- **Miejsca chłodu:** 33 miejsca (biblioteki, domy kultury, galerie, urzędy). ⚠️ Żadne nie ma jeszcze statusu "zweryfikowane". Na stronie są oznaczone jako niezweryfikowane. Weryfikację godzin otwarcia ręcznie robimy przed końcowym raportem.
+- **Miejsca chłodu:** 33 miejsca (biblioteki, domy kultury, galerie, urzędy). Dane z OSM, bez ręcznej weryfikacji, więc na stronie są oznaczone jako niezweryfikowane. Dla 10 miejsc bez adresu w OSM (m.in. budynki EC1, galerie i muzea) adresy dodaliśmy ręcznie w `scripts/places.py` (`ADDRESS_FIXES`), a budynki EC1 mają wspólny adres Targowa 1/3. Źródło tych miejsc pozostaje "OpenStreetMap".
 
 ### 5.4. Pliki
 
@@ -148,11 +148,11 @@ Etykieta "dane symulowane" jest więc tylko przy rankingu i banerze, bo tylko ta
 
 | Adres | Zawartość |
 | --- | --- |
-| `/` | Krótka strona startowa: hasło i przycisk "Otwórz mapę" z podglądem trasy, baner upału (przykład, "dane symulowane"), 3 kroki, 3 fakty ze źródłami, karta pobrania APK, wejście do panelu dla miasta. Do czasu publikacji APK karta pokazuje "APK wkrótce" ⚠️ |
+| `/` | Krótka strona startowa: hasło i przycisk "Otwórz mapę" z podglądem trasy, baner upału (przykład, "dane symulowane"), 3 kroki, 3 fakty ze źródłami, karta pobrania APK, wejście do panelu dla miasta. Zdjęcie parku w nagłówku i rozmyte zdjęcie Piotrkowskiej w tle z efektem paralaksy (tylko na stronie głównej, bez ruchu przy włączonym "ogranicz animacje"). Do czasu publikacji APK karta pokazuje "APK wkrótce" ⚠️ |
 | `/o-projekcie` | Problem ze źródłami, metodyka, ograniczenia, źródła danych |
 | `/mapa` | Mapa pełnoekranowa. Cień (odcinki kolorowane według udziału słońca, trzy przedziały: Cień, Półcień, Słońce), miejsca chłodu, woda, ławki. "Cisza" i "Powietrze" jako nieaktywne przyciski "w przygotowaniu". Przełącznik godziny 10 do 18, legenda z procentami, etykieta dokładności, atrybucja OSM |
 | `/trasa` | Wybór trasy i godziny, trzy warianty na mapie w różnych kolorach i stylach linii, karta porównania (dystans, czas, udział słońca, ile dłużej niż najkrótsza), miejsca chłodu i woda w promieniu 200 m od trasy |
-| `/miejsca-chlodu` | Lista i mini-mapa, filtr "Otwarte teraz" (czas Europe/Warsaw), najbliższa woda, "Pokaż na mapie", etykieta weryfikacji |
+| `/miejsca-chlodu` | Lista i mini-mapa, filtr "Otwarte teraz" (czas Europe/Warsaw), najbliższa woda (odległość w linii prostej, po wybraniu miejsca przerywana linia na mapie do tej wody, punkty wody są klikalne), "Pokaż na mapie", etykieta weryfikacji |
 | `/panel` | Logowanie z krótkim opisem oferty dla miasta, po zalogowaniu 3 widoki (sekcja 7). W menu jako "Dla miasta" (w "Więcej") i linkowany ze strony głównej |
 
 ### 6.2. Dodatkowe (zbudowane)
@@ -195,14 +195,14 @@ W demie pliki panelu leżą w `public/data/`, więc każdy, kto zna adres (np. `
 
 Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia na koniec.
 
-- [ ] Publiczny adres HTTPS działa na telefonie z Androidem i na komputerze.
+- [x] Publiczny adres HTTPS działa: https://coollodz.web.app (na adresie jest jeszcze starsza wersja, najnowsza po kolejnym wdrożeniu).
 - [x] 5 obowiązkowych stron dostępnych z menu (panel jako "Dla miasta" w "Więcej").
-- [ ] Mapa: warstwy cień, miejsca chłodu, woda, ławki włączają się bez błędu, przełącznik godziny zmienia cień.
-- [ ] Trasa Manufaktura do Piotrkowskiej pokazuje co najmniej 2 warianty z różnym udziałem słońca.
-- [ ] Miejsca chłodu: lista z godzinami i działający filtr "otwarte teraz".
+- [x] Mapa: warstwy cień, miejsca chłodu, woda, ławki włączają się bez błędu, przełącznik godziny zmienia cień. Filtry "Cisza" i "Powietrze" są nieaktywne ("w przygotowaniu").
+- [x] Trasa Manufaktura do Piotrkowskiej pokazuje co najmniej 2 warianty z różnym udziałem słońca. Są wszystkie 4 trasy (a nie 2 z planu awaryjnego), każda w 3 wariantach i 5 godzinach. Przykład, trasa 1 o 14:00: najkrótsza 81 % słońca, kompromis 31 %, zacieniona 25 %.
+- [x] Miejsca chłodu: lista z godzinami i działający filtr "otwarte teraz" (logikę godzin sprawdza `npm run check`).
 - [x] Etykieta dokładności przy wartościach cienia.
-- [ ] Strona główna z opisem problemu, metodyki, źródłami, ograniczeniami i linkiem do APK (link czeka na publikację APK).
-- [ ] Panel: logowanie, 3 widoki, dane symulowane oznaczone.
+- [ ] Strona główna z opisem problemu, metodyki, źródłami, ograniczeniami i linkiem do APK. Gotowe: problem, 3 kroki, fakty ze źródłami i wejście do `/o-projekcie` (metodyka, ograniczenia, źródła). Brakuje tylko linku do APK.
+- [x] Panel: logowanie i 3 widoki (luki cienia, dostępność miejsc chłodu, kandydaci). Dane panelu to nasze obliczenia z etykietą "szacunek", symulowane są tylko baner upału i ranking dzielnic.
 - [ ] Wyniki tras referencyjnych (dystans, czas, udział słońca, data i godzina obliczenia)
 - [ ] Zrzuty ekranu: strona główna, mapa z warstwami, wynik trasy, miejsca chłodu, panel (luki cienia, kandydaci).
 
@@ -216,8 +216,7 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 - Logowanie do panelu służy tylko do demonstracji. Dane panelu to pliki statyczne dostępne bez logowania, a w wersji docelowej będą chronione (sekcja 7.2).
 - Strona i aplikacja mają wspólną pulę kont Firebase Auth i w demie nie ma sprawdzania roli moderatora. Każde zalogowane konto widzi panel.
 - Baner upału i ranking dzielnic używają danych symulowanych.
-- Miejsca chłodu, woda pitna i ławki pochodzą z OpenStreetMap, nie były sprawdzane na miejscu i mogą być nieaktualne. Godziny otwarcia i adresy miejsc chłodu wymagają ręcznej weryfikacji ⚠️.
-- Filtry "Cisza" i "Powietrze" są nieaktywne.
+- Miejsca chłodu, woda pitna i ławki pochodzą z OpenStreetMap, nie były sprawdzane na miejscu i mogą być nieaktualne.- Filtry "Cisza" i "Powietrze" są nieaktywne.
 - Szacunek cienia nie uwzględnia drzew, zadaszeń ani zmiennego zachmurzenia.
 
 ---
@@ -227,7 +226,8 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 1. Przenieść dane panelu do Firestore z regułami dostępu dla roli moderatora (custom claim lub lista dozwolonych adresów e-mail) i dodać sprawdzenie roli w panelu.
 2. Rozdzielić konta moderatorów od kont użytkowników aplikacji (rola moderatora zamiast wspólnej puli kont).
 3. Poprawić model cienia: wysokości budynków z Geoportalu (LoD1) i drzewa, zmiana etykiety na "model".
-4. Dowolne punkty A i B oraz dłuższy dzień obliczeń (co 30 minut).
+4. Dowolne punkty A i B, dłuższy dzień obliczeń (co 30 minut) i wybór daty (kolejne dni lata, a nie tylko 15.07).
 5. Alerty z IMGW zamiast statycznego przykładu, profile komfortu, wersja angielska, PWA.
 6. Prawdziwy ranking dzielnic z danych aplikacji (po połączeniu danych strony i aplikacji w jednym projekcie).
 7. Statystyki odwiedzin panelu, scenariusz inwestycji, eksport, `/zgloszenia`.
+8. Weryfikacja miejsc chłodu na miejscu (godziny, adresy) i nadanie statusu "zweryfikowane".

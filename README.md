@@ -26,7 +26,7 @@ There is no backend. Shade, routes and panel data are calculated beforehand in P
 | `/trasy-turystyczne` | 3 tourist walks planned in the shade (optional, under "Więcej") |
 | `/bezpieczenstwo` | Heat safety rules and official warning links (optional, under "Więcej") |
 | `/ranking` | District ranking preview with simulated data (optional, under "Więcej") |
-| `/panel` | City panel, moderator login only (linked from `/`, not in the menu) |
+| `/panel` | City panel with a demo login (in the menu as "Dla miasta" under "Więcej", and linked from `/`) |
 
 ## Getting started
 
@@ -50,7 +50,7 @@ npm run dev
 
 ## Firebase setup (once)
 
-1. Create a Firebase project (EU region) and enable Email/Password sign-in. Under Authentication → Settings → Authorized domains, make sure `localhost`, `coollodz.web.app` and `coollodz.firebaseapp.com` are listed. Under User actions, turn off **Enable create (sign-up)**: moderator accounts are added by hand in Authentication → Users.
+1. Create a Firebase project (EU region) and enable Email/Password sign-in. Under Authentication → Settings → Authorized domains, make sure `localhost`, `coollodz.web.app` and `coollodz.firebaseapp.com` are listed. Leave sign-up on if the project is shared with the mobile app, turning it off would block the app. The demo account is added by hand in Authentication → Users.
 2. Put the web app config into `.env.local`.
 3. Link the project:
 
@@ -59,7 +59,7 @@ npm run dev
    npx firebase use --add
    ```
 
-Never commit `.env.local` or the demo login credentials.
+Never commit `.env.local`. The demo account is shown on the login card of `/panel` on purpose (`demo` in `src/Panel.tsx`), so give it a throwaway password and never reuse a real one.
 
 ## Data
 
