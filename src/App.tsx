@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
 import { AppBar, Box, ButtonBase, CircularProgress, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
-import { AcUnit, DirectionsWalk, HealthAndSafety, Home, Info, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
+import { AccountBalance, AcUnit, DirectionsWalk, HealthAndSafety, Home, Info, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
 import Mapa from './Mapa'
 import HomePage from './Home'
 import MiejscaChlodu from './MiejscaChlodu'
@@ -14,13 +14,13 @@ import OProjekcie from './OProjekcie'
 // Firebase only loads on /panel, so the public pages never depend on it
 const Panel = lazy(() => import('./Panel'))
 
-// /panel is moderator-only, so it is linked from the home page, not the menu.
-// Optional pages (more: true) sit under "Więcej" so the phone bar keeps 5 slots.
+// Optional pages and /panel ("Dla miasta", the login) sit under "Więcej" (more: true) so the phone bar keeps 5 slots.
 const pages = [
   { to: '/', label: 'Start', icon: <Home />, element: <HomePage /> },
   { to: '/mapa', label: 'Mapa', icon: <Map />, element: <Mapa /> },
   { to: '/trasa', label: 'Trasa', icon: <DirectionsWalk />, element: <Trasa /> },
   { to: '/miejsca-chlodu', label: 'Chłód', icon: <AcUnit />, element: <MiejscaChlodu /> },
+  { to: '/panel', label: 'Dla miasta', icon: <AccountBalance />, element: <Suspense fallback={<CircularProgress sx={{ display: 'block', mx: 'auto', mt: 8 }} />}><Panel /></Suspense>, more: true },
   { to: '/trasy-turystyczne', label: 'Trasy turystyczne', icon: <Museum />, element: <TrasyTurystyczne />, more: true },
   { to: '/bezpieczenstwo', label: 'Bezpieczeństwo w upał', icon: <HealthAndSafety />, element: <Bezpieczenstwo />, more: true },
   { to: '/ranking', label: 'Ranking dzielnic', icon: <Leaderboard />, element: <Ranking />, more: true },
@@ -101,7 +101,6 @@ export default function App() {
       <Box component="main" sx={{ flex: 1, overflow: 'auto', position: 'relative', p: { xs: 2, md: 3 } }}>
         <Routes>
           {pages.map(({ to, element }) => <Route key={to} path={to} element={element} />)}
-          <Route path="/panel" element={<Suspense fallback={<CircularProgress sx={{ display: 'block', mx: 'auto', mt: 8 }} />}><Panel /></Suspense>} />
         </Routes>
       </Box>
       <Box sx={{ display: { md: 'none' } }}><Nav /></Box>

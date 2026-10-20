@@ -68,7 +68,7 @@ Walking time: 4.5 km/h. `extra_min` is the time difference compared with the `sh
 | `/mapa` | Full-screen MapLibre. Line layer from `edges.geojson`, coloured by `s{hour}`, hidden until the user picks sun-share ranges (Cień / Półcień / Słońce, several at once, or "Wszystkie"). Point layers for cool places, water, benches with toggles. "Cisza" and "Powietrze" are disabled buttons marked "w przygotowaniu". Hour buttons 10–18. Legend with percentages and accuracy label | Layers toggle without errors, changing the hour recolours segments |
 | `/trasa` | Route select and hour buttons. Filter `routes.geojson` by route and hour, draw 3 variants in different colours and dash styles, comparison card. Cool places and water within 200 m of the route | Manufaktura → Piotrkowska shows at least 2 variants with different sun share |
 | `/miejsca-chlodu` | List and mini map of `type=cool`, "Otwarte teraz" checkbox, nearest water, "Pokaż na mapie" link to `/mapa?place=<name>`, verified label | The "open now" filter follows the hours in the data |
-| `/panel` | Moderator login card with a short offer for the city. Not in the menu, linked from `/`. After login: shade gaps (map and table), cool place reach (400 m circles), candidates (table with visible weights, "rekomendacja, nie decyzja") | Views are hidden until the user logs in |
+| `/panel` | Moderator login card with a short offer for the city. In the menu as "Dla miasta" (under "Więcej") and linked from `/`. After login: shade gaps (map and table), cool place reach (400 m circles), candidates (table with visible weights, "rekomendacja, nie decyzja") | Views are hidden until the user logs in |
 
 ### Optional, in this order
 
