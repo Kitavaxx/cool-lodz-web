@@ -80,6 +80,7 @@ python scripts/panel.py       # needs shade.py first: shade gaps and candidates
 | `edges.geojson` | Walking network segments (sidewalks included) with sun share for 5 hours, from building shadows | `shade.py` |
 | `routes.geojson` | 4 routes × 5 hours × 3 variants | `routes.py` |
 | `places.geojson` | Cool places (OSM libraries, culture centres, museums, galleries with known opening hours), drinking water, benches | `places.py` |
+| `lodz.geojson` | Łódź city boundary: maps stay inside it and dim the outside | `boundary.py` |
 | `ranking.json` | Simulated district ranking, written by hand (no script) | |
 | `tours.json` | 3 tourist routes through Manufaktura, Piotrkowska, EC1 and Księży Młyn (shaded variant at 14:00) | `routes.py` |
 | `panel_gaps.json` | 20 sunniest named street segments at 14:00 (at least 80 m, one per street) | `panel.py` |

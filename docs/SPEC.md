@@ -51,6 +51,7 @@ Python writes these files and the website only reads them. All files are in `pub
 | `panel_candidates.json` | `{ weights, far_m, items: [...] }` (`far_m`: distance at which the distance criterion is maxed out) | `name`, `address`, `score`, `no_shade_200m`, `dist_to_cool_m`, `summer_hours` |
 | `tours.json` | `{ items: [...] }` | `id`, `name`, `description`, `hour`, `stops` (`name`, `coordinates`), `distance_m`, `time_min`, `sun_share` (shaded variant), `sun_share_shortest`, `geometry` (GeoJSON LineString) |
 | `ranking.json` | `{ simulated: true, items: [...] }`, hand-written, `accuracy` is `dane symulowane` | `district`, `comfort` (0–100, higher is more comfortable in heat), `shade_share` (0–1), `cool_places` |
+| `lodz.geojson` | Polygon | `name`; Łódź boundary from OSM, simplified to ~20 m. Maps cannot be panned outside the city and dim everything beyond it |
 
 `hours` uses the OSM `opening_hours` subset `Mo-Fr 10:00-18:00; Sa 10:00-14:00`. Places without hours are never "open now".
 
@@ -64,7 +65,7 @@ Walking time: 4.5 km/h. `extra_min` is the time difference compared with the `sh
 | --- | --- | --- |
 | `/` | Short start page, one idea per card: headline with "Otwórz mapę" and a live route preview, heat banner ("dane symulowane"), 3 steps linking to the pages, 3 facts with source links, APK and panel cards. The long text lives on `/o-projekcie` | A visitor gets the idea at a glance, details are one click away |
 | `/o-projekcie` | Problem with sources, methodology, limitations (section 9), data sources, AI use. Under "Więcej" in the menu | All sections present, sources and limits described |
-| `/mapa` | Full-screen MapLibre. Line layer from `edges.geojson`, coloured by `s{hour}`. Point layers for cool places, water, benches with toggles. "Cisza" and "Powietrze" are disabled buttons marked "w przygotowaniu". Hour buttons 10–18. Legend with percentages and accuracy label | Layers toggle without errors, changing the hour recolours segments |
+| `/mapa` | Full-screen MapLibre. Line layer from `edges.geojson`, coloured by `s{hour}`, hidden until the user picks sun-share ranges (Cień / Półcień / Słońce, several at once, or "Wszystkie"). Point layers for cool places, water, benches with toggles. "Cisza" and "Powietrze" are disabled buttons marked "w przygotowaniu". Hour buttons 10–18. Legend with percentages and accuracy label | Layers toggle without errors, changing the hour recolours segments |
 | `/trasa` | Route select and hour buttons. Filter `routes.geojson` by route and hour, draw 3 variants in different colours and dash styles, comparison card. Cool places and water within 200 m of the route | Manufaktura → Piotrkowska shows at least 2 variants with different sun share |
 | `/miejsca-chlodu` | List and mini map of `type=cool`, "Otwarte teraz" checkbox, nearest water, "Pokaż na mapie" link to `/mapa?place=<name>`, verified label | The "open now" filter follows the hours in the data |
 | `/panel` | Moderator login card with a short offer for the city. Not in the menu, linked from `/`. After login: shade gaps (map and table), cool place reach (400 m circles), candidates (table with visible weights, "rekomendacja, nie decyzja") | Views are hidden until the user logs in |

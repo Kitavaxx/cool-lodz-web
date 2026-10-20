@@ -1,16 +1,26 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import type { MapMouseEvent } from 'maplibre-gl'
-import { Alert, Box, Chip, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import type { ExpressionSpecification, MapMouseEvent } from 'maplibre-gl'
+import { Alert, Box, Button, Chip, Paper, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { hours, pct, placeLines, placeTypes, showPopup, steps, sunColor, useData, useMap } from './shared'
 
 const placeLayers = placeTypes.map(({ type }) => `places-${type}`)
+
+// Sun-share ranges the user switches on one by one; cut-offs match the colour steps
+const ranges = [
+  { name: 'Cień', cut: [0, 0.335] },
+  { name: 'Półcień', cut: [0.335, 0.665] },
+  { name: 'Słońce', cut: [0.665, 1.01] },
+]
+const inRange = (hour: number, i: number): ExpressionSpecification =>
+  ['all', ['>=', ['get', `s${hour}`], ranges[i].cut[0]], ['<', ['get', `s${hour}`], ranges[i].cut[1]]]
 
 export default function Mapa() {
   const [container, map] = useMap()
   const edges = useData('/data/edges.geojson')
   const places = useData('/data/places.geojson')
   const [hour, setHour] = useState(14)
+  const [picked, setPicked] = useState<number[]>([]) // no streets coloured until the user picks a range
   const [shown, setShown] = useState<Record<string, boolean>>({ cool: true, water: true, bench: false })  // thousands of benches, opt-in
   const placeName = useSearchParams()[0].get('place')
 
@@ -22,7 +32,9 @@ export default function Mapa() {
       map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: { 'line-cap': 'round' }, paint: { 'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 15, 2.5, 17, 6] } }, map.getLayer(placeLayers[0]) ? placeLayers[0] : undefined)
     }
     map.setPaintProperty('edges', 'line-color', sunColor(hour))
-  }, [map, edges, hour])
+    map.setLayoutProperty('edges', 'visibility', picked.length ? 'visible' : 'none')
+    map.setFilter('edges', ['any', ...picked.map((i) => inRange(hour, i))])
+  }, [map, edges, hour, picked])
 
   useEffect(() => {
     if (!map || !places) return
@@ -90,18 +102,32 @@ export default function Mapa() {
           <Chip label="Powietrze · w przygotowaniu" variant="outlined" disabled />
         </Box>
       </Paper>
-      <Paper sx={{ position: 'absolute', bottom: { xs: 64, sm: 32 }, left: 16, p: 1.5 }}>
+      <Paper sx={{ position: 'absolute', bottom: { xs: 64, sm: 32 }, left: 16, right: { xs: 16, sm: 'auto' }, p: 1.5, width: { sm: 340 } }}>
         {edges === null ? <Alert severity="warning">Brak danych</Alert> : (
-          <Stack spacing={0.5}>
-            <Typography variant="subtitle2">Słońce o {hour}:00</Typography>
-            {steps.map(({ color, label }) => (
-              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ width: 24, height: 5, borderRadius: 1, bgcolor: color }} />
-                <Typography variant="body2">{label}</Typography>
-              </Box>
-            ))}
-            {edges && <Typography variant="caption" color="text.secondary">Dokładność: {edges.accuracy}</Typography>}
-          </Stack>
+          <>
+            <Typography variant="subtitle2">Pokaż ulice według słońca o {hour}:00</Typography>
+            <ToggleButtonGroup value={picked} onChange={(_, v: number[]) => setPicked(v)} size="small" fullWidth aria-label="Zakres słońca" sx={{ mt: 1 }}>
+              {ranges.map(({ name }, i) => (
+                <ToggleButton
+                  key={name}
+                  value={i}
+                  sx={{ flexDirection: 'column', gap: 0.5, py: 1, lineHeight: 1.2, '&.Mui-selected, &.Mui-selected:hover': { bgcolor: `${steps[i].color}26`, color: 'text.primary' } }}
+                >
+                  <Box sx={{ width: 28, height: 5, borderRadius: 1, bgcolor: steps[i].color }} />
+                  <b>{name}</b>
+                  <Box component="span" sx={{ fontSize: 12 }}>{steps[i].label}</Box>
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, mt: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                {picked.length ? `Dokładność: ${edges?.accuracy ?? '…'}` : 'Wybierz zakres, by pokolorować ulice'}
+              </Typography>
+              <Button size="small" onClick={() => setPicked(picked.length === ranges.length ? [] : [0, 1, 2])}>
+                {picked.length === ranges.length ? 'Ukryj' : 'Wszystkie'}
+              </Button>
+            </Box>
+          </>
         )}
       </Paper>
     </Box>
