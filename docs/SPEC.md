@@ -49,6 +49,7 @@ Python writes these files and the website only reads them. All files are in `pub
 | `places.geojson` | Point | `type` (`cool`, `water`, `bench`), `name`, `address`, `hours`, `source`, `verified` |
 | `panel_gaps.json` | `{ items: [...] }` | `id`, `name`, `length_m`, `s14`, `geometry` (GeoJSON LineString) |
 | `panel_candidates.json` | `{ weights, far_m, items: [...] }` (`far_m`: distance at which the distance criterion is maxed out) | `name`, `address`, `score`, `no_shade_200m`, `dist_to_cool_m`, `summer_hours` |
+| `tours.json` | `{ items: [...] }` | `id`, `name`, `description`, `hour`, `stops` (`name`, `coordinates`), `distance_m`, `time_min`, `sun_share` (shaded variant), `sun_share_shortest`, `geometry` (GeoJSON LineString) |
 
 `hours` uses the OSM `opening_hours` subset `Mo-Fr 10:00-18:00; Sa 10:00-14:00`. Places without hours are never "open now".
 
