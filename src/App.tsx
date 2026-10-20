@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
 import { AppBar, Box, ButtonBase, CircularProgress, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
-import { AcUnit, DirectionsWalk, HealthAndSafety, Home, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
+import { AcUnit, DirectionsWalk, HealthAndSafety, Home, Info, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
 import Mapa from './Mapa'
 import HomePage from './Home'
 import MiejscaChlodu from './MiejscaChlodu'
@@ -9,6 +9,7 @@ import Trasa from './Trasa'
 import Bezpieczenstwo from './Bezpieczenstwo'
 import TrasyTurystyczne from './TrasyTurystyczne'
 import Ranking from './Ranking'
+import OProjekcie from './OProjekcie'
 
 // Firebase only loads on /panel, so the public pages never depend on it
 const Panel = lazy(() => import('./Panel'))
@@ -23,6 +24,7 @@ const pages = [
   { to: '/trasy-turystyczne', label: 'Trasy turystyczne', icon: <Museum />, element: <TrasyTurystyczne />, more: true },
   { to: '/bezpieczenstwo', label: 'Bezpieczeństwo w upał', icon: <HealthAndSafety />, element: <Bezpieczenstwo />, more: true },
   { to: '/ranking', label: 'Ranking dzielnic', icon: <Leaderboard />, element: <Ranking />, more: true },
+  { to: '/o-projekcie', label: 'O projekcie', icon: <Info />, element: <OProjekcie />, more: true },
 ]
 
 const item = {

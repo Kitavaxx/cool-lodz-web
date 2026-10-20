@@ -18,7 +18,8 @@ There is no backend. Shade, routes and panel data are calculated beforehand in P
 
 | Path | Page |
 | --- | --- |
-| `/` | Home: about the project, methodology, data sources, APK download |
+| `/` | Start: short intro, live route preview, links to the pages, APK download |
+| `/o-projekcie` | About: problem with sources, methodology, limitations, data sources |
 | `/mapa` | Map with shade, cool places, water and benches, plus an hour switch |
 | `/trasa` | 4 ready routes, each in 3 variants (shortest, compromise, shaded) |
 | `/miejsca-chlodu` | List of cool places with an "open now" filter |
