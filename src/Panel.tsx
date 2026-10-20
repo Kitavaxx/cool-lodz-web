@@ -1,11 +1,14 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth'
 import { LngLatBounds } from 'maplibre-gl'
-import type { LineString } from 'geojson'
+import type { Feature, LineString, Point } from 'geojson'
 import { Alert, Box, Button, Chip, CircularProgress, Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material'
 import { AdminPanelSettings } from '@mui/icons-material'
 import { auth } from './firebase'
-import { pct, steps, useData, useMap } from './shared'
+import { metres, pct, steps, useData, useMap } from './shared'
+
+const REACH = 400 // m, walking distance to a cool place we treat as reachable (source spec 7.2)
+const [covered, uncovered] = ['#4fb3e8', '#e4572e']
 
 type Gaps = { items: { id: number; name: string; length_m: number; s14: number; geometry: LineString }[] }
 
@@ -78,6 +81,7 @@ export default function Panel() {
 
 const views = [
   { label: 'Luki cienia', view: <ShadeGaps /> },
+  { label: 'Dostępność miejsc chłodu', view: <Reach /> },
 ]
 
 // Segments with the most sun at 14:00 (source spec 7.2), on a map and in a table
@@ -137,6 +141,79 @@ function ShadeGaps() {
         </TableContainer>
       </Box>
       {gaps && <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>Dokładność: {gaps.accuracy}, obliczono {gaps.computed_at}. Dane: OpenStreetMap.</Typography>}
+    </>
+  )
+}
+
+// Polygon ring approximating a circle of r metres around [lon, lat]
+function circle([x, y]: number[], r: number) {
+  const k = 111320 * Math.cos((y * Math.PI) / 180)
+  return Array.from({ length: 65 }, (_, i) => [x + (r * Math.cos((i / 32) * Math.PI)) / k, y + (r * Math.sin((i / 32) * Math.PI)) / 110540])
+}
+
+// 400 m circles around cool places; walking segments outside every circle are the "biała plama"
+function Reach() {
+  const places = useData('/data/places.geojson')
+  const edges = useData<{ features: Feature<LineString>[] }>('/data/edges.geojson')
+  const [container, map] = useMap()
+
+  const cool = useMemo(() => (places?.features ?? []).filter((f) => f.properties?.type === 'cool') as Feature<Point>[], [places])
+  const [network, share] = useMemo(() => {
+    if (!edges || !cool.length) return [[], 0]
+    let total = 0, outside = 0
+    const marked = edges.features.map((f) => {
+      const c = f.geometry.coordinates
+      const mid = c[Math.floor(c.length / 2)]
+      const len = c.slice(1).reduce((sum, p, i) => sum + metres(c[i], p), 0)
+      const inside = cool.some((p) => metres(mid, p.geometry.coordinates) <= REACH)
+      total += len
+      if (!inside) outside += len
+      return { ...f, properties: { inside } }
+    })
+    return [marked, outside / total]
+  }, [edges, cool])
+
+  useEffect(() => {
+    if (!map || !network.length) return
+    const rings = cool.map((p) => ({ type: 'Feature' as const, properties: {}, geometry: { type: 'Polygon' as const, coordinates: [circle(p.geometry.coordinates, REACH)] } }))
+    map.addSource('network', { type: 'geojson', data: { type: 'FeatureCollection', features: network } })
+    map.addSource('reach', { type: 'geojson', data: { type: 'FeatureCollection', features: rings } })
+    map.addSource('cool', { type: 'geojson', data: { type: 'FeatureCollection', features: cool } })
+    map.addLayer({ id: 'reach-fill', type: 'fill', source: 'reach', paint: { 'fill-color': covered, 'fill-opacity': 0.08 } })
+    map.addLayer({
+      id: 'network', type: 'line', source: 'network',
+      paint: { 'line-color': ['case', ['get', 'inside'], covered, uncovered], 'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 16, 3] },
+    })
+    map.addLayer({ id: 'reach-line', type: 'line', source: 'reach', paint: { 'line-color': '#0e5f74', 'line-width': 1.5, 'line-dasharray': [2, 2] } })
+    map.addLayer({ id: 'cool', type: 'circle', source: 'cool', paint: { 'circle-radius': 6, 'circle-color': '#0e5f74', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' } })
+  }, [map, network, cool])
+
+  if (places === null || edges === null) return <Alert severity="warning">Brak danych</Alert>
+  return (
+    <>
+      <Typography color="text.secondary" sx={{ maxWidth: 800 }}>
+        Koła o promieniu {REACH} m (ok. 5 minut pieszo) wokół {cool.length || '…'} miejsc chłodu. Chodniki poza wszystkimi kołami to „białe plamy”: stamtąd do najbliższego miejsca chłodu jest dalej niż {REACH} m.
+      </Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 300px' }, gap: 2, mt: 2, alignItems: 'start' }}>
+        <Box ref={container} sx={{ height: { xs: 360, md: 600 }, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }} />
+        <Paper variant="outlined" sx={{ p: 2.5 }}>
+          {!network.length ? <CircularProgress /> : (
+            <>
+              <Typography sx={{ fontSize: 44, fontWeight: 700, color: uncovered, lineHeight: 1.1 }}>{pct(share)}</Typography>
+              <Typography>długości chodników leży w białych plamach, dalej niż {REACH} m od miejsca chłodu.</Typography>
+            </>
+          )}
+          <Stack spacing={1} sx={{ mt: 3, typography: 'body2' }}>
+            {[[covered, `do ${REACH} m od miejsca chłodu`], [uncovered, 'biała plama: dalej niż ' + REACH + ' m']].map(([color, label]) => (
+              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><Box sx={{ width: 24, height: 4, borderRadius: 1, bgcolor: color }} />{label}</Box>
+            ))}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#0e5f74', mx: '6px' }} />miejsce chłodu</Box>
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+            Odległość w linii prostej od środka odcinka. Miejsca chłodu z OpenStreetMap ze znanymi godzinami otwarcia.
+          </Typography>
+        </Paper>
+      </Box>
     </>
   )
 }
