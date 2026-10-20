@@ -72,7 +72,7 @@ export default function Panel() {
   }
 
   return (
-    <Box sx={{ maxWidth: 1300, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 1680, mx: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 700, flex: 1 }}>Panel miasta</Typography>
         <Chip icon={<AdminPanelSettings />} label={user.email} variant="outlined" />

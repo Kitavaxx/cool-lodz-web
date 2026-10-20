@@ -72,7 +72,7 @@ export default function MiejscaChlodu() {
   }
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 1680, mx: 'auto' }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>Miejsca chłodu</Typography>
       <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 720 }}>
         Biblioteki, muzea, galerie i domy kultury w Śródmieściu, w których można odpocząć od upału. Godziny otwarcia pochodzą z OpenStreetMap, sprawdź je przed wyjściem.

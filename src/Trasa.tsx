@@ -97,7 +97,7 @@ export default function Trasa() {
   }, [map, focus, current])
 
   return (
-    <Box sx={{ maxWidth: 1300, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 1680, mx: 'auto' }}>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>Trasa w cieniu</Typography>
       <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 760 }}>
         Wybierz jedną z 4 gotowych tras i godzinę. Porównaj trasę najkrótszą, kompromisową i zacienioną: ile dłużej idziesz i ile słońca unikasz.

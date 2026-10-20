@@ -88,7 +88,7 @@ function Preview() {
   ]
   if (!rows[0].p || !rows[1].p) return null
   return (
-    <Card sx={{ p: 3, borderRadius: '24px', boxShadow: '0 30px 60px rgb(0 0 0 / 0.3)', color: 'text.primary', width: '100%', maxWidth: 400 }}>
+    <Card sx={{ p: 3, borderRadius: '24px', boxShadow: '0 30px 60px rgb(0 0 0 / 0.3)', color: 'text.primary', width: { xs: '100%', md: 400, xl: 460 }, maxWidth: '100%' }}>
       <Typography variant="body2" color="text.secondary">Przykład o 14:00</Typography>
       <Typography sx={{ fontWeight: 700, fontSize: 18 }}>{rows[0].p.route_name}</Typography>
       {rows.map(({ label, color, p }) => (
@@ -109,12 +109,12 @@ function Preview() {
 
 export default function Home() {
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 4 }}>
+    <Box sx={{ maxWidth: 1680, mx: 'auto', pb: 4 }}>
       {/* Hero: the whole first screen */}
       <Box
         sx={{
           position: 'relative', overflow: 'hidden', borderRadius: { xs: '28px', md: '40px' }, color: 'common.white',
-          px: { xs: 3, md: 8 }, pt: { xs: 5, md: 8 }, pb: { xs: 9, md: 8 }, minHeight: { md: 'calc(100dvh - 64px - 32px)' },
+          px: { xs: 3, md: 8, xl: 16 }, pt: { xs: 5, md: 8 }, pb: { xs: 9, md: 8 }, minHeight: { md: 'calc(100dvh - 64px - 48px)' },
           background: 'linear-gradient(135deg, #0b4a5b 0%, #0e5f74 45%, #1b8aa6 100%)',
           display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.15fr 1fr' }, gap: { xs: 5, md: 6 }, alignItems: 'center',
         }}
@@ -123,10 +123,10 @@ export default function Home() {
         <Box sx={{ position: 'relative' }}>
           <Reveal>
             <Chip icon={<WbSunny />} label="Upał 2. stopnia, do 33 °C · dane symulowane" sx={{ bgcolor: 'rgb(255 255 255 / 0.15)', color: 'common.white', '& .MuiChip-icon': { color: amber } }} />
-            <Typography variant="h2" component="h1" sx={{ fontWeight: 700, mt: 3, fontSize: { xs: 40, md: 64 }, lineHeight: 1.02 }}>
+            <Typography variant="h2" component="h1" sx={{ fontWeight: 700, mt: 3, fontSize: { xs: 40, md: 64, xl: 80 }, lineHeight: 1.02 }}>
               Przejdź przez Łódź <Box component="span" sx={{ color: amber }}>w{' '}cieniu</Box>
             </Typography>
-            <Typography sx={{ mt: 2.5, fontSize: { xs: 18, md: 21 }, opacity: 0.9 }}>
+            <Typography sx={{ mt: 2.5, fontSize: { xs: 18, md: 21, xl: 24 }, opacity: 0.9 }}>
               Cień, woda i miejsca chłodu w Śródmieściu, godzina po godzinie.
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 5 }}>

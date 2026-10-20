@@ -73,6 +73,7 @@ python scripts/places.py      # run from the repo root; OSM downloads are cached
 python scripts/shade.py       # ~3–5 min: buildings, sun position, sun share per segment
 python scripts/routes.py      # needs shade.py first: 4 routes × 5 hours × 3 variants, and 3 tourist routes
 python scripts/panel.py       # needs shade.py first: shade gaps and candidates
+python scripts/boundary.py    # Łódź city boundary for the map mask
 ```
 
 | File | Contents | Script |
