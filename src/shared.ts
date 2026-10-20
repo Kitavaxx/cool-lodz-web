@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Map as MapLibre, Popup, setWorkerUrl, type ExpressionSpecification, type LngLatLike } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import type { FeatureCollection, GeoJsonProperties } from 'geojson'
+import { polishDays } from './hours'
 
 // Code used by more than one page (SPEC 4)
 
@@ -30,9 +31,6 @@ export const placeTypes = [
   { type: 'bench', label: 'Ławki', color: '#8d6e63' },
 ]
 
-// OSM opening_hours day codes to Polish
-const days: Record<string, string> = { Mo: 'pn', Tu: 'wt', We: 'śr', Th: 'czw', Fr: 'pt', Sa: 'sob', Su: 'nd' }
-export const polishDays = (hours: string) => hours.replace(/Mo|Tu|We|Th|Fr|Sa|Su/g, (d) => days[d])
 
 export const placeLines = (p: NonNullable<GeoJsonProperties>) =>
   [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', p.verified ? 'Zweryfikowane' : 'Niezweryfikowane', `Źródło: ${p.source}`]
@@ -65,3 +63,7 @@ export function useMap() {
   }, [])
   return [ref, map] as const
 }
+
+// Distance in metres between two [lon, lat] points (equirectangular, fine within a city)
+export const metres = ([x1, y1]: number[], [x2, y2]: number[]) =>
+  Math.hypot((x2 - x1) * 111320 * Math.cos((y1 * Math.PI) / 180), (y2 - y1) * 110540)
