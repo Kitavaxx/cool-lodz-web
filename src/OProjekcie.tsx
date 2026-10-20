@@ -46,6 +46,8 @@ const status: { label: string; color: 'default' | 'info' | 'warning'; text: stri
 const sources = [
   { name: 'OpenStreetMap', text: 'budynki, sieć piesza, woda pitna, ławki, budynki publiczne', href: 'https://www.openstreetmap.org/copyright' },
   { name: 'OpenFreeMap', text: 'podkład mapy', href: 'https://openfreemap.org' },
+  { name: 'Łódź.pl', text: 'zdjęcie w tle strony: ul. Piotrkowska z nowymi drzewami, serwis miejski lodz.pl', href: 'https://lodz.pl/artykul/ponad-40-nowych-drzew-na-piotrkowskiej-to-dzieki-wspolpracy-miasta-z-firmami-z-lodzi-zdjecia-63839/' },
+  { name: 'Wikimedia Commons', text: 'zdjęcie w nagłówku strony głównej: Park Źródliska w Łodzi, autor Rakoon, CC0', href: 'https://commons.wikimedia.org/wiki/File:20200531_142731_Park_%C5%B9r%C3%B3dliska_in_%C5%81%C3%B3d%C5%BA_May_2020.jpg' },
   { name: 'astral', text: 'pozycja słońca dla Łodzi', href: 'https://github.com/sffjunkie/astral' },
   { name: 'OSMnx, Shapely, GeoPandas', text: 'obliczenia cienia i tras w Pythonie', href: 'https://osmnx.readthedocs.io' },
   { name: 'IMGW-PIB', text: 'definicja dnia upalnego, ostrzeżenia', href: 'https://meteo.imgw.pl' },
