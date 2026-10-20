@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { FeatureCollection, LineString } from 'geojson'
 import { Box, Button, Card, CardActionArea, Chip, Link as MuiLink, Typography } from '@mui/material'
-import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, Map, WbSunny } from '@mui/icons-material'
+import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, WbSunny } from '@mui/icons-material'
 import { QRCodeSVG } from 'qrcode.react'
 import { pct, useData } from './shared'
 
@@ -11,21 +11,71 @@ const apkUrl = ''
 
 // One idea per card; the long version lives on /o-projekcie
 const howTo = [
-  { to: '/mapa', icon: <Map />, title: 'Mapa cienia', text: 'Sprawdź, który chodnik jest w cieniu.' },
-  { to: '/trasa', icon: <DirectionsWalk />, title: 'Trasa w cieniu', text: 'Porównaj drogę najkrótszą i chłodniejszą.' },
-  { to: '/miejsca-chlodu', icon: <AcUnit />, title: 'Miejsca chłodu', text: 'Znajdź otwartą bibliotekę lub muzeum.' },
+  { to: '/mapa', icon: <Map />, title: 'Sprawdź cień', text: 'Mapa pokazuje, który chodnik jest w cieniu o wybranej godzinie.' },
+  { to: '/trasa', icon: <DirectionsWalk />, title: 'Wybierz trasę', text: 'Porównaj drogę najkrótszą z zacienioną i zobacz, ile to kosztuje minut.' },
+  { to: '/miejsca-chlodu', icon: <AcUnit />, title: 'Odpocznij w chłodzie', text: 'Znajdź otwartą bibliotekę, muzeum albo punkt z wodą pitną.' },
 ]
 
 const facts = [
-  { value: '75 %', text: 'nocy z miejską wyspą ciepła w Łodzi', href: 'https://nowa.mapa.lodz.pl/wp-content/uploads/pdf/the_lodz_atlas/en-10R.pdf' },
-  { value: '10–11', text: 'dni upalnych w roku w centralnej Polsce', href: 'https://demagog.org.pl/wypowiedzi/dni-upalne-w-miastach-czy-2022-rok-byl-rekordowy/' },
-  { value: '61 tys.', text: 'zgonów od upału w Europie latem 2022', href: 'https://www.nature.com/articles/s41591-023-02419-z' },
+  { value: '75 %', text: 'nocy w roku z miejską wyspą ciepła w Łodzi', href: 'https://nowa.mapa.lodz.pl/wp-content/uploads/pdf/the_lodz_atlas/en-10R.pdf' },
+  { value: '10–11', text: 'dni upalnych w roku w centralnej Polsce, coraz więcej', href: 'https://demagog.org.pl/wypowiedzi/dni-upalne-w-miastach-czy-2022-rok-byl-rekordowy/' },
+  { value: '61 tys.', text: 'zgonów związanych z upałem w Europie latem 2022', href: 'https://www.nature.com/articles/s41591-023-02419-z' },
 ]
 
+const amber = '#f4b942'
 const white = { bgcolor: 'common.white', color: 'primary.main', '&:hover': { bgcolor: '#e6f4f8' } }
 
-function Heading({ children }: { children: ReactNode }) {
-  return <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mt: { xs: 6, md: 8 }, mb: 2 }}>{children}</Typography>
+// Fades and slides its content in the first time it scrolls into view (native IntersectionObserver)
+function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setShown(true), { threshold: 0.15 })
+    io.observe(ref.current!)
+    return () => io.disconnect()
+  }, [])
+  return (
+    <Box
+      ref={ref}
+      sx={{
+        height: '100%',
+        opacity: shown ? 1 : 0,
+        transform: shown ? 'none' : 'translateY(40px)',
+        transition: `opacity .8s ease ${delay}s, transform .8s cubic-bezier(.2,.7,.2,1) ${delay}s`,
+        '@media (prefers-reduced-motion: reduce)': { opacity: 1, transform: 'none', transition: 'none' },
+      }}
+    >
+      {children}
+    </Box>
+  )
+}
+
+// A big rounded panel, roughly one screen of the scroll story
+function Section({ id, dark, children }: { id?: string; dark?: boolean; children: ReactNode }) {
+  return (
+    <Box
+      component="section"
+      id={id}
+      sx={{
+        mt: { xs: 3, md: 4 }, borderRadius: { xs: '28px', md: '40px' }, px: { xs: 2.5, sm: 4, md: 7 }, py: { xs: 7, md: 12 },
+        bgcolor: dark ? undefined : 'background.paper', color: dark ? 'common.white' : undefined,
+        background: dark ? 'linear-gradient(160deg, #0b3f4d 0%, #0e5f74 100%)' : undefined,
+      }}
+    >
+      {children}
+    </Box>
+  )
+}
+
+function Title({ plain, accent, color = 'primary.main', sub }: { plain: string; accent: string; color?: string; sub: string }) {
+  return (
+    <Reveal>
+      <Typography variant="h2" component="h2" sx={{ fontWeight: 700, textAlign: 'center', fontSize: { xs: 32, md: 48 }, lineHeight: 1.1 }}>
+        {plain} <Box component="span" sx={{ color }}>{accent}</Box>
+      </Typography>
+      <Typography sx={{ textAlign: 'center', mt: 2, fontSize: { xs: 17, md: 19 }, opacity: 0.75, maxWidth: 560, mx: 'auto' }}>{sub}</Typography>
+    </Reveal>
+  )
 }
 
 // Real numbers from routes.geojson: what walking in the shade costs on the first route at 14:00
@@ -38,110 +88,153 @@ function Preview() {
   ]
   if (!rows[0].p || !rows[1].p) return null
   return (
-    <Card sx={{ p: 2.5, borderRadius: '20px', boxShadow: '0 20px 50px rgb(0 0 0 / 0.25)', color: 'text.primary', width: '100%', maxWidth: 380 }}>
+    <Card sx={{ p: 3, borderRadius: '24px', boxShadow: '0 30px 60px rgb(0 0 0 / 0.3)', color: 'text.primary', width: '100%', maxWidth: 400 }}>
       <Typography variant="body2" color="text.secondary">Przykład o 14:00</Typography>
-      <Typography sx={{ fontWeight: 700 }}>{rows[0].p.route_name}</Typography>
+      <Typography sx={{ fontWeight: 700, fontSize: 18 }}>{rows[0].p.route_name}</Typography>
       {rows.map(({ label, color, p }) => (
-        <Box key={label} sx={{ mt: 2 }}>
+        <Box key={label} sx={{ mt: 2.5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', typography: 'body2' }}>
             <b>{label}</b>
             <span>{pct(p!.sun_share)} słońca · {Math.round(p!.time_min)} min</span>
           </Box>
-          <Box sx={{ mt: 0.75, height: 10, borderRadius: 5, bgcolor: '#edf1f2', overflow: 'hidden' }}>
-            <Box sx={{ width: pct(p!.sun_share).replace(' ', ''), height: '100%', borderRadius: 5, bgcolor: color }} />
+          <Box sx={{ mt: 1, height: 12, borderRadius: 6, bgcolor: '#edf1f2', overflow: 'hidden' }}>
+            <Box sx={{ width: pct(p!.sun_share).replace(' ', ''), height: '100%', borderRadius: 6, bgcolor: color }} />
           </Box>
         </Box>
       ))}
-      <Chip icon={<AcUnit />} color="primary" sx={{ mt: 2.5 }} label={`${Math.round((rows[0].p.sun_share - rows[1].p.sun_share) * 100)} p.p. mniej słońca za +${Math.round(rows[1].p.extra_min)} min`} />
+      <Chip icon={<AcUnit />} color="primary" sx={{ mt: 3 }} label={`${Math.round((rows[0].p.sun_share - rows[1].p.sun_share) * 100)} p.p. mniej słońca za +${Math.round(rows[1].p.extra_min)} min`} />
     </Card>
   )
 }
 
 export default function Home() {
   return (
-    <Box sx={{ maxWidth: 1100, mx: 'auto', pb: 4 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 4 }}>
+      {/* Hero: the whole first screen */}
       <Box
         sx={{
-          position: 'relative', overflow: 'hidden', borderRadius: '28px', color: 'common.white', px: { xs: 3, md: 6 }, py: { xs: 4, md: 7 },
+          position: 'relative', overflow: 'hidden', borderRadius: { xs: '28px', md: '40px' }, color: 'common.white',
+          px: { xs: 3, md: 8 }, pt: { xs: 5, md: 8 }, pb: { xs: 9, md: 8 }, minHeight: { md: 'calc(100dvh - 64px - 32px)' },
           background: 'linear-gradient(135deg, #0b4a5b 0%, #0e5f74 45%, #1b8aa6 100%)',
-          display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.2fr 1fr' }, gap: 4, alignItems: 'center',
+          display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.15fr 1fr' }, gap: { xs: 5, md: 6 }, alignItems: 'center',
         }}
       >
-        <WbSunny sx={{ position: 'absolute', right: -70, top: -80, fontSize: 280, color: '#f4b942', opacity: 0.15 }} />
+        <WbSunny sx={{ position: 'absolute', right: -80, top: -90, fontSize: 320, color: amber, opacity: 0.14 }} />
         <Box sx={{ position: 'relative' }}>
-          <Chip icon={<AcUnit />} label="Śródmieście Łodzi · lato 2026" sx={{ bgcolor: 'rgb(255 255 255 / 0.15)', color: 'common.white', '& .MuiChip-icon': { color: 'secondary.main' } }} />
-          <Typography variant="h2" component="h1" sx={{ fontWeight: 700, mt: 2.5, fontSize: { xs: 38, md: 54 }, lineHeight: 1.05 }}>
-            Przejdź przez Łódź w{' '}cieniu
-          </Typography>
-          <Typography sx={{ mt: 2, fontSize: { xs: 17, md: 20 }, opacity: 0.9 }}>
-            Cień, woda i miejsca chłodu godzina po godzinie.
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 4 }}>
-            <Button component={Link} to="/mapa" size="large" variant="contained" startIcon={<Map />} sx={white}>Otwórz mapę</Button>
-            <Button component={Link} to="/trasa" size="large" variant="outlined" startIcon={<DirectionsWalk />} sx={{ color: 'common.white', borderColor: 'rgb(255 255 255 / 0.5)' }}>
-              Zaplanuj trasę
+          <Reveal>
+            <Chip icon={<WbSunny />} label="Upał 2. stopnia, do 33 °C · dane symulowane" sx={{ bgcolor: 'rgb(255 255 255 / 0.15)', color: 'common.white', '& .MuiChip-icon': { color: amber } }} />
+            <Typography variant="h2" component="h1" sx={{ fontWeight: 700, mt: 3, fontSize: { xs: 40, md: 64 }, lineHeight: 1.02 }}>
+              Przejdź przez Łódź <Box component="span" sx={{ color: amber }}>w{' '}cieniu</Box>
+            </Typography>
+            <Typography sx={{ mt: 2.5, fontSize: { xs: 18, md: 21 }, opacity: 0.9 }}>
+              Cień, woda i miejsca chłodu w Śródmieściu, godzina po godzinie.
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 5 }}>
+              <Button component={Link} to="/mapa" size="large" variant="contained" startIcon={<Map />} sx={{ ...white, px: 3, py: 1.25 }}>Otwórz mapę</Button>
+              <Button component={Link} to="/trasa" size="large" variant="outlined" startIcon={<DirectionsWalk />} sx={{ color: 'common.white', borderColor: 'rgb(255 255 255 / 0.5)', px: 3, py: 1.25 }}>
+                Zaplanuj trasę
+              </Button>
+            </Box>
+          </Reveal>
+        </Box>
+        <Box sx={{ position: 'relative', display: 'flex', justifyContent: { md: 'flex-end' } }}>
+          <Reveal delay={0.2}><Preview /></Reveal>
+        </Box>
+        <Button
+          onClick={() => document.getElementById('jak')?.scrollIntoView({ behavior: 'smooth' })}
+          endIcon={<KeyboardArrowDown />}
+          sx={{
+            position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', color: 'common.white', opacity: 0.85,
+            '& .MuiButton-endIcon': { animation: 'bounce 1.6s infinite' },
+            '@keyframes bounce': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(5px)' } },
+          }}
+        >
+          Przewiń
+        </Button>
+      </Box>
+
+      <Section id="jak">
+        <Title plain="Chłodniej w" accent="3 krokach" sub="Wszystko, czego potrzebujesz w upalny dzień w centrum Łodzi." />
+        <Box sx={{ display: 'grid', gap: { xs: 2.5, md: 4 }, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, mt: { xs: 5, md: 8 }, alignItems: 'center' }}>
+          {howTo.map(({ to, icon, title, text }, i) => {
+            const main = i === 1 // the middle card stands out
+            return (
+              <Reveal key={to} delay={i * 0.15}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    borderRadius: '28px', height: '100%', border: 1, borderColor: main ? 'primary.main' : 'divider',
+                    bgcolor: main ? 'primary.main' : '#f4f7f8', color: main ? 'common.white' : 'text.primary',
+                    transform: { md: main ? 'scale(1.06)' : 'none' }, boxShadow: main ? '0 24px 48px rgb(14 95 116 / 0.3)' : 'none',
+                    transition: 'transform .25s, box-shadow .25s', '&:hover': { boxShadow: '0 24px 48px rgb(14 95 116 / 0.25)' },
+                  }}
+                >
+                  <CardActionArea component={Link} to={to} sx={{ p: { xs: 3.5, md: 4.5 }, textAlign: 'center', height: '100%' }}>
+                    <Box sx={{ position: 'relative', display: 'inline-flex', p: 2.25, borderRadius: '50%', bgcolor: main ? 'rgb(255 255 255 / 0.15)' : 'primary.main', color: 'common.white', '& svg': { fontSize: 32 } }}>
+                      {icon}
+                      <Box sx={{ position: 'absolute', top: -6, right: -10, width: 28, height: 28, borderRadius: '50%', bgcolor: amber, color: '#1b2a30', fontWeight: 700, fontSize: 14, display: 'grid', placeItems: 'center' }}>{i + 1}</Box>
+                    </Box>
+                    <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mt: 3 }}>{title}</Typography>
+                    <Typography sx={{ mt: 1.5, opacity: 0.8 }}>{text}</Typography>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 3, fontWeight: 700, color: main ? 'common.white' : 'primary.main' }}>
+                      Otwórz <ArrowForward fontSize="small" />
+                    </Box>
+                  </CardActionArea>
+                </Card>
+              </Reveal>
+            )
+          })}
+        </Box>
+      </Section>
+
+      <Section dark>
+        <Title plain="Upał w mieście" accent="to realny problem" color={amber} sub="Zwarta zabudowa nagrzewa się w dzień i oddaje ciepło w nocy." />
+        <Box sx={{ display: 'grid', gap: { xs: 2.5, md: 4 }, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, mt: { xs: 5, md: 8 } }}>
+          {facts.map(({ value, text, href }, i) => (
+            <Reveal key={value} delay={i * 0.15}>
+              <Box sx={{ height: '100%', p: { xs: 3.5, md: 4.5 }, borderRadius: '28px', bgcolor: 'rgb(255 255 255 / 0.08)', border: 1, borderColor: 'rgb(255 255 255 / 0.12)' }}>
+                <Typography sx={{ fontSize: { xs: 48, md: 60 }, fontWeight: 700, color: amber, lineHeight: 1 }}>{value}</Typography>
+                <Typography sx={{ mt: 2, fontSize: 18 }}>{text}</Typography>
+                <MuiLink href={href} target="_blank" rel="noopener" variant="body2" sx={{ display: 'inline-block', mt: 2, color: 'rgb(255 255 255 / 0.65)' }}>źródło</MuiLink>
+              </Box>
+            </Reveal>
+          ))}
+        </Box>
+        <Reveal>
+          <Box sx={{ textAlign: 'center', mt: { xs: 5, md: 7 } }}>
+            <Button component={Link} to="/o-projekcie" variant="outlined" endIcon={<ArrowForward />} sx={{ color: 'common.white', borderColor: 'rgb(255 255 255 / 0.5)', px: 3 }}>
+              Metodyka, ograniczenia i źródła
             </Button>
           </Box>
-        </Box>
-        <Box sx={{ position: 'relative', display: 'flex', justifyContent: { md: 'flex-end' } }}><Preview /></Box>
-      </Box>
+        </Reveal>
+      </Section>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2, px: 2, py: 1.25, borderRadius: '14px', bgcolor: '#fff4dc', border: 1, borderColor: '#f4d58a' }}>
-        <WbSunny sx={{ color: '#e4572e' }} />
-        <Typography sx={{ flex: 1, fontWeight: 500 }}>Upał 2. stopnia w Łodzi, do 33 °C</Typography>
-        <Chip label="dane symulowane" size="small" variant="outlined" />
-      </Box>
-
-      <Heading>Jak to działa</Heading>
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
-        {howTo.map(({ to, icon, title, text }, i) => (
-          <Card key={to} variant="outlined" sx={{ transition: 'border-color .2s, transform .2s', '&:hover': { borderColor: 'primary.main', transform: 'translateY(-2px)' } }}>
-            <CardActionArea component={Link} to={to} sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ display: 'flex', p: 1.25, borderRadius: '14px', bgcolor: 'primary.main', color: 'common.white' }}>{icon}</Box>
+      <Section>
+        <Title plain="Cool Łódź" accent="dla każdego" sub="Dla mieszkańców w telefonie, dla urzędników w panelu miasta." />
+        <Box sx={{ display: 'grid', gap: { xs: 2.5, md: 4 }, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, mt: { xs: 5, md: 8 } }}>
+          <Reveal>
+            <Box sx={{ height: '100%', p: { xs: 3.5, md: 5 }, borderRadius: '28px', bgcolor: 'primary.main', color: 'common.white', display: 'flex', gap: 3, alignItems: 'center', flexDirection: { xs: 'column', sm: 'row' }, textAlign: { xs: 'center', sm: 'left' } }}>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="body2" color="text.secondary">Krok {i + 1}</Typography>
-                <Typography sx={{ fontWeight: 700, fontSize: 18 }}>{title}</Typography>
-                <Typography variant="body2" color="text.secondary">{text}</Typography>
+                <Android sx={{ fontSize: 44, color: 'secondary.main' }} />
+                <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mt: 1.5 }}>Aplikacja na Androida</Typography>
+                <Typography sx={{ mt: 1, opacity: 0.85 }}>Cień i miejsca chłodu zawsze pod ręką.</Typography>
+                {apkUrl ? <Button href={apkUrl} variant="contained" sx={{ ...white, mt: 3 }}>Pobierz APK</Button> : <Chip label="APK wkrótce" sx={{ mt: 3, bgcolor: 'rgb(255 255 255 / 0.15)', color: 'common.white' }} />}
               </Box>
-              <ArrowForward color="primary" />
-            </CardActionArea>
-          </Card>
-        ))}
-      </Box>
-
-      <Heading>Dlaczego cień?</Heading>
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' } }}>
-        {facts.map(({ value, text, href }) => (
-          <Box key={value} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: '16px', bgcolor: '#e6f4f8', display: { xs: 'flex', sm: 'block' }, alignItems: 'center', gap: 2 }}>
-            <Typography sx={{ fontSize: { xs: 28, sm: 40 }, fontWeight: 700, color: 'primary.main', lineHeight: 1, minWidth: { xs: 96, sm: 0 } }}>{value}</Typography>
-            <Box>
-            <Typography sx={{ mt: { sm: 1 } }}>{text}</Typography>
-            <MuiLink href={href} target="_blank" rel="noopener" variant="caption" color="text.secondary">źródło</MuiLink>
+              {apkUrl && <Box sx={{ bgcolor: 'common.white', p: 1.5, borderRadius: '16px', display: 'flex' }}><QRCodeSVG value={apkUrl} size={128} /></Box>}
             </Box>
-          </Box>
-        ))}
-      </Box>
-      <Button component={Link} to="/o-projekcie" endIcon={<ArrowForward />} sx={{ mt: 1.5 }}>Metodyka, ograniczenia i źródła danych</Button>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <Box sx={{ height: '100%', p: { xs: 3.5, md: 5 }, borderRadius: '28px', bgcolor: '#f4f7f8', border: 1, borderColor: 'divider', textAlign: { xs: 'center', sm: 'left' } }}>
+              <AdminPanelSettings sx={{ fontSize: 44, color: 'primary.main' }} />
+              <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mt: 1.5 }}>Panel miasta</Typography>
+              <Typography color="text.secondary" sx={{ mt: 1 }}>Luki cienia, zasięg miejsc chłodu i kandydaci na nowe.</Typography>
+              <Button component={Link} to="/panel" variant="outlined" endIcon={<ArrowForward />} sx={{ mt: 3 }}>Zaloguj się</Button>
+            </Box>
+          </Reveal>
+        </Box>
+      </Section>
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, mt: { xs: 6, md: 8 } }}>
-        <Card sx={{ bgcolor: 'primary.main', color: 'common.white', p: { xs: 3, md: 4 }, display: 'flex', gap: 3, alignItems: 'center', flexDirection: { xs: 'column', sm: 'row' } }}>
-          <Box sx={{ flex: 1 }}>
-            <Android sx={{ fontSize: 36, color: 'secondary.main' }} />
-            <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mt: 1 }}>Cool Łódź na Androida</Typography>
-            <Typography sx={{ mt: 0.5, opacity: 0.9 }}>Cień i miejsca chłodu w telefonie.</Typography>
-            {apkUrl ? <Button href={apkUrl} variant="contained" sx={{ ...white, mt: 2 }}>Pobierz APK</Button> : <Chip label="APK wkrótce" sx={{ mt: 2, bgcolor: 'rgb(255 255 255 / 0.15)', color: 'common.white' }} />}
-          </Box>
-          {apkUrl && <Box sx={{ bgcolor: 'common.white', p: 1.5, borderRadius: '12px', display: 'flex' }}><QRCodeSVG value={apkUrl} size={120} /></Box>}
-        </Card>
-        <Card variant="outlined" sx={{ p: { xs: 3, md: 4 } }}>
-          <AdminPanelSettings sx={{ fontSize: 36, color: 'primary.main' }} />
-          <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mt: 1 }}>Dla miasta</Typography>
-          <Typography color="text.secondary" sx={{ mt: 0.5 }}>Luki cienia i kandydaci na miejsca chłodu.</Typography>
-          <Button component={Link} to="/panel" variant="outlined" sx={{ mt: 2 }}>Panel miasta</Button>
-        </Card>
-      </Box>
-
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 4 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 4 }}>
         <Info sx={{ fontSize: 16 }} /> Cień szacujemy z budynków, bez drzew. Dane mapy © autorzy OpenStreetMap.
       </Typography>
     </Box>
