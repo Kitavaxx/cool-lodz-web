@@ -51,7 +51,9 @@ def public_buildings():
     gdf["hours"] = gdf["opening_hours"].map(hours) if "opening_hours" in gdf else None
     gdf["address"] = gdf.apply(address, axis=1)
     offices = fetch(OFFICES)
-    offices = offices[offices["name"].notna()].copy()
+    # Spec 7.2 asks for "urzędy": skip courts, prosecutors, police and similar government offices
+    office = offices["amenity"].isna() if "amenity" in offices else True
+    offices = offices[offices["name"].notna() & ~(office & ~offices["name"].str.contains("Urz[aą]d", na=False))].copy()
     offices["hours"] = offices["opening_hours"].map(hours) if "opening_hours" in offices else None
     offices["address"] = offices.apply(address, axis=1)
     cool = gdf[gdf["hours"].notna()]
