@@ -106,4 +106,4 @@ Fallback cuts and extras follow spec section 8.
 - One summer day and 5 hours.
 - 4 precomputed routes, no free A to B.
 - Panel data is static files, readable without logging in by anyone who knows the URL. A database with rules comes in the next steps.
-- Heat banner and ranking use simulated data. Nothing else is simulated: shade, routes and panel views are our calculations on OSM data (`szacunek`), and cool places, water and benches are unverified OSM points. `/o-projekcie` ("Skąd są dane na stronie") explains the three kinds, and map popups for water and benches say what the point is, that it is unverified and that it may be out of date.
+- Heat banner and ranking use simulated data. Nothing else is simulated: shade, routes and panel views are our calculations on OSM data (`szacunek`), and cool places, water and benches are unverified OSM points. `/o-projekcie` ("Skąd są dane na stronie") explains the three kinds, and the map caption says the points are unverified OSM data. Popups for water and benches say what the point is and its source.

@@ -134,7 +134,7 @@ Nie wszystkie dane na stronie są symulowane. Strona rozróżnia trzy rodzaje da
 
 | Rodzaj | Dane | Uwagi |
 | --- | --- | --- |
-| **OpenStreetMap, niezweryfikowane** | Woda pitna, ławki, miejsca chłodu z godzinami | Prawdziwe punkty z mapy społeczności, nie sprawdzane na miejscu, mogą być nieaktualne. Punkty wody i ławek nie mają w OSM nazwy ani adresu, dlatego okienko pokazuje opis, status "niezweryfikowane" i źródło |
+| **OpenStreetMap, niezweryfikowane** | Woda pitna, ławki, miejsca chłodu z godzinami | Prawdziwe punkty z mapy społeczności, nie sprawdzane na miejscu, mogą być nieaktualne. Punkty wody i ławek nie mają w OSM nazwy ani adresu, dlatego okienko pokazuje opis i źródło, a status "niezweryfikowane" jest w podpisie pod przyciskami warstw |
 | **Szacunek** | Cień, trasy, luki cienia, kandydaci na miejsca chłodu, trasy turystyczne | Nasze obliczenia na danych OSM, tylko z budynków, bez drzew |
 | **Dane symulowane** | Baner upału na `/`, ranking dzielnic na `/ranking` | Przykłady wpisane ręcznie, prawdziwy ranking powstanie w aplikacji |
 
