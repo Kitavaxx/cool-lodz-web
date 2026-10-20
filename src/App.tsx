@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
 import { AppBar, Box, ButtonBase, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
-import { AcUnit, DirectionsWalk, HealthAndSafety, Home, Map, MoreHoriz, Museum } from '@mui/icons-material'
+import { AcUnit, DirectionsWalk, HealthAndSafety, Home, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
 import Panel from './Panel'
 import Mapa from './Mapa'
 import HomePage from './Home'
@@ -9,6 +9,7 @@ import MiejscaChlodu from './MiejscaChlodu'
 import Trasa from './Trasa'
 import Bezpieczenstwo from './Bezpieczenstwo'
 import TrasyTurystyczne from './TrasyTurystyczne'
+import Ranking from './Ranking'
 
 // /panel is moderator-only, so it is linked from the home page, not the menu.
 // Optional pages (more: true) sit under "Więcej" so the phone bar keeps 5 slots.
@@ -19,6 +20,7 @@ const pages = [
   { to: '/miejsca-chlodu', label: 'Chłód', icon: <AcUnit />, element: <MiejscaChlodu /> },
   { to: '/trasy-turystyczne', label: 'Trasy turystyczne', icon: <Museum />, element: <TrasyTurystyczne />, more: true },
   { to: '/bezpieczenstwo', label: 'Bezpieczeństwo w upał', icon: <HealthAndSafety />, element: <Bezpieczenstwo />, more: true },
+  { to: '/ranking', label: 'Ranking dzielnic', icon: <Leaderboard />, element: <Ranking />, more: true },
 ]
 
 const item = {

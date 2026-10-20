@@ -50,6 +50,7 @@ Python writes these files and the website only reads them. All files are in `pub
 | `panel_gaps.json` | `{ items: [...] }` | `id`, `name`, `length_m`, `s14`, `geometry` (GeoJSON LineString) |
 | `panel_candidates.json` | `{ weights, far_m, items: [...] }` (`far_m`: distance at which the distance criterion is maxed out) | `name`, `address`, `score`, `no_shade_200m`, `dist_to_cool_m`, `summer_hours` |
 | `tours.json` | `{ items: [...] }` | `id`, `name`, `description`, `hour`, `stops` (`name`, `coordinates`), `distance_m`, `time_min`, `sun_share` (shaded variant), `sun_share_shortest`, `geometry` (GeoJSON LineString) |
+| `ranking.json` | `{ simulated: true, items: [...] }`, hand-written, `accuracy` is `dane symulowane` | `district`, `comfort` (0–100, higher is more comfortable in heat), `shade_share` (0–1), `cool_places` |
 
 `hours` uses the OSM `opening_hours` subset `Mo-Fr 10:00-18:00; Sa 10:00-14:00`. Places without hours are never "open now".
 
@@ -88,12 +89,12 @@ Polish text. Works on phone and desktop. Never use colour alone: show a percenta
 ## 8. Build order
 
 1. Moderator login on `/panel` and an app shell styled like the mobile app. **Done.**
-2. Home page `/` (static, no data dependency).
-3. `/mapa` with a hand-made sample `edges.geojson` and `places.geojson`, replaced when Python delivers. **Done**, tickets in [TICKETS.md](TICKETS.md).
-4. `/miejsca-chlodu` (reuses `places.geojson`).
-5. `/trasa`.
-6. Panel views.
-7. Optional pages.
+2. Home page `/` (static, no data dependency). **Done.**
+3. `/mapa`. **Done**, first tickets in [TICKETS.md](TICKETS.md); later work tracked as GitHub issues.
+4. `/miejsca-chlodu` (reuses `places.geojson`). **Done.**
+5. `/trasa`. **Done.**
+6. Panel views. **Done.**
+7. Optional pages. **Done.**
 
 Fallback cuts and extras follow spec section 8.
 

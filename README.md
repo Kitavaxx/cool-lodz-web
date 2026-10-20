@@ -24,6 +24,7 @@ There is no backend. Shade, routes and panel data are calculated beforehand in P
 | `/miejsca-chlodu` | List of cool places with an "open now" filter |
 | `/trasy-turystyczne` | 3 tourist walks planned in the shade (optional, under "Więcej") |
 | `/bezpieczenstwo` | Heat safety rules and official warning links (optional, under "Więcej") |
+| `/ranking` | District ranking preview with simulated data (optional, under "Więcej") |
 | `/panel` | City panel, moderator login only (linked from `/`, not in the menu) |
 
 ## Getting started
@@ -78,6 +79,7 @@ python scripts/panel.py       # needs shade.py first: shade gaps and candidates
 | `edges.geojson` | Walking network segments (sidewalks included) with sun share for 5 hours, from building shadows | `shade.py` |
 | `routes.geojson` | 4 routes × 5 hours × 3 variants | `routes.py` |
 | `places.geojson` | Cool places (OSM libraries, culture centres, museums, galleries with known opening hours), drinking water, benches | `places.py` |
+| `ranking.json` | Simulated district ranking, written by hand (no script) | |
 | `tours.json` | 3 tourist routes through Manufaktura, Piotrkowska, EC1 and Księży Młyn (shaded variant at 14:00) | `routes.py` |
 | `panel_gaps.json` | 20 sunniest named street segments at 14:00 (at least 80 m, one per street) | `panel.py` |
 | `panel_candidates.json` | Public buildings (museums, libraries, culture centres, city offices) that are not cool places yet, scored by sun within 200 m, distance to the nearest cool place and known hours | `panel.py` |

@@ -1,0 +1,12 @@
+{
+  "accuracy": "dane symulowane",
+  "computed_at": "2026-10-20",
+  "simulated": true,
+  "items": [
+    { "district": "Polesie", "comfort": 71, "shade_share": 0.41, "cool_places": 14 },
+    { "district": "Górna", "comfort": 64, "shade_share": 0.36, "cool_places": 9 },
+    { "district": "Widzew", "comfort": 58, "shade_share": 0.33, "cool_places": 11 },
+    { "district": "Bałuty", "comfort": 52, "shade_share": 0.29, "cool_places": 12 },
+    { "district": "Śródmieście", "comfort": 47, "shade_share": 0.24, "cool_places": 33 }
+  ]
+}
