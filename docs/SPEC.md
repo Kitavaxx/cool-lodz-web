@@ -12,7 +12,7 @@ A hackathon demo that shows shaded walking routes, cool places and shade gaps in
 | --- | --- |
 | Sun share (`s`) | Part of a segment's length outside building shadow, 0 (full shade) to 1 (full sun) |
 | Hour | One of `10, 12, 14, 16, 18` on 15.07.2026, Europe/Warsaw |
-| Variant | Route computed with cost `length × (1 + λ × s)`: `shortest` (λ=0), `compromise` (λ≈1), `shaded` (λ≈3) |
+| Variant | Route computed with cost `length × (1 + λ × s)`: `shortest` (λ=0), `compromise` (λ=0.3), `shaded` (λ=3). λ calibrated on the real network: with λ=1 the compromise mostly equalled the shaded route |
 | Cool place | Public indoor place to cool down (library, culture centre, gallery, office) |
 | Accuracy | `szacunek` (buildings only) or `model` (exact heights and trees) |
 | Shade gap | Segment with the highest sun share at 14:00 |
