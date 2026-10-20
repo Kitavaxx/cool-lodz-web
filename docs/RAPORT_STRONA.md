@@ -2,7 +2,7 @@
 
 Wersja 0.4 z 20.10.2026, następca specyfikacji 0.3 z 18.10.2026. Przygotowali: Aliaksandr Yurusau, Dmytro Malinovskyi. Dla: Mikita Kutsenka.
 
-To jest robocza wersja raportu zespołu strony. Opisuje, co **zbudowaliśmy i co zdecydowaliśmy**, żeby Mikita K. mógł na jej podstawie napisać raport końcowy z dem strony i aplikacji. Punkty oznaczone ⚠️ uzupełnimy na koniec prac.
+Punkty oznaczone ⚠️ uzupełnimy na koniec prac.
 
 ---
 
@@ -128,6 +128,18 @@ Każdy plik ma pola `accuracy` i `computed_at`, więc data i dokładność oblic
 
 Budynki LoD1 i drzewa z Geoportalu, Mapa Drzew Łodzi, drzewa z OSM (`natural=tree`) oraz zweryfikowana lista miejsc chłodu z godzinami. Jeśli je znajdziemy, poprawiamy model i zmieniamy etykietę z "szacunek" na "model". ⚠️ Status do uzupełnienia.
 
+### 5.6. Status danych: co jest prawdziwe, a co symulowane
+
+Nie wszystkie dane na stronie są symulowane. Strona rozróżnia trzy rodzaje danych i opisuje je na `/o-projekcie` (sekcja "Skąd są dane na stronie"):
+
+| Rodzaj | Dane | Uwagi |
+| --- | --- | --- |
+| **OpenStreetMap, niezweryfikowane** | Woda pitna, ławki, miejsca chłodu z godzinami | Prawdziwe punkty z mapy społeczności, nie sprawdzane na miejscu, mogą być nieaktualne. Punkty wody i ławek nie mają w OSM nazwy ani adresu, dlatego okienko pokazuje opis, status "niezweryfikowane" i źródło |
+| **Szacunek** | Cień, trasy, luki cienia, kandydaci na miejsca chłodu, trasy turystyczne | Nasze obliczenia na danych OSM, tylko z budynków, bez drzew |
+| **Dane symulowane** | Baner upału na `/`, ranking dzielnic na `/ranking` | Przykłady wpisane ręcznie, prawdziwy ranking powstanie w aplikacji |
+
+Etykieta "dane symulowane" jest więc tylko przy rankingu i banerze, bo tylko tam dane są symulowane.
+
 ---
 
 ## 6. Strony
@@ -137,7 +149,7 @@ Budynki LoD1 i drzewa z Geoportalu, Mapa Drzew Łodzi, drzewa z OSM (`natural=tr
 | Adres | Zawartość |
 | --- | --- |
 | `/` | Krótka strona startowa: hasło i przycisk "Otwórz mapę" z podglądem trasy, baner upału (przykład, "dane symulowane"), 3 kroki, 3 fakty ze źródłami, karta pobrania APK, wejście do panelu dla miasta. Do czasu publikacji APK karta pokazuje "APK wkrótce" ⚠️ |
-| `/o-projekcie` | Problem ze źródłami, metodyka, ograniczenia, źródła danych, informacja o użyciu AI |
+| `/o-projekcie` | Problem ze źródłami, metodyka, ograniczenia, źródła danych |
 | `/mapa` | Mapa pełnoekranowa. Cień (odcinki kolorowane według udziału słońca, trzy przedziały: Cień, Półcień, Słońce), miejsca chłodu, woda, ławki. "Cisza" i "Powietrze" jako nieaktywne przyciski "w przygotowaniu". Przełącznik godziny 10 do 18, legenda z procentami, etykieta dokładności, atrybucja OSM |
 | `/trasa` | Wybór trasy i godziny, trzy warianty na mapie w różnych kolorach i stylach linii, karta porównania (dystans, czas, udział słońca, ile dłużej niż najkrótsza), miejsca chłodu i woda w promieniu 200 m od trasy |
 | `/miejsca-chlodu` | Lista i mini-mapa, filtr "Otwarte teraz" (czas Europe/Warsaw), najbliższa woda, "Pokaż na mapie", etykieta weryfikacji |
@@ -191,9 +203,8 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 - [x] Etykieta dokładności przy wartościach cienia.
 - [ ] Strona główna z opisem problemu, metodyki, źródłami, ograniczeniami i linkiem do APK (link czeka na publikację APK).
 - [ ] Panel: logowanie, 3 widoki, dane symulowane oznaczone.
-- [ ] Wyniki tras referencyjnych (dystans, czas, udział słońca, data i godzina obliczenia) przekazane Mikicie K.
+- [ ] Wyniki tras referencyjnych (dystans, czas, udział słońca, data i godzina obliczenia)
 - [ ] Zrzuty ekranu: strona główna, mapa z warstwami, wynik trasy, miejsca chłodu, panel (luki cienia, kandydaci).
-- [ ] Lista ograniczeń i informacja o użyciu AI przekazane Mikicie K. (sekcja 9 i 11 tego dokumentu).
 
 ---
 
@@ -205,7 +216,7 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 - Logowanie do panelu służy tylko do demonstracji. Dane panelu to pliki statyczne dostępne bez logowania, a w wersji docelowej będą chronione (sekcja 7.2).
 - Strona i aplikacja mają wspólną pulę kont Firebase Auth i w demie nie ma sprawdzania roli moderatora. Każde zalogowane konto widzi panel.
 - Baner upału i ranking dzielnic używają danych symulowanych.
-- Miejsca chłodu: godziny otwarcia i adresy wymagają ręcznej weryfikacji ⚠️.
+- Miejsca chłodu, woda pitna i ławki pochodzą z OpenStreetMap, nie były sprawdzane na miejscu i mogą być nieaktualne. Godziny otwarcia i adresy miejsc chłodu wymagają ręcznej weryfikacji ⚠️.
 - Filtry "Cisza" i "Powietrze" są nieaktywne.
 - Szacunek cienia nie uwzględnia drzew, zadaszeń ani zmiennego zachmurzenia.
 
