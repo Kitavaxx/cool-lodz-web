@@ -32,7 +32,7 @@ export default function Panel() {
   const [busy, setBusy] = useState(false)
   const [tab, setTab] = useState(0)
 
-  useEffect(() => onAuthStateChanged(auth, setUser), [])
+  useEffect(() => (auth ? onAuthStateChanged(auth, setUser) : undefined), [])
 
   async function login(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -40,13 +40,14 @@ export default function Panel() {
     setError('')
     setBusy(true)
     try {
-      await signInWithEmailAndPassword(auth, String(form.get('email')), String(form.get('password')))
+      await signInWithEmailAndPassword(auth!, String(form.get('email')), String(form.get('password')))
     } catch (err) {
       setError(errors[(err as { code?: string }).code ?? ''] ?? 'Coś poszło nie tak, spróbuj ponownie')
     }
     setBusy(false)
   }
 
+  if (!auth) return <Alert severity="warning" sx={{ maxWidth: 420, mx: 'auto', mt: { md: 6 } }}>Logowanie do panelu jest chwilowo niedostępne.</Alert>
   if (user === undefined) return <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 8 }} />
 
   if (!user) {
@@ -75,7 +76,7 @@ export default function Panel() {
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 700, flex: 1 }}>Panel miasta</Typography>
         <Chip icon={<AdminPanelSettings />} label={user.email} variant="outlined" />
-        <Button variant="outlined" size="small" onClick={() => signOut(auth)}>Wyloguj</Button>
+        <Button variant="outlined" size="small" onClick={() => signOut(auth!)}>Wyloguj</Button>
       </Box>
       <Tabs value={tab} onChange={(_, t) => setTab(t)} variant="scrollable" allowScrollButtonsMobile sx={{ mt: 2, borderBottom: 1, borderColor: 'divider' }}>
         {views.map(({ label }) => <Tab key={label} label={label} />)}

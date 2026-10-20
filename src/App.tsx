@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
-import { AppBar, Box, ButtonBase, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, ButtonBase, CircularProgress, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
 import { AcUnit, DirectionsWalk, HealthAndSafety, Home, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
-import Panel from './Panel'
 import Mapa from './Mapa'
 import HomePage from './Home'
 import MiejscaChlodu from './MiejscaChlodu'
@@ -10,6 +9,9 @@ import Trasa from './Trasa'
 import Bezpieczenstwo from './Bezpieczenstwo'
 import TrasyTurystyczne from './TrasyTurystyczne'
 import Ranking from './Ranking'
+
+// Firebase only loads on /panel, so the public pages never depend on it
+const Panel = lazy(() => import('./Panel'))
 
 // /panel is moderator-only, so it is linked from the home page, not the menu.
 // Optional pages (more: true) sit under "Więcej" so the phone bar keeps 5 slots.
@@ -31,6 +33,7 @@ const item = {
   px: { md: 2 },
   py: { md: 1 },
   color: 'text.secondary',
+  fontFamily: 'inherit', // "Więcej" is a <button>, which doesn't inherit Roboto
   fontSize: { xs: 14, md: 15 },
   fontWeight: 500,
   '& .icon': { display: 'flex', px: { xs: 2.5, md: 0 }, py: { xs: 0.5, md: 0 }, borderRadius: 999 },
@@ -96,7 +99,7 @@ export default function App() {
       <Box component="main" sx={{ flex: 1, overflow: 'auto', position: 'relative', p: 2 }}>
         <Routes>
           {pages.map(({ to, element }) => <Route key={to} path={to} element={element} />)}
-          <Route path="/panel" element={<Panel />} />
+          <Route path="/panel" element={<Suspense fallback={<CircularProgress sx={{ display: 'block', mx: 'auto', mt: 8 }} />}><Panel /></Suspense>} />
         </Routes>
       </Box>
       <Box sx={{ display: { md: 'none' } }}><Nav /></Box>
