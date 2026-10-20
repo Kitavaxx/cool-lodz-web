@@ -153,7 +153,7 @@ Etykieta "dane symulowane" jest więc tylko przy rankingu i banerze, bo tylko ta
 | `/mapa` | Mapa pełnoekranowa. Cień (odcinki kolorowane według udziału słońca, trzy przedziały: Cień, Półcień, Słońce), miejsca chłodu, woda, ławki. "Cisza" i "Powietrze" jako nieaktywne przyciski "w przygotowaniu". Przełącznik godziny 10 do 18, legenda z procentami, etykieta dokładności, atrybucja OSM |
 | `/trasa` | Wybór trasy i godziny, trzy warianty na mapie w różnych kolorach i stylach linii, karta porównania (dystans, czas, udział słońca, ile dłużej niż najkrótsza), miejsca chłodu i woda w promieniu 200 m od trasy |
 | `/miejsca-chlodu` | Lista i mini-mapa, filtr "Otwarte teraz" (czas Europe/Warsaw), najbliższa woda, "Pokaż na mapie", etykieta weryfikacji |
-| `/panel` | Logowanie z krótkim opisem oferty dla miasta, po zalogowaniu 3 widoki (sekcja 7). Nie ma go w menu, jest linkowany ze strony głównej |
+| `/panel` | Logowanie z krótkim opisem oferty dla miasta, po zalogowaniu 3 widoki (sekcja 7). W menu jako "Dla miasta" (w "Więcej") i linkowany ze strony głównej |
 
 ### 6.2. Dodatkowe (zbudowane)
 
@@ -170,7 +170,7 @@ Etykieta "dane symulowane" jest więc tylko przy rankingu i banerze, bo tylko ta
 - **Logowanie w demie służy tylko do pokazania przepływu dostępu.** To demo projektu, a w docelowej wersji dane panelu będą chronione (sekcja 7.2).
 - Logowanie e-mailem i hasłem (Firebase Auth), z komunikatami błędów po polsku. Widoki panelu są ukryte do zalogowania.
 - **Konta Auth są wspólne ze stroną i aplikacją mobilną** (jeden projekt Firebase), więc jurorzy mogą testować demo jednym kontem. Każde zalogowane konto widzi panel, bo w demie nie ma sprawdzania roli. Rejestracji w konsoli nie wyłączamy, żeby nie zablokować aplikacji mobilnej.
-- Dane logowania do dema trafiają tylko do dokumentacji i zgłoszenia, nie do repozytorium.
+- Konto demo (e-mail i jednorazowe hasło) jest pokazane pod formularzem logowania na `/panel`, żeby testujący mogli wejść do panelu bez pytania o dostęp.
 
 ### 7.2. Ochrona danych: demo a wersja docelowa
 
@@ -196,7 +196,7 @@ W demie pliki panelu leżą w `public/data/`, więc każdy, kto zna adres (np. `
 Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia na koniec.
 
 - [ ] Publiczny adres HTTPS działa na telefonie z Androidem i na komputerze.
-- [x] 5 obowiązkowych stron dostępnych z menu (panel z linku na stronie głównej).
+- [x] 5 obowiązkowych stron dostępnych z menu (panel jako "Dla miasta" w "Więcej").
 - [ ] Mapa: warstwy cień, miejsca chłodu, woda, ławki włączają się bez błędu, przełącznik godziny zmienia cień.
 - [ ] Trasa Manufaktura do Piotrkowskiej pokazuje co najmniej 2 warianty z różnym udziałem słońca.
 - [ ] Miejsca chłodu: lista z godzinami i działający filtr "otwarte teraz".
