@@ -5,12 +5,13 @@ import Panel from './Panel'
 import Mapa from './Mapa'
 import HomePage from './Home'
 import MiejscaChlodu from './MiejscaChlodu'
+import Trasa from './Trasa'
 
 // /panel is moderator-only, so it is linked from the home page, not the menu
 const pages = [
   { to: '/', label: 'Start', icon: <Home />, element: <HomePage /> },
   { to: '/mapa', label: 'Mapa', icon: <Map />, element: <Mapa /> },
-  { to: '/trasa', label: 'Trasa', icon: <DirectionsWalk /> },
+  { to: '/trasa', label: 'Trasa', icon: <DirectionsWalk />, element: <Trasa /> },
   { to: '/miejsca-chlodu', label: 'Chłód', icon: <AcUnit />, element: <MiejscaChlodu /> },
 ]
 
