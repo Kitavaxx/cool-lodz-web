@@ -2,14 +2,20 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth'
 import { LngLatBounds } from 'maplibre-gl'
 import type { Feature, LineString, Point } from 'geojson'
-import { Alert, Box, Button, Chip, CircularProgress, Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, CircularProgress, LinearProgress, Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material'
 import { AdminPanelSettings } from '@mui/icons-material'
 import { auth } from './firebase'
+import { polishDays } from './hours'
 import { metres, pct, steps, useData, useMap } from './shared'
 
 const REACH = 400 // m, walking distance to a cool place we treat as reachable (source spec 7.2)
 const [covered, uncovered] = ['#4fb3e8', '#e4572e']
 
+type Candidates = {
+  weights: { no_shade_200m: number; dist_to_cool_m: number; summer_hours: number }
+  far_m: number
+  items: { name: string; address: string | null; score: number; no_shade_200m: number; dist_to_cool_m: number; summer_hours: string | null }[]
+}
 type Gaps = { items: { id: number; name: string; length_m: number; s14: number; geometry: LineString }[] }
 
 // Moderator accounts are created by hand in the Firebase console, sign-up is disabled
@@ -82,6 +88,7 @@ export default function Panel() {
 const views = [
   { label: 'Luki cienia', view: <ShadeGaps /> },
   { label: 'Dostępność miejsc chłodu', view: <Reach /> },
+  { label: 'Kandydaci na miejsca chłodu', view: <Candidates /> },
 ]
 
 // Segments with the most sun at 14:00 (source spec 7.2), on a map and in a table
@@ -214,6 +221,64 @@ function Reach() {
           </Typography>
         </Paper>
       </Box>
+    </>
+  )
+}
+
+// Public buildings ranked as possible new cool places, with the weights shown (source spec 7.2)
+function Candidates() {
+  const data = useData<Candidates>('/data/panel_candidates.json')
+  if (data === null) return <Alert severity="warning">Brak danych</Alert>
+  if (!data) return <CircularProgress />
+  const w = data.weights
+  const criteria = [
+    [w.no_shade_200m, 'Brak cienia w promieniu 200 m', 'udział słońca na chodnikach o 14:00'],
+    [w.dist_to_cool_m, 'Odległość do najbliższego miejsca chłodu', `maksimum od ${data.far_m} m`],
+    [w.summer_hours, 'Znane godziny otwarcia', 'czy wiadomo, kiedy budynek jest otwarty'],
+  ] as const
+  return (
+    <>
+      <Alert severity="info" sx={{ maxWidth: 900 }}>
+        <b>Rekomendacja, nie decyzja.</b> Ranking pokazuje budynki publiczne, które warto sprawdzić jako nowe miejsca chłodu. Wynik nie uwzględnia m.in. dostępności dla osób z niepełnosprawnościami, klimatyzacji ani zgody zarządcy.
+      </Alert>
+      <Typography sx={{ fontWeight: 700, mt: 3 }}>Wagi kryteriów (wynik 0–100)</Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 1.5, mt: 1 }}>
+        {criteria.map(([weight, label, note]) => (
+          <Paper key={label} variant="outlined" sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Typography sx={{ fontSize: 28, fontWeight: 700, color: 'primary.main', minWidth: 64 }}>{pct(weight)}</Typography>
+            <Box><Typography sx={{ fontWeight: 500 }}>{label}</Typography><Typography variant="body2" color="text.secondary">{note}</Typography></Box>
+          </Paper>
+        ))}
+      </Box>
+      <TableContainer component={Paper} variant="outlined" sx={{ mt: 2 }}>
+        <Table size="small" sx={{ minWidth: 760 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell>#</TableCell><TableCell>Budynek</TableCell><TableCell sx={{ width: 160 }}>Wynik</TableCell>
+              <TableCell align="right">Słońce w 200 m</TableCell><TableCell align="right">Do miejsca chłodu</TableCell><TableCell>Godziny otwarcia</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.items.map((c, i) => (
+              <TableRow key={c.name} hover>
+                <TableCell>{i + 1}</TableCell>
+                <TableCell><b>{c.name}</b>{c.address && <Typography variant="body2" color="text.secondary">{c.address}</Typography>}</TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <b>{c.score}</b><LinearProgress variant="determinate" value={c.score} sx={{ flex: 1, height: 6, borderRadius: 3 }} />
+                  </Box>
+                </TableCell>
+                <TableCell align="right">{pct(c.no_shade_200m)}</TableCell>
+                <TableCell align="right">{c.dist_to_cool_m} m</TableCell>
+                <TableCell>{c.summer_hours ? polishDays(c.summer_hours) : <Typography variant="body2" color="text.secondary">nieznane</Typography>}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+        Budynki z OpenStreetMap: muzea, biblioteki i domy kultury bez znanych godzin, urzędy. Dokładność: {data.accuracy}, obliczono {data.computed_at}.
+      </Typography>
     </>
   )
 }
