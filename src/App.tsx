@@ -86,9 +86,9 @@ function Nav() {
   )
 }
 
-// Blurred park photo behind every page. The page scrolls inside <main>, so the photo is slid by the scroll progress:
+// Blurred street photo behind the home page. The page scrolls inside <main>, so the photo is slid by the scroll progress:
 // from its top to its bottom over the whole page, which is slower than the content whatever the page length.
-// The layer is only 25% taller than the screen, so the photo is barely scaled up and stays sharp.
+// The layer is only 25% taller than the screen, so the photo is barely scaled up. The blur is baked into the file.
 function SiteBackground() {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -116,6 +116,7 @@ function SiteBackground() {
 }
 
 export default function App() {
+  const home = useLocation().pathname === '/' // the photo is only for the home page, other pages stay plain
   // Screen-high column, so pages like /mapa can fill the space between the bars
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
@@ -128,7 +129,7 @@ export default function App() {
         </Toolbar>
       </AppBar>
       <Box sx={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
-        <SiteBackground />
+        {home && <SiteBackground />}
         <Box component="main" sx={{ position: 'absolute', inset: 0, overflow: 'auto', p: { xs: 2, md: 3 } }}>
           <Routes>
             {pages.map(({ to, element }) => <Route key={to} path={to} element={element} />)}
