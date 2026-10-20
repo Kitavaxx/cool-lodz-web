@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth'
 import { LngLatBounds } from 'maplibre-gl'
 import type { Feature, LineString, Point } from 'geojson'
-import { Alert, Box, Button, Chip, CircularProgress, LinearProgress, Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material'
-import { AdminPanelSettings } from '@mui/icons-material'
+import { Alert, Box, Button, Chip, CircularProgress, IconButton, LinearProgress, Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material'
+import { AdminPanelSettings, Check, ContentCopy } from '@mui/icons-material'
 import { auth } from './firebase'
 import { polishDays } from './hours'
 import { metres, pct, steps, useData, useMap } from './shared'
@@ -18,11 +18,36 @@ type Candidates = {
 }
 type Gaps = { items: { id: number; name: string; length_m: number; s14: number; geometry: LineString }[] }
 
-// Moderator accounts are created by hand in the Firebase console, sign-up is disabled
+// The login is a demo of the access flow, so the test account is shown on the login card (SPEC 7).
+// It lives in the Firebase project shared with the mobile app: keep it a throwaway password, never reused.
+const demo = { email: 'public.test@gmail.com', password: 'test1111' }
+
 const errors: Record<string, string> = {
   'auth/invalid-credential': 'Nieprawidłowy e-mail lub hasło',
   'auth/invalid-email': 'Nieprawidłowy adres e-mail',
   'auth/too-many-requests': 'Zbyt wiele prób, spróbuj później',
+}
+
+// A value with a copy button; a tick shows for a moment after copying
+function Copyable({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false)
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // clipboard blocked: the value is still selectable with one tap
+    }
+  }
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Typography variant="body2" sx={{ flex: 1, wordBreak: 'break-all' }}>{label}: <b style={{ userSelect: 'all' }}>{value}</b></Typography>
+      <IconButton size="small" onClick={copy} aria-label={`Kopiuj: ${label}`}>
+        {copied ? <Check fontSize="small" color="success" /> : <ContentCopy fontSize="small" />}
+      </IconButton>
+    </Box>
+  )
 }
 
 export default function Panel() {
@@ -58,7 +83,7 @@ export default function Panel() {
             <AdminPanelSettings fontSize="large" />
             <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>Panel miasta</Typography>
           </Box>
-          <Chip label="Tylko dla moderatorów" size="small" sx={{ alignSelf: 'flex-start' }} />
+          <Chip label="Wersja demonstracyjna" size="small" sx={{ alignSelf: 'flex-start' }} />
           <Typography color="text.secondary">
             Luki cienia, dostępność miejsc chłodu i kandydaci na nowe miejsca chłodu dla urzędników.
           </Typography>
@@ -66,6 +91,11 @@ export default function Panel() {
           <TextField name="password" type="password" label="Hasło" autoComplete="current-password" required />
           {error && <Alert severity="error">{error}</Alert>}
           <Button type="submit" variant="contained" size="large" loading={busy}>Zaloguj</Button>
+          <Alert severity="info" icon={false}>
+            <Typography variant="subtitle2">Konto demo dla testujących</Typography>
+            <Copyable label="E-mail" value={demo.email} />
+            <Copyable label="Hasło" value={demo.password} />
+          </Alert>
         </Stack>
       </Paper>
     )

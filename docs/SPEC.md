@@ -82,7 +82,7 @@ Polish text. Works on phone and desktop. Never use colour alone: show a percenta
 
 - `onAuthStateChanged` in `Panel.tsx` only. `undefined` means loading, `null` means logged out.
 - `signInWithEmailAndPassword` only. Login is a demonstration of the access flow. Regular users never need an account.
-- The Firebase project (`coollodz`) is shared with the mobile app, so the user pool is shared too. The demo account is created by hand in the console. Sign-up is not disabled there, because that would block the app. The website has no registration screen.
+- The Firebase project (`coollodz`) is shared with the mobile app, so the user pool is shared too. The demo account is created by hand in the console and shown on the login card, so testers can try the panel. Its password is a throwaway one. Sign-up is not disabled there, because that would block the app. The website has no registration screen.
 - Firebase error codes are mapped to Polish messages. Raw errors are never shown.
 - Every signed-in account sees the panel, so no role check is needed in the demo. The login is not data protection: panel files are public static files. In the real version panel data moves to a database with security rules for the moderator role, and the panel checks the role (spec 7.1).
 - Authorized domains: `localhost`, `coollodz.web.app`, `coollodz.firebaseapp.com`.

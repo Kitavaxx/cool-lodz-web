@@ -30,7 +30,7 @@ Options: a React context for the whole app, or a listener only in the panel.
 ## Round 2: depends on round 1
 
 **Q8. Login UI (from Q1)?**
-➡️ **One card with e-mail, password, a "Tylko dla moderatorów" label and a short offer for the city.** No registration and no "forgot password": the team resets moderator passwords in the console.
+➡️ **One card with e-mail, password, a "Wersja demonstracyjna" label, a short offer for the city and the demo account shown under the form (Q11).** No registration and no "forgot password": the team resets the demo password in the console. No autofill button, since the site must also work on phones.
 
 **Q9. Error messages (from Q1, Q3)?**
 ➡️ **Map the few Firebase error codes we expect to Polish:** wrong credentials, invalid e-mail, too many attempts. Anything else shows a general message. We never show raw Firebase errors.
@@ -39,7 +39,7 @@ Options: a React context for the whole app, or a listener only in the panel.
 ➡️ `localhost`, `coollodz.web.app`, `coollodz.firebaseapp.com`. PR preview channels (`coollodz--pr-*.web.app`) must be added by hand if we test login on a preview.
 
 **Q11. Demo credentials (from Q1)?**
-➡️ Only in the documentation and the hackathon submission, never in the repository. `.env.local` stays ignored by git.
+➡️ **Shown on the login card of `/panel`** so judges can try the panel without asking for access. The login is a demo of the access flow and the panel files are public anyway (SPEC 7). The password is a throwaway one, because the Firebase project is shared with the mobile app. *(Revised 20.10.2026: the first answer kept credentials out of the repository.)*
 
 **Q12. Data file contract (from Q5, Q6)?**
 ➡️ Fixed in `docs/SPEC.md`, section 5. Python writes these files and the website only reads them, so the property names are the only interface between the two.

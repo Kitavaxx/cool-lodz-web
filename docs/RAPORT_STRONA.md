@@ -170,7 +170,7 @@ Etykieta "dane symulowane" jest więc tylko przy rankingu i banerze, bo tylko ta
 - **Logowanie w demie służy tylko do pokazania przepływu dostępu.** To demo projektu, a w docelowej wersji dane panelu będą chronione (sekcja 7.2).
 - Logowanie e-mailem i hasłem (Firebase Auth), z komunikatami błędów po polsku. Widoki panelu są ukryte do zalogowania.
 - **Konta Auth są wspólne ze stroną i aplikacją mobilną** (jeden projekt Firebase), więc jurorzy mogą testować demo jednym kontem. Każde zalogowane konto widzi panel, bo w demie nie ma sprawdzania roli. Rejestracji w konsoli nie wyłączamy, żeby nie zablokować aplikacji mobilnej.
-- Dane logowania do dema trafiają tylko do dokumentacji i zgłoszenia, nie do repozytorium.
+- Konto demo (e-mail i jednorazowe hasło) jest pokazane pod formularzem logowania na `/panel`, żeby testujący mogli wejść do panelu bez pytania o dostęp.
 
 ### 7.2. Ochrona danych: demo a wersja docelowa
 
