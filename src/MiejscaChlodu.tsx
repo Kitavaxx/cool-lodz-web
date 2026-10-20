@@ -28,8 +28,13 @@ export default function MiejscaChlodu() {
     return cool
       .map((f) => {
         const at = f.geometry.coordinates
-        const nearest = Math.min(...water.map((w) => metres(at, w.geometry.coordinates)))
-        return { f, name: f.properties!.name as string, open: isOpen(f.properties!.hours, now.day, now.time), water: nearest }
+        let nearest = Infinity
+        let waterAt: number[] | undefined
+        for (const w of water) {
+          const d = metres(at, w.geometry.coordinates)
+          if (d < nearest) [nearest, waterAt] = [d, w.geometry.coordinates]
+        }
+        return { f, name: f.properties!.name as string, open: isOpen(f.properties!.hours, now.day, now.time), water: nearest, waterAt }
       })
       .sort((a, b) => Number(b.open) - Number(a.open) || a.name.localeCompare(b.name, 'pl'))
   }, [places, water, now])
@@ -46,6 +51,9 @@ export default function MiejscaChlodu() {
     const source = map.getSource('places') as GeoJSONSource | undefined
     if (source) return void source.setData(data)
     map.addSource('places', { type: 'geojson', data })
+    // Straight line from the selected place to its nearest water point, under the points
+    map.addSource('water-line', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({ id: 'water-line', type: 'line', source: 'water-line', layout: { 'line-cap': 'round' }, paint: { 'line-color': '#1565c0', 'line-width': 2.5, 'line-dasharray': [2, 2] } })
     map.addLayer({ id: 'drinking-water', type: 'circle', source: 'places', filter: ['==', ['get', 'type'], 'water'], paint: { 'circle-radius': 4, 'circle-color': '#1565c0', 'circle-stroke-width': 1, 'circle-stroke-color': '#fff' } })
     map.addLayer({
       id: 'cool', type: 'circle', source: 'places', filter: ['==', ['get', 'type'], 'cool'],
@@ -56,9 +64,22 @@ export default function MiejscaChlodu() {
       setSelected(f.properties!.name)
       showPopup(map, (f.geometry as Point).coordinates as [number, number], placeLines(f.properties!))
     })
-    map.on('mouseenter', 'cool', () => (map.getCanvas().style.cursor = 'pointer'))
-    map.on('mouseleave', 'cool', () => (map.getCanvas().style.cursor = ''))
+    map.on('click', 'drinking-water', (e: MapMouseEvent & { features?: Feature[] }) => {
+      const f = e.features![0]
+      showPopup(map, (f.geometry as Point).coordinates as [number, number], placeLines(f.properties!))
+    })
+    for (const layer of ['cool', 'drinking-water']) {
+      map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'))
+      map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''))
+    }
   }, [map, places, water, shown])
+
+  useEffect(() => {
+    const source = map?.getSource('water-line') as GeoJSONSource | undefined
+    const place = list.find((p) => p.name === selected)
+    const features = place?.waterAt ? [{ type: 'Feature' as const, properties: {}, geometry: { type: 'LineString' as const, coordinates: [place.f.geometry.coordinates, place.waterAt] } }] : []
+    source?.setData({ type: 'FeatureCollection', features })
+  }, [map, selected, list])
 
   useEffect(() => {
     if (!map?.getLayer('cool')) return
@@ -105,7 +126,7 @@ export default function MiejscaChlodu() {
                   <Stack spacing={0.5} sx={{ mt: 1, typography: 'body2', color: 'text.secondary', '& > div': { display: 'flex', gap: 1, alignItems: 'center' }, '& svg': { fontSize: 18 } }}>
                     {p.address && <div><Place />{p.address}</div>}
                     <div><AccessTime />{p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia'}</div>
-                    {Number.isFinite(water) && <div><WaterDrop sx={{ color: '#1565c0' }} />Woda pitna: {Math.round(water)} m</div>}
+                    {Number.isFinite(water) && <div><WaterDrop sx={{ color: '#1565c0' }} />Najbliższa woda pitna: ok. {Math.round(water)} m w linii prostej</div>}
                   </Stack>
                 </CardActionArea>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, pb: 1.5 }}>
