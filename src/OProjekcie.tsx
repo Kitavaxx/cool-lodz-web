@@ -35,7 +35,6 @@ const limits = [
   'Godziny otwarcia miejsc chłodu pochodzą z OpenStreetMap i nie są zweryfikowane.',
   'Baner upału i ranking dzielnic to dane symulowane.',
   'Dane panelu miasta to pliki statyczne. W kolejnych krokach przeniesiemy je do bazy z regułami dostępu.',
-  'Kod strony pisaliśmy z pomocą AI (Claude Code).',
 ]
 
 const sources = [

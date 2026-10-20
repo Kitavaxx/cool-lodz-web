@@ -81,10 +81,10 @@ Polish text. Works on phone and desktop. Never use colour alone: show a percenta
 ## 7. Auth
 
 - `onAuthStateChanged` in `Panel.tsx` only. `undefined` means loading, `null` means logged out.
-- `signInWithEmailAndPassword` only. Login is for moderators. Regular users never need an account.
-- Moderator accounts are created by hand in the Firebase console. Sign-up is disabled in the console (Authentication → Settings → User actions), so the API refuses new accounts too.
+- `signInWithEmailAndPassword` only. Login is a demonstration of the access flow. Regular users never need an account.
+- The Firebase project (`coollodz`) is shared with the mobile app, so the user pool is shared too. The demo account is created by hand in the console. Sign-up is not disabled there, because that would block the app. The website has no registration screen.
 - Firebase error codes are mapped to Polish messages. Raw errors are never shown.
-- Every signed-in account is a moderator, so no role check is needed in the demo. When panel data moves to a database, access is limited by security rules for the moderator role (spec 7.1).
+- Every signed-in account sees the panel, so no role check is needed in the demo. The login is not data protection: panel files are public static files. In the real version panel data moves to a database with security rules for the moderator role, and the panel checks the role (spec 7.1).
 - Authorized domains: `localhost`, `coollodz.web.app`, `coollodz.firebaseapp.com`.
 - Out of scope: registration, e-mail verification, password reset in the UI, social login.
 
@@ -107,4 +107,3 @@ Fallback cuts and extras follow spec section 8.
 - 4 precomputed routes, no free A to B.
 - Panel data is static files, readable without logging in by anyone who knows the URL. A database with rules comes in the next steps.
 - Heat banner and ranking use simulated data.
-- AI use: Claude Code for code.
