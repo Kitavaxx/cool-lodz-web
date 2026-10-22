@@ -1,62 +1,58 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { Box, Button, Card, CardContent, Chip, Link as MuiLink, Typography } from '@mui/material'
-import { Map } from '@mui/icons-material'
+import { Box, Button, Card, CardActionArea, Chip, Typography } from '@mui/material'
+import {
+  Apartment, BeachAccess, CalendarMonth, Calculate, Construction, DirectionsWalk, FilterDrama, Height, Info, Map, NearMe, OpenInNew, Park, Percent, Place, Public, Science, Storage, WbSunny,
+} from '@mui/icons-material'
+import { steps } from './shared'
+import { HeatFacts, PageHeader, Reveal } from './ui'
 
 // The long version of the start page: problem with sources, methodology, limitations, data (SPEC 6, SPEC 9)
 
-const facts = [
-  {
-    value: '75 %',
-    text: 'nocy w roku w Łodzi występuje miejska wyspa ciepła. Centrum jest zwykle o 3–4 °C cieplejsze niż okolice, rekordowo nawet o 12 °C.',
-    source: 'Atlas Miasta Łodzi, plansza „Klimat lokalny”',
-    href: 'https://nowa.mapa.lodz.pl/wp-content/uploads/pdf/the_lodz_atlas/en-10R.pdf',
-  },
-  {
-    value: '10–11',
-    text: 'dni upalnych (co najmniej 30 °C) średnio w roku w miastach centralnej Polski w latach 1991–2022, a ich liczba rośnie.',
-    source: 'Demagog na podstawie danych IMGW',
-    href: 'https://demagog.org.pl/wypowiedzi/dni-upalne-w-miastach-czy-2022-rok-byl-rekordowy/',
-  },
-  {
-    value: '61 tys.',
-    text: 'zgonów związanych z upałem w Europie latem 2022 roku.',
-    source: 'Ballester i in., Nature Medicine 2023',
-    href: 'https://www.nature.com/articles/s41591-023-02419-z',
-  },
+const method = [
+  { icon: <WbSunny />, title: 'Słońce', text: 'Położenie słońca nad Łodzią 15 lipca, co dwie godziny.' },
+  { icon: <Apartment />, title: 'Cień budynków', text: 'Obrys budynku przesunięty od słońca o wysokość / tg(kąta słońca).' },
+  { icon: <Percent />, title: 'Udział słońca', text: 'Jaka część chodnika jest poza cieniem.' },
+  { icon: <DirectionsWalk />, title: 'Trasy', text: 'Odcinki w słońcu „kosztują” więcej. Czas przy 4,5 km/h.' },
+]
+
+const lambdas = [
+  { label: 'Najkrótsza', value: '0', color: '#e4572e' },
+  { label: 'Kompromis', value: '0,3', color: '#f2a516' },
+  { label: 'Zacieniona', value: '3', color: '#0e5f74' },
+]
+
+const status = [
+  { icon: <Public />, color: '#5b6b72', label: 'OpenStreetMap, niezweryfikowane', note: 'Prawdziwe punkty z mapy społeczności, niesprawdzone na miejscu.', items: ['Woda pitna', 'Ławki', 'Miejsca chłodu'] },
+  { icon: <Calculate />, color: '#1e88c9', label: 'Szacunek', note: 'Nasze obliczenia na danych OSM, tylko z budynków, bez drzew.', items: ['Cień', 'Trasy', 'Luki cienia', 'Kandydaci', 'Trasy turystyczne'] },
+  { icon: <Science />, color: '#ef6c00', label: 'Dane symulowane', note: 'Przykłady wpisane ręcznie. Prawdziwy ranking powstanie w aplikacji.', items: ['Baner upału', 'Ranking dzielnic'] },
 ]
 
 const limits = [
-  'Cień liczymy tylko z obrysów budynków z OpenStreetMap. Wysokość bierzemy z tagu height, z liczby kondygnacji × 3 m, a gdy jej brak, przyjmujemy 12 m.',
-  'W wersji podstawowej pomijamy drzewa, dlatego wyniki mają etykietę „szacunek”.',
-  'Liczymy jeden letni dzień (15.07) i 5 godzin.',
-  'Obszar to Śródmieście: od Manufaktury do południowego końca Piotrkowskiej.',
-  '4 gotowe trasy, bez wyznaczania trasy z dowolnego punktu A do B.',
-  'Miejsca chłodu z godzinami otwarcia, woda pitna i ławki pochodzą z OpenStreetMap. Nie sprawdzaliśmy ich na miejscu i mogą być nieaktualne.',
-  'Baner upału i ranking dzielnic to dane symulowane.',
-  'Dane panelu miasta to pliki statyczne. W kolejnych krokach przeniesiemy je do bazy z regułami dostępu.',
-]
-
-const status: { label: string; color: 'default' | 'info' | 'warning'; text: string }[] = [
-  { label: 'OpenStreetMap, niezweryfikowane', color: 'default', text: 'Woda pitna, ławki i miejsca chłodu z godzinami otwarcia. To prawdziwe punkty z mapy tworzonej przez społeczność, ale nie sprawdzaliśmy ich na miejscu.' },
-  { label: 'Szacunek', color: 'info', text: 'Cień, trasy, luki cienia, kandydaci na nowe miejsca chłodu i trasy turystyczne. To nasze obliczenia na danych OpenStreetMap, tylko z budynków i bez drzew.' },
-  { label: 'Dane symulowane', color: 'warning', text: 'Baner upału na stronie głównej i ranking dzielnic. To przykłady wpisane ręcznie. Prawdziwy ranking powstanie w aplikacji.' },
+  { icon: <Height />, text: 'Wysokość z tagu height albo kondygnacje × 3 m, bez danych 12 m' },
+  { icon: <Park />, text: 'Bez drzew, dlatego etykieta „szacunek”' },
+  { icon: <CalendarMonth />, text: 'Jeden letni dzień (15.07), 5 godzin' },
+  { icon: <Map />, text: 'Tylko Śródmieście, od Manufaktury do końca Piotrkowskiej' },
+  { icon: <NearMe />, text: '4 gotowe trasy, bez trasy z dowolnego punktu A do B' },
+  { icon: <Place />, text: 'Punkty z OSM mogą być nieaktualne' },
+  { icon: <Science />, text: 'Baner upału i ranking dzielnic są symulowane' },
+  { icon: <Storage />, text: 'Panel miasta czyta pliki statyczne, baza z regułami dostępu w planach' },
 ]
 
 const sources = [
-  { name: 'OpenStreetMap', text: 'budynki, sieć piesza, woda pitna, ławki, budynki publiczne', href: 'https://www.openstreetmap.org/copyright' },
+  { name: 'OpenStreetMap', text: 'budynki, sieć piesza, woda, ławki, budynki publiczne', href: 'https://www.openstreetmap.org/copyright' },
   { name: 'OpenFreeMap', text: 'podkład mapy', href: 'https://openfreemap.org' },
-  { name: 'Łódź.pl', text: 'zdjęcie w tle strony: ul. Piotrkowska z nowymi drzewami, serwis miejski lodz.pl', href: 'https://lodz.pl/artykul/ponad-40-nowych-drzew-na-piotrkowskiej-to-dzieki-wspolpracy-miasta-z-firmami-z-lodzi-zdjecia-63839/' },
-  { name: 'Wikimedia Commons', text: 'zdjęcie w nagłówku strony głównej: Park Źródliska w Łodzi, autor Rakoon, CC0', href: 'https://commons.wikimedia.org/wiki/File:20200531_142731_Park_%C5%B9r%C3%B3dliska_in_%C5%81%C3%B3d%C5%BA_May_2020.jpg' },
+  { name: 'Łódź.pl', text: 'zdjęcie w tle: ul. Piotrkowska z nowymi drzewami', href: 'https://lodz.pl/artykul/ponad-40-nowych-drzew-na-piotrkowskiej-to-dzieki-wspolpracy-miasta-z-firmami-z-lodzi-zdjecia-63839/' },
+  { name: 'Wikimedia Commons', text: 'zdjęcie Parku Źródliska, autor Rakoon, CC0', href: 'https://commons.wikimedia.org/wiki/File:20200531_142731_Park_%C5%B9r%C3%B3dliska_in_%C5%81%C3%B3d%C5%BA_May_2020.jpg' },
   { name: 'astral', text: 'pozycja słońca dla Łodzi', href: 'https://github.com/sffjunkie/astral' },
-  { name: 'OSMnx, Shapely, GeoPandas', text: 'obliczenia cienia i tras w Pythonie', href: 'https://osmnx.readthedocs.io' },
+  { name: 'OSMnx, Shapely, GeoPandas', text: 'obliczenia cienia i tras', href: 'https://osmnx.readthedocs.io' },
   { name: 'IMGW-PIB', text: 'definicja dnia upalnego, ostrzeżenia', href: 'https://meteo.imgw.pl' },
 ]
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Box component="section" sx={{ mt: { xs: 5, md: 7 } }}>
-      <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 2 }}>{title}</Typography>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mb: 2.5, fontSize: { md: 28 } }}>{title}</Typography>
       {children}
     </Box>
   )
@@ -65,74 +61,99 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export default function OProjekcie() {
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 4 }}>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>O projekcie</Typography>
-      <Typography color="text.secondary" sx={{ mt: 1, fontSize: 18 }}>
-        Cool Łódź pokazuje, które chodniki Śródmieścia są w cieniu o danej godzinie, gdzie się schłodzić i napić wody, i jak dojść na miejsce, mniej się grzejąc. Tu opisujemy, skąd bierzemy dane i czego nie wiemy.
-      </Typography>
+      <PageHeader icon={<Info />} title="O projekcie" sub="Skąd bierzemy dane, jak liczymy cień i czego jeszcze nie wiemy." />
 
       <Section title="Problem">
-        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
-          {facts.map(({ value, text, source, href }) => (
-            <Card key={value} variant="outlined">
-              <CardContent>
-                <Typography sx={{ fontSize: 36, fontWeight: 700, color: 'primary.main', lineHeight: 1.1 }}>{value}</Typography>
-                <Typography sx={{ mt: 1 }}>{text}</Typography>
-                <MuiLink href={href} target="_blank" rel="noopener" variant="body2" sx={{ display: 'block', mt: 2 }}>Źródło: {source}</MuiLink>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-        <Typography color="text.secondary" sx={{ mt: 2 }}>
-          Zwarta zabudowa Śródmieścia nagrzewa się w dzień i oddaje ciepło w nocy. Mapy pogody nie mówią, po której stronie ulicy jest cień ani gdzie w pobliżu można odpocząć w chłodzie.
-        </Typography>
+        <HeatFacts />
       </Section>
 
       <Section title="Jak liczymy cień">
-        <Card variant="outlined">
-          <CardContent>
-            <Box component="ol" sx={{ pl: 2.5, my: 0, '& li': { mt: 1 } }}>
-              <li>Dla każdej godziny liczymy położenie słońca nad Łodzią 15 lipca.</li>
-              <li>Cień budynku to jego obrys przesunięty od słońca o wysokość / tg(wysokości słońca).</li>
-              <li>Dla każdego odcinka chodnika liczymy, jaka część długości jest poza cieniem. To <b>udział słońca</b>: 0 % to pełny cień, 100 % to pełne słońce.</li>
-              <li>Trasy liczymy z kosztem odcinka <b>długość × (1 + λ × udział słońca)</b>: najkrótsza (λ = 0), kompromis (λ = 0,3), zacieniona (λ = 3). Czas przy 4,5 km/h.</li>
+        {/* Four steps on a line, numbered like the stops on the tours page */}
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(4, 1fr)' } }}>
+          {method.map(({ icon, title, text }, i) => (
+            <Reveal key={title} delay={i * 0.12}>
+              <Card variant="outlined" sx={{ height: '100%', p: 2.5, borderRadius: '24px', position: 'relative' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{ width: 48, height: 48, borderRadius: '50%', bgcolor: 'primary.main', color: 'common.white', display: 'grid', placeItems: 'center' }}>{icon}</Box>
+                  <Typography sx={{ fontSize: 40, fontWeight: 800, color: 'divider', ml: 'auto', lineHeight: 1 }}>{i + 1}</Typography>
+                </Box>
+                <Typography variant="h6" component="h3" sx={{ fontWeight: 700, mt: 1.5 }}>{title}</Typography>
+                <Typography color="text.secondary" sx={{ mt: 0.5 }}>{text}</Typography>
+                {i === 2 && (
+                  <Box sx={{ display: 'flex', gap: 0.5, mt: 1.5 }}>
+                    {[BeachAccess, FilterDrama, WbSunny].map((Icon, k) => (
+                      <Box key={k} sx={{ flex: 1, textAlign: 'center', py: 0.75, borderRadius: '10px', bgcolor: `${steps[k].color}1f`, color: steps[k].color, typography: 'caption', fontWeight: 700 }}>
+                        <Icon sx={{ display: 'block', mx: 'auto', fontSize: 20 }} />{steps[k].label}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+              </Card>
+            </Reveal>
+          ))}
+        </Box>
+        <Reveal>
+          <Card variant="outlined" sx={{ mt: 2, p: { xs: 2.5, md: 3 }, borderRadius: '24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ fontFamily: 'ui-monospace, monospace', fontSize: { xs: 15, md: 18 }, fontWeight: 700, px: 2, py: 1, borderRadius: '12px', bgcolor: '#f4f7f8' }}>
+              koszt = długość × (1 + λ × udział słońca)
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              Etykieta dokładności: <b>szacunek</b> (tylko budynki) albo <b>model</b> (dokładne wysokości i drzewa).
-            </Typography>
-          </CardContent>
-        </Card>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {lambdas.map(({ label, value, color }) => (
+                <Chip key={label} label={<><b>{label}</b> λ = {value}</>} sx={{ bgcolor: `${color}1f`, border: 1.5, borderColor: color }} />
+              ))}
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', width: '100%' }}>
+              <Chip size="small" icon={<Calculate />} label="szacunek: tylko budynki" />
+              <Chip size="small" icon={<Construction />} label="model: dokładne wysokości i drzewa" variant="outlined" />
+            </Box>
+          </Card>
+        </Reveal>
       </Section>
 
       <Section title="Skąd są dane na stronie">
-        <Card variant="outlined">
-          {status.map(({ label, color, text }, i) => (
-            <Box key={label} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'flex-start' }, gap: { xs: 1, sm: 2 }, px: 2, py: 1.5, borderTop: i ? 1 : 0, borderColor: 'divider' }}>
-              <Box sx={{ minWidth: 260 }}><Chip label={label} color={color} variant={color === 'default' ? 'outlined' : 'filled'} /></Box>
-              <Typography color="text.secondary">{text}</Typography>
-            </Box>
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
+          {status.map(({ icon, color, label, note, items }, i) => (
+            <Reveal key={label} delay={i * 0.12}>
+              <Card variant="outlined" sx={{ height: '100%', p: 2.5, borderRadius: '24px', borderTop: `6px solid ${color}` }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color }}>
+                  {icon}
+                  <Typography sx={{ fontWeight: 800 }}>{label}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2 }}>
+                  {items.map((item) => <Chip key={item} size="small" label={item} sx={{ bgcolor: `${color}1a`, fontWeight: 600 }} />)}
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>{note}</Typography>
+              </Card>
+            </Reveal>
           ))}
-        </Card>
+        </Box>
       </Section>
 
       <Section title="Ograniczenia">
-        <Card variant="outlined">
-          <CardContent>
-            <Box component="ul" sx={{ pl: 2.5, my: 0, '& li': { mt: 1 } }}>
-              {limits.map((l) => <li key={l}>{l}</li>)}
+        <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+          {limits.map(({ icon, text }) => (
+            <Box key={text} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, borderRadius: '16px', bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}>
+              <Box sx={{ width: 40, height: 40, borderRadius: '12px', flexShrink: 0, display: 'grid', placeItems: 'center', bgcolor: '#fff4e5', color: '#c2410c' }}>{icon}</Box>
+              <Typography>{text}</Typography>
             </Box>
-          </CardContent>
-        </Card>
+          ))}
+        </Box>
       </Section>
 
       <Section title="Źródła danych">
-        <Card variant="outlined">
-          {sources.map(({ name, text, href }, i) => (
-            <Box key={name} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { sm: 2 }, px: 2, py: 1.5, borderTop: i ? 1 : 0, borderColor: 'divider' }}>
-              <MuiLink href={href} target="_blank" rel="noopener" sx={{ fontWeight: 700, minWidth: 220 }}>{name}</MuiLink>
-              <Typography color="text.secondary">{text}</Typography>
-            </Box>
+        <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' } }}>
+          {sources.map(({ name, text, href }) => (
+            <Card key={name} variant="outlined" sx={{ borderRadius: '16px' }}>
+              <CardActionArea href={href} target="_blank" rel="noopener" sx={{ p: 1.75, display: 'flex', alignItems: 'flex-start', gap: 1, height: '100%' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography sx={{ fontWeight: 700, color: 'primary.main' }}>{name}</Typography>
+                  <Typography variant="body2" color="text.secondary">{text}</Typography>
+                </Box>
+                <OpenInNew sx={{ fontSize: 16, color: 'text.secondary', mt: 0.5 }} />
+              </CardActionArea>
+            </Card>
           ))}
-        </Card>
+        </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>Dane mapy © autorzy OpenStreetMap, licencja ODbL.</Typography>
       </Section>
 

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { LngLatBounds, type GeoJSONSource, type Popup } from 'maplibre-gl'
 import type { Feature, FeatureCollection, LineString, Point } from 'geojson'
 import { Alert, Box, ButtonBase, Card, CardActionArea, Chip, CircularProgress, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
-import { AcUnit, WbSunny } from '@mui/icons-material'
+import { AcUnit, DirectionsWalk, WbSunny } from '@mui/icons-material'
+import { PageHeader } from './ui'
 import { hourPills, hours, pct, placeIcon, placeLines, showPopup, steps, useData, useMap } from './shared'
 
 // Colour and dash differ, so variants are told apart without colour alone
@@ -109,10 +110,7 @@ export default function Trasa() {
 
   return (
     <Box sx={{ maxWidth: 1680, mx: 'auto' }}>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>Trasa w cieniu</Typography>
-      <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 760 }}>
-        Wybierz jedną z 4 gotowych tras i godzinę. Porównaj trasę najkrótszą, kompromisową i zacienioną: ile dłużej idziesz i ile słońca unikasz.
-      </Typography>
+      <PageHeader icon={<DirectionsWalk />} title="Trasa w cieniu" sub="Najkrótsza, kompromis czy zacieniona: ile dłużej idziesz i ile słońca unikasz." />
 
       {routes === undefined && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 6 }} />}
       {routes === null && <Alert severity="warning" sx={{ mt: 3 }}>Brak danych</Alert>}
