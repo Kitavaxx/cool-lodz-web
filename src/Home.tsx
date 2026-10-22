@@ -5,7 +5,7 @@ import { Box, Button, Card, CardActionArea, Chip, ToggleButton, ToggleButtonGrou
 import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, WbSunny } from '@mui/icons-material'
 import { QRCodeSVG } from 'qrcode.react'
 import { hourPills, hours, pct, useData } from './shared'
-import { GrowBar, HeatFacts, Reveal } from './ui'
+import { GrowBar, HeatFacts, Reveal, Stars } from './ui'
 
 // ponytail: set when the mobile team publishes the APK; until then the card says "wkrótce"
 const apkUrl = ''
@@ -18,6 +18,48 @@ const howTo = [
 ]
 
 const amber = '#f4b942'
+
+// The page follows the chosen hour from a day theme to a night theme. night: 0 = day, 1 = night.
+const night: Record<number, number> = { 10: 0, 12: 0, 14: 0.1, 16: 0.45, 18: 1 }
+const palette: Record<string, [string, string]> = {
+  surface: ['#ffffff', '#122129'],
+  card: ['#f4f7f8', '#1a2e38'],
+  ink: ['#1b2a30', '#e6eff2'],
+  muted: ['#5b6b72', '#9db2ba'],
+  line: ['#dfe5e7', '#2b414b'],
+  accent: ['#0e5f74', '#6cc4ee'],
+  track: ['#edf1f2', '#2b414b'], // read by GrowBar
+}
+// A page colour as a CSS variable, with the day colour until the first frame sets it
+const v = (name: string) => `var(--${name}, ${palette[name][0]})`
+const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+const mix = (a: string, b: string, t: number) => `rgb(${rgb(a).map((x, i) => Math.round(x + (rgb(b)[i] - x) * t)).join(' ')})`
+
+// Blends the palette towards the hour's darkness over 1.2 s and writes it as CSS variables on <html>,
+// where the page and the blurred photo behind it (App) both read them
+function useNight(hour: number) {
+  const shown = useRef(night[hour])
+  useEffect(() => {
+    const root = document.documentElement.style
+    const [from, to, start] = [shown.current, night[hour], performance.now()]
+    let frame = 0
+    const step = (now: number) => {
+      const k = Math.min(1, (now - start) / 1200)
+      const t = from + (to - from) * k * k * (3 - 2 * k)
+      shown.current = t
+      root.setProperty('--night', String(t))
+      for (const [name, [day, dark]] of Object.entries(palette)) root.setProperty(`--${name}`, mix(day, dark, t))
+      if (k < 1) frame = requestAnimationFrame(step)
+    }
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [hour])
+  // Other pages keep their own colours
+  useEffect(() => () => {
+    const root = document.documentElement.style
+    for (const name of ['night', ...Object.keys(palette)]) root.removeProperty(`--${name}`)
+  }, [])
+}
 const white = { bgcolor: 'common.white', color: 'primary.main', '&:hover': { bgcolor: '#e6f4f8' } }
 
 // A big rounded panel, roughly one screen of the scroll story
@@ -28,7 +70,7 @@ function Section({ id, dark, children }: { id?: string; dark?: boolean; children
       id={id}
       sx={{
         mt: { xs: 3, md: 4 }, borderRadius: { xs: '28px', md: '40px' }, px: { xs: 2.5, sm: 4, md: 7 }, py: { xs: 7, md: 12 },
-        bgcolor: dark ? undefined : 'background.paper', color: dark ? 'common.white' : undefined,
+        bgcolor: dark ? undefined : v('surface'), color: dark ? 'common.white' : v('ink'),
         background: dark ? 'linear-gradient(160deg, #0b3f4d 0%, #0e5f74 100%)' : undefined,
       }}
     >
@@ -37,7 +79,7 @@ function Section({ id, dark, children }: { id?: string; dark?: boolean; children
   )
 }
 
-function Title({ plain, accent, color = 'primary.main', sub }: { plain: string; accent: string; color?: string; sub: string }) {
+function Title({ plain, accent, color = v('accent'), sub }: { plain: string; accent: string; color?: string; sub: string }) {
   return (
     <Reveal>
       <Typography variant="h2" component="h2" sx={{ fontWeight: 700, textAlign: 'center', fontSize: { xs: 32, md: 48 }, lineHeight: 1.1 }}>
@@ -59,9 +101,9 @@ function Preview({ hour, onHour }: { hour: number; onHour: (h: number) => void }
   if (!rows[0].p || !rows[1].p) return null
   const extra = Math.round(rows[1].p.extra_min)
   return (
-    <Card sx={{ p: 3, borderRadius: '24px', boxShadow: '0 30px 60px rgb(0 0 0 / 0.3)', color: 'text.primary', width: { xs: '100%', md: 400, xl: 460 }, maxWidth: '100%' }}>
+    <Card sx={{ p: 3, borderRadius: '24px', boxShadow: '0 30px 60px rgb(0 0 0 / 0.3)', bgcolor: v('surface'), color: v('ink'), width: { xs: '100%', md: 400, xl: 460 }, maxWidth: '100%' }}>
       <Typography sx={{ fontWeight: 700, fontSize: 18 }}>{rows[0].p.route_name}</Typography>
-      <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && onHour(h)} aria-label="Godzina" sx={{ ...hourPills, mt: 1.5 }}>
+      <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && onHour(h)} aria-label="Godzina" sx={{ ...hourPills, mt: 1.5, bgcolor: v('card'), '& .MuiToggleButtonGroup-grouped': { ...hourPills['& .MuiToggleButtonGroup-grouped'], color: v('muted') } }}>
         {hours.map((h) => <ToggleButton key={h} value={h}>{h}:00</ToggleButton>)}
       </ToggleButtonGroup>
       {rows.map(({ label, color, p }) => (
@@ -90,10 +132,13 @@ function SunArc({ hour }: { hour: number }) {
       <Box component="svg" viewBox="0 0 100 100" preserveAspectRatio="none" sx={{ display: { xs: 'none', md: 'block' }, position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
         <path d="M6 30 A44 24 0 0 1 94 30" fill="none" stroke="rgb(255 255 255 / 0.4)" strokeWidth="2" strokeDasharray="2 8" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
       </Box>
+      {/* Night sky over the hero: darker blue and stars as the evening comes */}
+      <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #050d24, #0a2236 70%)', opacity: 'calc(var(--night, 0) * 0.6)' }} />
+      <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '55%' }}><Stars /></Box>
       {/* Warmer light towards the hottest hours */}
       <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgb(244 120 40 / 0.35), rgb(244 120 40 / 0) 70%)', opacity: Math.max(0, 1 - Math.abs(hour - 15) / 5), transition: 'opacity 1.2s' }} />
       <Box sx={{ display: { xs: 'none', md: 'block' }, position: 'absolute', left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)', transition: move, textAlign: 'center' }}>
-        <Box sx={{ width: 48, height: 48, borderRadius: '50%', mx: 'auto', background: 'radial-gradient(circle, #fff3c4 0%, #f4b942 55%, #f29a2e 100%)', boxShadow: '0 0 40px 16px rgb(244 185 66 / 0.45), 0 0 120px 40px rgb(244 185 66 / 0.2)' }} />
+        <Box sx={{ width: 48, height: 48, borderRadius: '50%', mx: 'auto', background: hour >= 18 ? 'radial-gradient(circle, #ffd29a 0%, #f2853a 55%, #e4572e 100%)' : 'radial-gradient(circle, #fff3c4 0%, #f4b942 55%, #f29a2e 100%)', transition: 'background 1.2s', boxShadow: '0 0 40px 16px rgb(244 185 66 / 0.45), 0 0 120px 40px rgb(244 185 66 / 0.2)' }} />
         <Box sx={{ mt: 1, fontWeight: 700, fontSize: 14, color: amber, textShadow: '0 1px 4px rgb(0 0 0 / 0.4)' }}>{hour}:00</Box>
       </Box>
     </Box>
@@ -135,14 +180,18 @@ function ParallaxPhoto() {
   )
 }
 
+
 export default function Home() {
   const [hour, setHour] = useState(14)
   const [auto, setAuto] = useState(() => !matchMedia('(prefers-reduced-motion: reduce)').matches)
   useEffect(() => {
     if (!auto) return
-    const t = setInterval(() => setHour((h) => hours[(hours.indexOf(h) + 1) % hours.length]), 2500)
+    // Only while the hero is in view, so the page light doesn't change under someone reading further down
+    const t = setInterval(() => document.querySelector('main')!.scrollTop < 300 && setHour((h) => hours[(hours.indexOf(h) + 1) % hours.length]), 2500)
     return () => clearInterval(t)
   }, [auto])
+
+  useNight(hour)
 
   return (
     <Box sx={{ maxWidth: 1680, mx: 'auto', pb: 4 }}>
@@ -200,8 +249,8 @@ export default function Home() {
                 <Card
                   elevation={0}
                   sx={{
-                    borderRadius: '28px', height: '100%', border: 1, borderColor: main ? 'primary.main' : 'divider',
-                    bgcolor: main ? 'primary.main' : '#f4f7f8', color: main ? 'common.white' : 'text.primary',
+                    borderRadius: '28px', height: '100%', border: 1, borderColor: main ? 'primary.main' : v('line'),
+                    bgcolor: main ? 'primary.main' : v('card'), color: main ? 'common.white' : v('ink'),
                     transform: { md: main ? 'scale(1.06)' : 'none' }, boxShadow: main ? '0 24px 48px rgb(14 95 116 / 0.3)' : 'none',
                     transition: 'transform .25s, box-shadow .25s', '&:hover': { boxShadow: '0 24px 48px rgb(14 95 116 / 0.25)' },
                   }}
@@ -213,7 +262,7 @@ export default function Home() {
                     </Box>
                     <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mt: 3 }}>{title}</Typography>
                     <Typography sx={{ mt: 1.5, opacity: 0.8 }}>{text}</Typography>
-                    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 3, fontWeight: 700, color: main ? 'common.white' : 'primary.main' }}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 3, fontWeight: 700, color: main ? 'common.white' : v('accent') }}>
                       Otwórz <ArrowForward fontSize="small" />
                     </Box>
                   </CardActionArea>
@@ -251,17 +300,17 @@ export default function Home() {
             </Box>
           </Reveal>
           <Reveal delay={0.15}>
-            <Box sx={{ height: '100%', p: { xs: 3.5, md: 5 }, borderRadius: '28px', bgcolor: '#f4f7f8', border: 1, borderColor: 'divider', textAlign: { xs: 'center', sm: 'left' } }}>
-              <AdminPanelSettings sx={{ fontSize: 44, color: 'primary.main' }} />
+            <Box sx={{ height: '100%', p: { xs: 3.5, md: 5 }, borderRadius: '28px', bgcolor: v('card'), border: 1, borderColor: v('line'), textAlign: { xs: 'center', sm: 'left' } }}>
+              <AdminPanelSettings sx={{ fontSize: 44, color: v('accent') }} />
               <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mt: 1.5 }}>Panel miasta</Typography>
-              <Typography color="text.secondary" sx={{ mt: 1 }}>Luki cienia, zasięg miejsc chłodu i kandydaci na nowe.</Typography>
-              <Button component={Link} to="/panel" variant="outlined" endIcon={<ArrowForward />} sx={{ mt: 3 }}>Zaloguj się</Button>
+              <Typography sx={{ mt: 1, color: v('muted') }}>Luki cienia, zasięg miejsc chłodu i kandydaci na nowe.</Typography>
+              <Button component={Link} to="/panel" variant="outlined" endIcon={<ArrowForward />} sx={{ mt: 3, color: v('accent'), borderColor: v('accent') }}>Zaloguj się</Button>
             </Box>
           </Reveal>
         </Box>
       </Section>
 
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 4, mx: 'auto', width: 'fit-content', maxWidth: '100%', px: 2, py: 0.75, borderRadius: 999, bgcolor: 'rgb(255 255 255 / 0.85)' }}>
+      <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 4, mx: 'auto', width: 'fit-content', maxWidth: '100%', px: 2, py: 0.75, borderRadius: 999, bgcolor: v('surface'), color: v('muted') }}>
         <Info sx={{ fontSize: 16 }} /> Cień szacujemy z budynków, bez drzew. Dane mapy © autorzy OpenStreetMap.
       </Typography>
     </Box>
