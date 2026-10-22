@@ -73,7 +73,7 @@ Walking time: 4.5 km/h. `extra_min` is the time difference compared with the `sh
 
 ### Optional, in this order
 
-`/bezpieczenstwo` (112 banner, a hot-day timeline, rules and links to GIS, IMGW, RCB), `/trasy-turystyczne` (`tours.json`), `/ranking` (`ranking.json`, "dane symulowane" label).
+`/bezpieczenstwo` (a hot-day timeline, rules and links to GIS, IMGW, RCB), `/trasy-turystyczne` (`tours.json`), `/ranking` (`ranking.json`, "dane symulowane" label).
 
 ### Everywhere
 
