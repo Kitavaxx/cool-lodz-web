@@ -3,7 +3,7 @@ import { LngLatBounds, type GeoJSONSource, type Popup } from 'maplibre-gl'
 import type { Feature, FeatureCollection, LineString, Point } from 'geojson'
 import { Alert, Box, ButtonBase, Card, CardActionArea, Chip, CircularProgress, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { AcUnit, WbSunny } from '@mui/icons-material'
-import { hours, pct, placeIcon, placeLines, showPopup, steps, useData, useMap } from './shared'
+import { hourPills, hours, pct, placeIcon, placeLines, showPopup, steps, useData, useMap } from './shared'
 
 // Colour and dash differ, so variants are told apart without colour alone
 const variants = [
@@ -122,7 +122,7 @@ export default function Trasa() {
           <TextField select label="Trasa" value={routeId} onChange={(e) => setRouteId(Number(e.target.value))}>
             {names.map(([id, name]) => <MenuItem key={id} value={id}>{name}</MenuItem>)}
           </TextField>
-          <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && setHour(h)} aria-label="Godzina">
+          <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && setHour(h)} aria-label="Godzina" sx={hourPills}>
             {hours.map((h) => <ToggleButton key={h} value={h}>{h}:00</ToggleButton>)}
           </ToggleButtonGroup>
 

@@ -19,6 +19,13 @@ const theme = createTheme({
     button: { textTransform: 'none', fontWeight: 500 },
   },
   components: {
+    // Map popups look like the cards
+    MuiCssBaseline: {
+      styleOverrides: {
+        '.maplibregl-popup-content': { borderRadius: 14, padding: '12px 16px', boxShadow: '0 6px 24px rgb(0 0 0 / 0.15)', fontFamily: 'Roboto, system-ui, sans-serif', color: '#1b2a30' },
+        '.maplibregl-popup-close-button': { fontSize: 18, padding: '2px 8px', borderRadius: '0 14px 0 8px' },
+      },
+    },
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: { root: { borderRadius: 999 } },

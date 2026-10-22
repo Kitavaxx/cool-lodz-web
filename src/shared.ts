@@ -16,6 +16,13 @@ export const bounds: [number, number, number, number] = [19.43, 51.74, 19.48, 51
 export const hours = [10, 12, 14, 16, 18]
 export const pct = (s: number) => `${Math.round(s * 100)} %`
 
+// Hour buttons as pills, the selected one filled like the active nav item
+export const hourPills = {
+  gap: 0.5, bgcolor: 'action.hover', p: 0.5, borderRadius: 999,
+  '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important', m: 0, fontWeight: 600, color: 'text.secondary' },
+  '& .MuiToggleButton-root.Mui-selected, & .MuiToggleButton-root.Mui-selected:hover': { bgcolor: 'primary.main', color: 'common.white' },
+}
+
 // Three sun-share steps; cut-offs match Math.round on the percentage labels
 export const steps = [
   { color: '#2c7fb8', label: '0–33 %' },
@@ -50,19 +57,22 @@ async function addPlaceIcons(map: MapLibre) {
 }
 
 
-// Water and bench points have no address or hours in OSM, so say what they are instead of "Brak godzin otwarcia". Their unverified status is in the map caption.
+// Water and bench points have no address or hours in OSM, so say what they are instead of "Brak godzin otwarcia"
 export const placeLines = (p: NonNullable<GeoJsonProperties>) => {
-  const status = [p.verified ? 'Zweryfikowane' : 'Niezweryfikowane', `Źródło: ${p.source}`]
-  if (p.type === 'cool') return [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', ...status]
-  return [p.type === 'water' ? 'Miejsce, w którym można napić się wody' : p.name, p.address, `Źródło: ${p.source}`]
+  const source = `${p.source} · ${p.verified ? 'zweryfikowane' : 'niezweryfikowane'}`
+  if (p.type === 'cool') return [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', source]
+  return [p.type === 'water' ? 'Woda pitna' : p.name, p.address, source]
 }
 
-// Text only (no HTML), one line per entry
+// Text only (no HTML): the first line is the title, the rest smaller and grey
 export function showPopup(map: MapLibre, at: LngLatLike, lines: string[]) {
   const el = document.createElement('div')
-  el.style.whiteSpace = 'pre-line'
-  el.textContent = lines.filter(Boolean).join('\n')
-  return new Popup().setLngLat(at).setDOMContent(el).addTo(map)
+  lines.filter(Boolean).forEach((line, i) => {
+    const row = el.appendChild(document.createElement('div'))
+    row.textContent = line
+    row.style.cssText = i ? 'font-size:13px;color:#5b6b72;margin-top:2px' : 'font-size:15px;font-weight:700;margin-bottom:2px;padding-right:16px'
+  })
+  return new Popup({ maxWidth: '280px', focusAfterOpen: false }).setLngLat(at).setDOMContent(el).addTo(map)
 }
 
 // undefined = loading, null = missing or broken file (shown as "Brak danych")
