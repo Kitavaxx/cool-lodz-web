@@ -13,30 +13,6 @@ const clock = (t: number) => `${String(Math.floor(t / 60)).padStart(2, '0')}:${S
 const span = (ranges: [number, number][]) => ranges.map(([a, b]) => `${clock(a)}–${clock(b)}`).join(', ')
 const green = '#2e7d32'
 
-// Seven day pills: tinted on open days, today outlined; hover shows that day's hours
-function Week({ hours, today }: { hours?: string; today: number }) {
-  return (
-    <Box sx={{ display: 'flex', gap: 0.5 }}>
-      {dayNames.map((d, i) => {
-        const ranges = rangesOn(hours, i)
-        return (
-          <Tooltip key={d} title={ranges.length ? span(ranges) : 'zamknięte'}>
-            <Box
-              sx={{
-                flex: 1, maxWidth: 44, py: 0.5, textAlign: 'center', borderRadius: '8px', typography: 'caption', fontWeight: 700,
-                bgcolor: ranges.length ? '#e3f1f6' : '#f1f3f4', color: ranges.length ? 'primary.main' : 'text.disabled',
-                outline: i === today ? '2px solid' : 'none', outlineColor: 'primary.main',
-              }}
-            >
-              {d}
-            </Box>
-          </Tooltip>
-        )
-      })}
-    </Box>
-  )
-}
-
 export default function MiejscaChlodu() {
   const places = useData('/data/places.geojson')
   const [container, map] = useMap()
@@ -165,9 +141,8 @@ export default function MiejscaChlodu() {
                       {open ? 'Otwarte' : 'Zamknięte'}
                     </Box>
                   </Box>
-                  <Box sx={{ mt: 1.5 }}><Week hours={p.hours} today={now.day} /></Box>
-                  <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
-                    {p.hours ? <>Dziś: <b>{today.length ? span(today) : 'zamknięte'}</b></> : 'Brak godzin otwarcia'}
+                  <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <AccessTime sx={{ fontSize: 16 }} />{p.hours ? <>Dziś: <b>{today.length ? span(today) : 'zamknięte'}</b></> : 'Brak godzin otwarcia'}
                   </Typography>
                 </CardActionArea>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, pb: 1.5 }}>

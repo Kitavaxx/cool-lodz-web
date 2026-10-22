@@ -22,7 +22,7 @@ assert.equal(isOpen('Fr 18:00-00:00', 4, at(23, 30)), true)
 assert.equal(isOpen(null, Wed, at(12)), false)
 assert.equal(isOpen('', Wed, at(12)), false)
 
-// ranges per day, for the week strip on /miejsca-chlodu
+// ranges per day, for today's hours on /miejsca-chlodu
 assert.deepEqual(rangesOn('Mo-Fr 10:00-18:00; Sa 10:00-14:00', Sat), [[at(10), at(14)]])
 assert.deepEqual(rangesOn('Mo-Fr 10:00-18:00; Sa 10:00-14:00', Sun), [])
 assert.deepEqual(rangesOn('Fr 18:00-00:00', 4), [[at(18), at(24)]])

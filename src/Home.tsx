@@ -2,10 +2,10 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { FeatureCollection, LineString } from 'geojson'
 import { Box, Button, Card, CardActionArea, Chip, Typography } from '@mui/material'
-import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, Museum, WbSunny } from '@mui/icons-material'
+import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, WbSunny } from '@mui/icons-material'
 import { QRCodeSVG } from 'qrcode.react'
-import { pct, placeIcon, useData } from './shared'
-import { CountUp, GrowBar, HeatFacts, Reveal } from './ui'
+import { pct, useData } from './shared'
+import { GrowBar, HeatFacts, Reveal } from './ui'
 
 // ponytail: set when the mobile team publishes the APK; until then the card says "wkrótce"
 const apkUrl = ''
@@ -72,35 +72,6 @@ function Preview() {
       ))}
       <Chip icon={<AcUnit />} color="primary" sx={{ mt: 3 }} label={`${Math.round((rows[0].p.sun_share - rows[1].p.sun_share) * 100)} p.p. mniej słońca za +${Math.round(rows[1].p.extra_min)} min`} />
     </Card>
-  )
-}
-
-// What is on the maps right now, counted from the data files
-function OnTheMap() {
-  const places = useData('/data/places.geojson')
-  const tours = useData<{ items: unknown[] }>('/data/tours.json')
-  const count = (type: string) => places?.features.filter((f) => f.properties?.type === type).length ?? 0
-  const tiles = [
-    { icon: <img src={placeIcon('cool')} alt="" width={40} height={40} />, n: count('cool'), label: 'miejsc chłodu', to: '/miejsca-chlodu' },
-    { icon: <img src={placeIcon('water')} alt="" width={40} height={40} />, n: count('water'), label: 'punktów z wodą', to: '/mapa' },
-    { icon: <img src={placeIcon('bench')} alt="" width={40} height={40} />, n: count('bench'), label: 'ławek', to: '/mapa' },
-    { icon: <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: '#7b4fb3', color: 'common.white', display: 'grid', placeItems: 'center' }}><Museum /></Box>, n: tours?.items.length ?? 0, label: 'trasy turystyczne', to: '/trasy-turystyczne' },
-  ]
-  if (!places) return null
-  return (
-    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, mt: { xs: 5, md: 8 } }}>
-      {tiles.map(({ icon, n, label, to }, i) => (
-        <Reveal key={label} delay={i * 0.1}>
-          <CardActionArea component={Link} to={to} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 1.5, p: 2, borderRadius: '20px', bgcolor: '#f4f7f8', height: '100%' }}>
-            {icon}
-            <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
-              <Typography sx={{ fontSize: 28, fontWeight: 800, lineHeight: 1 }}><CountUp to={n} /></Typography>
-              <Typography variant="body2" color="text.secondary">{label}</Typography>
-            </Box>
-          </CardActionArea>
-        </Reveal>
-      ))}
-    </Box>
   )
 }
 
@@ -218,7 +189,6 @@ export default function Home() {
             )
           })}
         </Box>
-        <OnTheMap />
       </Section>
 
       <Section dark>
