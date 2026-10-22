@@ -25,11 +25,29 @@ export const steps = [
 export const sunColor = (hour: number) =>
   ['step', ['get', `s${hour}`], steps[0].color, 0.335, steps[1].color, 0.665, steps[2].color] as ExpressionSpecification
 
+// icon: 24×24 SVG path (snowflake and drop from Material Icons, bench drawn by hand)
 export const placeTypes = [
-  { type: 'cool', label: 'Miejsca chłodu', color: '#4fb3e8' },
-  { type: 'water', label: 'Woda pitna', color: '#1565c0' },
-  { type: 'bench', label: 'Ławki', color: '#8d6e63' },
+  { type: 'cool', label: 'Miejsca chłodu', color: '#1e88c9', icon: 'M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z' },
+  { type: 'water', label: 'Woda pitna', color: '#3949ab', icon: 'M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8M7.83 14c.37 0 .67.26.74.62.41 2.22 2.28 2.98 3.64 2.87.43-.02.79.32.79.75 0 .4-.32.73-.72.75-2.13.13-4.62-1.09-5.19-4.12-.08-.45.28-.87.74-.87' },
+  { type: 'bench', label: 'Ławki', color: '#8d6e63', icon: 'M4 6h16v3.5H4zM2 11h20v3h-2v5h-2.5v-5h-11v5H4v-5H2z' },
 ]
+
+// Round badge with a white glyph, as a data URL: the map marker and the matching legend icon
+export const placeIcon = (type: string) => {
+  const { color, icon } = placeTypes.find((t) => t.type === type)!
+  return 'data:image/svg+xml,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="34" r="28" fill="#000" opacity=".2"/><circle cx="32" cy="31" r="27" fill="${color}" stroke="#fff" stroke-width="4"/><path transform="translate(17 16) scale(1.25)" fill="#fff" d="${icon}"/></svg>`,
+  )
+}
+
+async function addPlaceIcons(map: MapLibre) {
+  await Promise.all(placeTypes.map(async ({ type }) => {
+    const img = new Image(64, 64)
+    img.src = placeIcon(type)
+    await img.decode()
+    map.addImage(`place-${type}`, img, { pixelRatio: 2 })
+  }))
+}
 
 
 // Water and bench points have no address or hours in OSM, so say what they are instead of "Brak godzin otwarcia". Their unverified status is in the map caption.
@@ -70,13 +88,13 @@ async function maskOutsideCity(map: MapLibre) {
   map.addLayer({ id: 'city-line', type: 'line', source: 'city', paint: { 'line-color': '#0e5f74', 'line-width': 2, 'line-opacity': 0.5 } }, labels)
 }
 
-// Base map of Śródmieście; the map is returned once its style (and the city mask) has loaded
+// Base map of Śródmieście; the map is returned once its style (with the city mask and place icons) has loaded
 export function useMap() {
   const ref = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<MapLibre>()
   useEffect(() => {
     const m = new MapLibre({ container: ref.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds, maxBounds: city })
-    m.on('load', () => maskOutsideCity(m).catch(() => { }).finally(() => setMap(m))) // no mask is fine, no map is not
+    m.on('load', () => Promise.allSettled([maskOutsideCity(m), addPlaceIcons(m)]).then(() => setMap(m))) // no mask is fine, no map is not
     return () => m.remove()
   }, [])
   return [ref, map] as const

@@ -54,10 +54,11 @@ export default function MiejscaChlodu() {
     // Straight line from the selected place to its nearest water point, under the points
     map.addSource('water-line', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
     map.addLayer({ id: 'water-line', type: 'line', source: 'water-line', layout: { 'line-cap': 'round' }, paint: { 'line-color': '#1565c0', 'line-width': 2.5, 'line-dasharray': [2, 2] } })
-    map.addLayer({ id: 'drinking-water', type: 'circle', source: 'places', filter: ['==', ['get', 'type'], 'water'], paint: { 'circle-radius': 4, 'circle-color': '#1565c0', 'circle-stroke-width': 1, 'circle-stroke-color': '#fff' } })
+    map.addLayer({ id: 'drinking-water', type: 'symbol', source: 'places', filter: ['==', ['get', 'type'], 'water'], layout: { 'icon-image': 'place-water', 'icon-size': 0.55, 'icon-allow-overlap': true } })
     map.addLayer({
-      id: 'cool', type: 'circle', source: 'places', filter: ['==', ['get', 'type'], 'cool'],
-      paint: { 'circle-radius': 8, 'circle-color': ['case', ['get', 'open'], '#4fb3e8', '#9aa9b0'], 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' },
+      id: 'cool', type: 'symbol', source: 'places', filter: ['==', ['get', 'type'], 'cool'],
+      layout: { 'icon-image': 'place-cool', 'icon-allow-overlap': true },
+      paint: { 'icon-opacity': ['case', ['get', 'open'], 1, 0.45] },
     })
     map.on('click', 'cool', (e: MapMouseEvent & { features?: Feature[] }) => {
       const f = e.features![0]
@@ -83,8 +84,8 @@ export default function MiejscaChlodu() {
 
   useEffect(() => {
     if (!map?.getLayer('cool')) return
-    map.setPaintProperty('cool', 'circle-stroke-color', ['case', ['==', ['get', 'name'], selected], '#0e5f74', '#fff'])
-    map.setPaintProperty('cool', 'circle-radius', ['case', ['==', ['get', 'name'], selected], 11, 8])
+    map.setLayoutProperty('cool', 'icon-size', ['case', ['==', ['get', 'name'], selected], 1.2, 0.85])
+    map.setLayoutProperty('cool', 'symbol-sort-key', ['case', ['==', ['get', 'name'], selected], 1, 0])
   }, [map, selected, shown])
 
   function pick(name: string, at: number[]) {

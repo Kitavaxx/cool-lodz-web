@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import type { ExpressionSpecification, MapMouseEvent } from 'maplibre-gl'
 import { Alert, Box, Button, Chip, Paper, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
-import { hours, pct, placeLines, placeTypes, showPopup, steps, sunColor, useData, useMap } from './shared'
+import { hours, pct, placeIcon, placeLines, placeTypes, showPopup, steps, sunColor, useData, useMap } from './shared'
 
 const placeLayers = placeTypes.map(({ type }) => `places-${type}`)
 
@@ -29,7 +29,7 @@ export default function Mapa() {
     if (!map.getSource('edges')) {
       map.addSource('edges', { type: 'geojson', data: edges })
       // Keep segments under the points if places loaded first
-      map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: { 'line-cap': 'round' }, paint: { 'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 15, 2.5, 17, 6] } }, map.getLayer(placeLayers[0]) ? placeLayers[0] : undefined)
+      map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: { 'line-cap': 'round' }, paint: { 'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 15, 2.5, 17, 6] } }, map.getLayer('places-bench') ? 'places-bench' : undefined)
     }
     map.setPaintProperty('edges', 'line-color', sunColor(hour))
     map.setLayoutProperty('edges', 'visibility', picked.length ? 'visible' : 'none')
@@ -40,13 +40,13 @@ export default function Mapa() {
     if (!map || !places) return
     if (!map.getSource('places')) {
       map.addSource('places', { type: 'geojson', data: places })
-      for (const { type, color } of placeTypes) {
+      // Benches first so cool places and water sit on top; benches may hide each other so thousands don't cover the start view
+      for (const { type } of [...placeTypes].reverse()) {
         map.addLayer({
-          id: `places-${type}`, type: 'circle', source: 'places', filter: ['==', ['get', 'type'], type],
-          // Points grow with zoom so thousands of benches don't cover the city at the start view
-          paint: {
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, { cool: 6, water: 4 }[type] ?? 2.5, 17, { cool: 11, water: 8 }[type] ?? 7],
-            'circle-color': color, 'circle-stroke-width': type === 'cool' ? 2 : 1, 'circle-stroke-color': '#fff',
+          id: `places-${type}`, type: 'symbol', source: 'places', filter: ['==', ['get', 'type'], type],
+          layout: {
+            'icon-image': `place-${type}`, 'icon-allow-overlap': type !== 'bench',
+            'icon-size': ['interpolate', ['linear'], ['zoom'], 13, { cool: 0.75, water: 0.6 }[type] ?? 0.4, 17, { cool: 1.1, water: 0.9 }[type] ?? 0.75],
           },
         })
       }
@@ -86,20 +86,24 @@ export default function Mapa() {
         <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && setHour(h)} aria-label="Godzina">
           {hours.map((h) => <ToggleButton key={h} value={h}>{h}:00</ToggleButton>)}
         </ToggleButtonGroup>
-        <Box sx={{ display: 'flex', flexWrap: { xs: 'nowrap', sm: 'wrap' }, overflowX: 'auto', scrollbarWidth: 'none', gap: 1, mt: 1.5, maxWidth: { sm: 400 }, '& > *': { flexShrink: 0 } }}>
+        <Box sx={{ display: 'flex', overflowX: 'auto', scrollbarWidth: 'none', gap: 1, mt: 1.5, '& > *': { flexShrink: 0 } }}>
           {places === null && <Alert severity="warning">Brak danych o miejscach</Alert>}
           {places && placeTypes.map(({ type, label, color }) => (
             <Chip
               key={type}
-              label={label}
-              variant={shown[type] ? 'filled' : 'outlined'}
-              icon={<Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: color, opacity: shown[type] ? 1 : 0.4 }} />}
+              label={<>{label} <Box component="span" sx={{ opacity: 0.6, fontWeight: 400 }}>{places.features.filter((f) => f.properties?.type === type).length}</Box></>}
+              variant="outlined"
+              icon={<img src={placeIcon(type)} alt="" width={24} height={24} />}
               onClick={() => setShown({ ...shown, [type]: !shown[type] })}
               aria-pressed={shown[type]}
+              sx={{
+                height: 36, pl: 0.25, fontWeight: 600, borderWidth: 1.5, transition: 'all .15s',
+                ...(shown[type]
+                  ? { borderColor: color, bgcolor: `${color}1a`, '&&:hover': { bgcolor: `${color}2e` } }
+                  : { color: 'text.secondary', '& img': { filter: 'grayscale(1)', opacity: 0.45 } }),
+              }}
             />
           ))}
-          <Chip label="Cisza · w przygotowaniu" variant="outlined" disabled />
-          <Chip label="Powietrze · w przygotowaniu" variant="outlined" disabled />
         </Box>
         {places && (
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, maxWidth: { sm: 400 } }}>
