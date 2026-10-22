@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { LngLatBounds, type GeoJSONSource } from 'maplibre-gl'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { LngLatBounds, type GeoJSONSource, type Popup } from 'maplibre-gl'
 import type { Feature, FeatureCollection, LineString, Point } from 'geojson'
-import { Alert, Box, Card, CardActionArea, Chip, CircularProgress, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
-import { AcUnit, WaterDrop } from '@mui/icons-material'
-import { hours, pct, placeLines, showPopup, useData, useMap } from './shared'
+import { Alert, Box, ButtonBase, Card, CardActionArea, Chip, CircularProgress, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { AcUnit, WbSunny } from '@mui/icons-material'
+import { hours, pct, placeIcon, placeLines, showPopup, steps, useData, useMap } from './shared'
 
 // Colour and dash differ, so variants are told apart without colour alone
 const variants = [
@@ -37,6 +37,7 @@ export default function Trasa() {
   const [routeId, setRouteId] = useState(1)
   const [hour, setHour] = useState(14)
   const [focus, setFocus] = useState('')
+  const popup = useRef<Popup>(undefined)
 
   const names = useMemo(() => [...new Map((routes?.features ?? []).map((f) => [f.properties!.route_id, f.properties!.route_name])).entries()], [routes])
   const current = useMemo(
@@ -69,8 +70,8 @@ export default function Trasa() {
         })
       }
       map.addLayer({
-        id: 'near', type: 'circle', source: 'near',
-        paint: { 'circle-radius': ['match', ['get', 'type'], 'cool', 7, 5], 'circle-color': ['match', ['get', 'type'], 'cool', '#4fb3e8', '#1565c0'], 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' },
+        id: 'near', type: 'symbol', source: 'near',
+        layout: { 'icon-image': ['concat', 'place-', ['get', 'type']], 'icon-size': ['match', ['get', 'type'], 'cool', 0.8, 0.65], 'icon-allow-overlap': true },
       })
       map.addLayer({ id: 'ends', type: 'circle', source: 'ends', paint: { 'circle-radius': 8, 'circle-color': '#1b2a30', 'circle-stroke-width': 3, 'circle-stroke-color': '#fff' } })
       map.addLayer({
@@ -80,7 +81,7 @@ export default function Trasa() {
       })
       map.on('click', 'near', (e) => {
         const f = e.features![0]
-        showPopup(map, (f.geometry as Point).coordinates as [number, number], placeLines(f.properties!))
+        popup.current = showPopup(map, (f.geometry as Point).coordinates as [number, number], placeLines(f.properties!))
       })
     } else {
       for (const [id, d] of Object.entries(data)) (map.getSource(id) as GeoJSONSource).setData(d)
@@ -95,6 +96,16 @@ export default function Trasa() {
     if (!map?.getLayer('route-shaded')) return
     for (const v of variants) map.setPaintProperty(`route-${v.id}`, 'line-opacity', !focus || focus === v.id ? 1 : 0.25)
   }, [map, focus, current])
+
+  // A place tapped in the list: fly there and open its popup (the map is above the list on phones)
+  function goTo(f: Feature<Point>) {
+    if (!map) return
+    const at = f.geometry.coordinates as [number, number]
+    popup.current?.remove()
+    popup.current = showPopup(map, at, placeLines(f.properties!))
+    map.flyTo({ center: at, zoom: 17 })
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <Box sx={{ maxWidth: 1680, mx: 'auto' }}>
@@ -123,14 +134,22 @@ export default function Trasa() {
                 <CardActionArea onClick={() => setFocus(focus === v.id ? '' : v.id)} sx={{ p: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <svg width="36" height="8" aria-hidden><line x1="4" y1="4" x2="32" y2="4" stroke={v.color} strokeWidth="5" strokeLinecap="round" strokeDasharray={v.dash?.map((d) => d * 5).join(' ')} /></svg>
-                    <Typography sx={{ fontWeight: 700, flex: 1 }}>{v.label}</Typography>
-                    {p.sun_share === coolest && v.id !== 'shortest' && <Chip size="small" color="primary" icon={<AcUnit />} label="Najmniej słońca" />}
+                    <Box sx={{ flex: 1 }}>
+                      <Typography component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 700 }}>
+                        {v.label}
+                        {p.sun_share === coolest && v.id !== 'shortest' && <Chip size="small" color="primary" icon={<AcUnit />} label="Najmniej słońca" />}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">{distance(p.distance_m)}{p.extra_min > 0 && ` · +${num.format(p.extra_min)} min`}</Typography>
+                    </Box>
+                    <Typography sx={{ fontSize: 22, fontWeight: 700, whiteSpace: 'nowrap' }}>{Math.round(p.time_min)} min</Typography>
                   </Box>
-                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', mt: 1.5, typography: 'body2', '& b': { display: 'block', fontSize: 18, color: 'text.primary' }, color: 'text.secondary' }}>
-                    <div><b>{distance(p.distance_m)}</b>dystans</div>
-                    <div><b>{Math.round(p.time_min)} min</b>czas</div>
-                    <div><b>{pct(p.sun_share)}</b>słońca</div>
-                    <div><b>{p.extra_min > 0 ? `+${num.format(p.extra_min)} min` : '—'}</b>{p.extra_min > 0 ? 'dłużej' : 'bazowa'}</div>
+                  {/* Sun share as a bar in the map's sun colours */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }} aria-label={`${pct(p.sun_share)} trasy w słońcu`}>
+                    <WbSunny sx={{ fontSize: 18, color: steps[1].color }} />
+                    <Box sx={{ flex: 1, height: 8, borderRadius: 4, bgcolor: 'action.hover' }}>
+                      <Box sx={{ width: pct(p.sun_share).replace(' ', ''), height: '100%', borderRadius: 4, bgcolor: steps[p.sun_share < 0.335 ? 0 : p.sun_share < 0.665 ? 1 : 2].color }} />
+                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: 700, minWidth: 40, textAlign: 'right' }}>{pct(p.sun_share)}</Typography>
                   </Box>
                 </CardActionArea>
               </Card>
@@ -142,15 +161,15 @@ export default function Trasa() {
             <Typography sx={{ fontWeight: 700 }}>W pobliżu trasy (do {NEAR} m)</Typography>
             {places === null && <Alert severity="warning" sx={{ mt: 1 }}>Brak danych o miejscach</Alert>}
             {places && near.length === 0 && <Typography color="text.secondary" sx={{ mt: 1 }}>Brak miejsc chłodu i wody pitnej przy tej trasie.</Typography>}
-            <Stack spacing={0.75} sx={{ mt: 1 }}>
+            <Stack sx={{ mt: 1, mx: -1 }}>
               {near.slice(0, 8).map(({ f, d }, i) => (
-                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, typography: 'body2' }}>
-                  {f.properties!.type === 'cool' ? <AcUnit sx={{ fontSize: 18, color: '#4fb3e8' }} /> : <WaterDrop sx={{ fontSize: 18, color: '#1565c0' }} />}
+                <ButtonBase key={i} onClick={() => goTo(f)} sx={{ display: 'flex', gap: 1.25, px: 1, py: 0.75, borderRadius: 2, typography: 'body2', textAlign: 'left', '&:hover, &.Mui-focusVisible': { bgcolor: 'action.hover' } }}>
+                  <img src={placeIcon(f.properties!.type)} alt="" width={24} height={24} />
                   <Box sx={{ flex: 1 }}>{f.properties!.name}</Box>
-                  <Box sx={{ color: 'text.secondary' }}>{Math.round(d)} m</Box>
-                </Box>
+                  <Box sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>{Math.round(d)} m</Box>
+                </ButtonBase>
               ))}
-              {near.length > 8 && <Typography variant="body2" color="text.secondary">i jeszcze {near.length - 8} na mapie</Typography>}
+              {near.length > 8 && <Typography variant="body2" color="text.secondary" sx={{ px: 1, pt: 0.5 }}>i jeszcze {near.length - 8} na mapie</Typography>}
             </Stack>
           </Card>
         </Stack>
