@@ -108,7 +108,7 @@ export function Ring({ share, color, size = 120, children }: { share: number; co
 
 const amber = '#f4b942'
 
-// Three facts about heat in the city, each with a small graphic; on the home page (dark) and /o-projekcie
+// Three facts about heat in the city: plain numbers on the home page (dark), with a ring and a row of suns on /o-projekcie
 export function HeatFacts({ dark }: { dark?: boolean }) {
   const [suns, sunsShown] = useInView<HTMLDivElement>()
   const accent = dark ? amber : 'primary.main'
@@ -124,9 +124,11 @@ export function HeatFacts({ dark }: { dark?: boolean }) {
     <Box sx={{ display: 'grid', gap: { xs: 2.5, md: 3 }, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' } }}>
       <Reveal>
         <Box sx={card}>
-          <Ring share={0.75} color={dark ? amber : '#e4572e'}>
-            <Typography sx={{ fontSize: 28, fontWeight: 800 }}><CountUp to={75} /> %</Typography>
-          </Ring>
+          {dark ? <Typography sx={big}><CountUp to={75} /> %</Typography> : (
+            <Ring share={0.75} color="#e4572e">
+              <Typography sx={{ fontSize: 28, fontWeight: 800 }}><CountUp to={75} /> %</Typography>
+            </Ring>
+          )}
           <Typography sx={{ mt: 2, fontSize: 18, fontWeight: 600 }}>nocy w roku z miejską wyspą ciepła</Typography>
           <Typography sx={{ mt: 0.5, opacity: 0.7 }}>Centrum Łodzi jest o 3–4 °C cieplejsze niż okolice, rekordowo o 12 °C.</Typography>
           {source('https://nowa.mapa.lodz.pl/wp-content/uploads/pdf/the_lodz_atlas/en-10R.pdf', 'Atlas Miasta Łodzi')}
@@ -136,7 +138,7 @@ export function HeatFacts({ dark }: { dark?: boolean }) {
         <Box sx={card}>
           <Typography sx={big}>10–11</Typography>
           {/* One sun per hot day, popping in one after another */}
-          <Box ref={suns} sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25, mt: 2 }} aria-hidden>
+          <Box ref={suns} sx={{ display: dark ? 'none' : 'flex', flexWrap: 'wrap', gap: 0.25, mt: 2 }} aria-hidden>
             {Array.from({ length: 11 }, (_, i) => (
               <WbSunny key={i} sx={{ color: i < 10 ? amber : 'rgb(244 185 66 / 0.45)', fontSize: 22, transform: sunsShown ? 'scale(1)' : 'scale(0)', transition: `transform .4s cubic-bezier(.3,1.6,.5,1) ${i * 0.08}s` }} />
             ))}

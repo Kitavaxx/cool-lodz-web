@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { LngLatBounds, type GeoJSONSource } from 'maplibre-gl'
 import type { LineString } from 'geojson'
-import { Alert, Box, Card, CardActionArea, CircularProgress, Stack, Typography } from '@mui/material'
-import { DirectionsWalk, Museum, Schedule, Straighten, WbSunny } from '@mui/icons-material'
+import { Alert, Box, Button, Card, CardActionArea, CircularProgress, Collapse, Stack, Typography } from '@mui/material'
+import { DirectionsWalk, ExpandMore, Museum, Schedule, Straighten, WbSunny } from '@mui/icons-material'
 import { PageHeader } from './ui'
 import { pct, useData, useMap } from './shared'
 
@@ -21,6 +21,7 @@ export default function TrasyTurystyczne() {
   const tours = useData<Tours>('/data/tours.json')
   const [container, map] = useMap()
   const [selected, setSelected] = useState(1)
+  const [about, setAbout] = useState(false)
 
   useEffect(() => {
     if (!map || !tours) return
@@ -60,6 +61,7 @@ export default function TrasyTurystyczne() {
   }, [map, tours, selected])
 
   function show(id: number) {
+    if (id !== selected) setAbout(false)
     setSelected(id)
     document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' }) // the map is above the list on phones
   }
@@ -97,7 +99,6 @@ export default function TrasyTurystyczne() {
                   </Box>
                   {on ? (
                     <>
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>{t.description}</Typography>
                       {/* Stops as a line with numbered dots, the same numbers as on the map */}
                       <Box component="ol" sx={{ listStyle: 'none', p: 0, m: 0, mt: 2 }}>
                         {t.stops.map((s, i) => (
@@ -118,6 +119,17 @@ export default function TrasyTurystyczne() {
                     </Typography>
                   )}
                 </CardActionArea>
+                {/* The description stays folded until asked for */}
+                {on && (
+                  <Box sx={{ px: 2, pb: 1.5 }}>
+                    <Button size="small" onClick={() => setAbout(!about)} endIcon={<ExpandMore sx={{ transform: about ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />} aria-expanded={about} sx={{ color: c }}>
+                      O trasie
+                    </Button>
+                    <Collapse in={about}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{t.description}</Typography>
+                    </Collapse>
+                  </Box>
+                )}
               </Card>
             )
           })}

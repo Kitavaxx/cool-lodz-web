@@ -60,7 +60,7 @@ export default function Bezpieczenstwo() {
     <Box sx={{ maxWidth: 1400, mx: 'auto', pb: 4 }}>
       <PageHeader icon={<HealthAndSafety />} title="Bezpieczeństwo w upał" sub="Proste zasady na upalne dni w mieście." color="#b3261e" />
 
-      {/* Emergency number first, big and tappable */}
+      {/* Emergency number first and big */}
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: { xs: 2, md: 3 }, mt: 3, p: { xs: 2.5, md: 3 }, borderRadius: '24px', color: 'common.white', background: 'linear-gradient(135deg, #b3261e, #e4572e)', boxShadow: '0 12px 30px rgb(179 38 30 / 0.3)' }}>
         <Box sx={{ width: 56, height: 56, borderRadius: '50%', bgcolor: 'rgb(255 255 255 / 0.2)', display: 'grid', placeItems: 'center', animation: 'ring 2s infinite', '@keyframes ring': { '0%, 100%': { boxShadow: '0 0 0 0 rgb(255 255 255 / 0.5)' }, '50%': { boxShadow: '0 0 0 12px rgb(255 255 255 / 0)' } }, '@media (prefers-reduced-motion: reduce)': { animation: 'none' } }}>
           <Phone sx={{ fontSize: 30 }} />
@@ -69,7 +69,6 @@ export default function Bezpieczenstwo() {
           <Typography sx={{ fontSize: { xs: 40, md: 48 }, fontWeight: 800, lineHeight: 1 }}>112</Typography>
           <Typography sx={{ opacity: 0.9 }}>Zagrożenie zdrowia lub życia</Typography>
         </Box>
-        <Button href="tel:112" variant="contained" startIcon={<Phone />} sx={{ bgcolor: 'common.white', color: '#b3261e', px: 3, '&:hover': { bgcolor: '#fdecea' } }}>Zadzwoń</Button>
       </Box>
 
       <HotDay />
