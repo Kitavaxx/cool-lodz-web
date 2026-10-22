@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { LngLatBounds, type GeoJSONSource } from 'maplibre-gl'
 import type { LineString } from 'geojson'
 import { Alert, Box, Card, CardActionArea, CircularProgress, Stack, Typography } from '@mui/material'
-import { DirectionsWalk, Schedule, Straighten, WbSunny } from '@mui/icons-material'
+import { DirectionsWalk, Museum, Schedule, Straighten, WbSunny } from '@mui/icons-material'
+import { PageHeader } from './ui'
 import { pct, useData, useMap } from './shared'
 
 type Tours = {
@@ -65,10 +66,7 @@ export default function TrasyTurystyczne() {
 
   return (
     <Box sx={{ maxWidth: 1680, mx: 'auto' }}>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>Trasy turystyczne w cieniu</Typography>
-      <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 760 }}>
-        Spacery po najciekawszych miejscach Śródmieścia, wyznaczone tak, by iść jak najdłużej w cieniu budynków o najgorętszej porze dnia.
-      </Typography>
+      <PageHeader icon={<Museum />} title="Trasy turystyczne w cieniu" sub="Zabytki Śródmieścia, jak najdłużej w cieniu budynków." color="#7b4fb3" />
       {tours === undefined && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 6 }} />}
       {tours === null && <Alert severity="warning" sx={{ mt: 3 }}>Brak danych</Alert>}
 

@@ -2,13 +2,40 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import type { GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
 import type { Feature, Point } from 'geojson'
-import { Alert, Box, Button, Card, CardActionArea, Checkbox, Chip, CircularProgress, FormControlLabel, Stack, Typography } from '@mui/material'
-import { AccessTime, Map, Place, WaterDrop } from '@mui/icons-material'
-import { isOpen, polishDays, warsawNow } from './hours'
-import { metres, placeLines, showPopup, useData, useMap } from './shared'
+import { Alert, Box, Card, CardActionArea, Chip, CircularProgress, FormControlLabel, IconButton, Stack, Switch, Tooltip, Typography } from '@mui/material'
+import { AccessTime, AcUnit, Map, Place, WaterDrop } from '@mui/icons-material'
+import { isOpen, rangesOn, warsawNow } from './hours'
+import { metres, placeIcon, placeLines, showPopup, useData, useMap } from './shared'
+import { PageHeader, Ring } from './ui'
 
 const dayNames = ['pn', 'wt', 'śr', 'czw', 'pt', 'sob', 'nd']
 const clock = (t: number) => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`
+const span = (ranges: [number, number][]) => ranges.map(([a, b]) => `${clock(a)}–${clock(b)}`).join(', ')
+const green = '#2e7d32'
+
+// Seven day pills: tinted on open days, today outlined; hover shows that day's hours
+function Week({ hours, today }: { hours?: string; today: number }) {
+  return (
+    <Box sx={{ display: 'flex', gap: 0.5 }}>
+      {dayNames.map((d, i) => {
+        const ranges = rangesOn(hours, i)
+        return (
+          <Tooltip key={d} title={ranges.length ? span(ranges) : 'zamknięte'}>
+            <Box
+              sx={{
+                flex: 1, maxWidth: 44, py: 0.5, textAlign: 'center', borderRadius: '8px', typography: 'caption', fontWeight: 700,
+                bgcolor: ranges.length ? '#e3f1f6' : '#f1f3f4', color: ranges.length ? 'primary.main' : 'text.disabled',
+                outline: i === today ? '2px solid' : 'none', outlineColor: 'primary.main',
+              }}
+            >
+              {d}
+            </Box>
+          </Tooltip>
+        )
+      })}
+    </Box>
+  )
+}
 
 export default function MiejscaChlodu() {
   const places = useData('/data/places.geojson')
@@ -95,18 +122,23 @@ export default function MiejscaChlodu() {
 
   return (
     <Box sx={{ maxWidth: 1680, mx: 'auto' }}>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>Miejsca chłodu</Typography>
-      <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 720 }}>
-        Biblioteki, muzea, galerie i domy kultury w Śródmieściu, w których można odpocząć od upału. Godziny otwarcia pochodzą z OpenStreetMap, sprawdź je przed wyjściem.
-      </Typography>
+      <PageHeader icon={<AcUnit />} title="Miejsca chłodu" sub="Biblioteki, muzea i domy kultury, gdzie odpoczniesz od upału." color="#1e88c9" />
 
-      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: { xs: 0.5, sm: 2 }, mt: 2 }}>
-        <FormControlLabel control={<Checkbox checked={onlyOpen} onChange={(e) => setOnlyOpen(e.target.checked)} />} label="Otwarte teraz" />
-        <Chip icon={<AccessTime />} label={`Teraz w Łodzi: ${dayNames[now.day]} ${clock(now.time)}`} variant="outlined" />
-        {places && <Typography color="text.secondary">Otwarte: {openCount} z {list.length}</Typography>}
-      </Box>
+      {/* Open right now as a ring, next to the clock and the filter */}
+      <Card variant="outlined" sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: { xs: 1.5, sm: 3 }, mt: 3, p: 2, borderRadius: '24px' }}>
+        <Ring share={list.length ? openCount / list.length : 0} color={green} size={72}>
+          <Typography sx={{ fontWeight: 800, fontSize: 18 }}>{openCount}</Typography>
+        </Ring>
+        <Box sx={{ flex: 1, minWidth: 160 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: 18 }}>{places ? `${openCount} z ${list.length} otwarte teraz` : '…'}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <AccessTime sx={{ fontSize: 16 }} />Łódź, {dayNames[now.day]} {clock(now.time)}
+          </Typography>
+        </Box>
+        <FormControlLabel control={<Switch checked={onlyOpen} onChange={(e) => setOnlyOpen(e.target.checked)} color="success" />} label="Tylko otwarte" />
+      </Card>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mt: 2, alignItems: 'start' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: '1fr 1fr' }, gap: 2, mt: 2, alignItems: 'start' }}>
         <Box
           ref={container}
           sx={{ order: { md: 2 }, height: { xs: 280, md: 'calc(100dvh - 260px)' }, minHeight: 280, position: { md: 'sticky' }, top: 0, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }}
@@ -117,22 +149,37 @@ export default function MiejscaChlodu() {
           {places && shown.length === 0 && <Alert severity="info">Żadne miejsce chłodu nie jest teraz otwarte.</Alert>}
           {shown.map(({ f, name, open, water }) => {
             const p = f.properties!
+            const today = rangesOn(p.hours, now.day)
+            const on = selected === name
             return (
-              <Card key={name} variant="outlined" sx={{ borderColor: selected === name ? 'primary.main' : 'divider', borderWidth: selected === name ? 2 : 1 }}>
+              <Card key={name} variant="outlined" sx={{ borderColor: on ? 'primary.main' : 'divider', borderWidth: 2, borderRadius: '20px', boxShadow: on ? '0 8px 24px rgb(14 95 116 / 0.18)' : 'none', transition: 'all .2s' }}>
                 <CardActionArea onClick={() => pick(name, f.geometry.coordinates)} sx={{ p: 2 }}>
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Typography sx={{ fontWeight: 700 }}>{name}</Typography>
-                    <Chip size="small" label={open ? 'Otwarte teraz' : 'Zamknięte'} color={open ? 'success' : 'default'} sx={{ flexShrink: 0 }} />
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                    <img src={placeIcon('cool')} alt="" width={40} height={40} style={{ flexShrink: 0, filter: open ? 'none' : 'grayscale(1)', opacity: open ? 1 : 0.5 }} />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography sx={{ fontWeight: 700, lineHeight: 1.3 }}>{name}</Typography>
+                      {p.address && <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}><Place sx={{ fontSize: 16 }} />{p.address}</Typography>}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0, typography: 'body2', fontWeight: 700, color: open ? green : 'text.secondary' }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: open ? green : 'text.disabled', boxShadow: open ? `0 0 0 4px ${green}33` : 'none' }} />
+                      {open ? 'Otwarte' : 'Zamknięte'}
+                    </Box>
                   </Box>
-                  <Stack spacing={0.5} sx={{ mt: 1, typography: 'body2', color: 'text.secondary', '& > div': { display: 'flex', gap: 1, alignItems: 'center' }, '& svg': { fontSize: 18 } }}>
-                    {p.address && <div><Place />{p.address}</div>}
-                    <div><AccessTime />{p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia'}</div>
-                    {Number.isFinite(water) && <div><WaterDrop sx={{ color: '#1565c0' }} />Najbliższa woda pitna: ok. {Math.round(water)} m w linii prostej</div>}
-                  </Stack>
+                  <Box sx={{ mt: 1.5 }}><Week hours={p.hours} today={now.day} /></Box>
+                  <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                    {p.hours ? <>Dziś: <b>{today.length ? span(today) : 'zamknięte'}</b></> : 'Brak godzin otwarcia'}
+                  </Typography>
                 </CardActionArea>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, pb: 1.5 }}>
-                  <Chip size="small" variant="outlined" label={p.verified ? 'Zweryfikowane' : 'Niezweryfikowane'} />
-                  <Button component={Link} to={`/mapa?place=${encodeURIComponent(name)}`} size="small" startIcon={<Map />}>Pokaż na mapie</Button>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, pb: 1.5 }}>
+                  {Number.isFinite(water) && (
+                    <Tooltip title="Najbliższa woda pitna, w linii prostej">
+                      <Chip size="small" icon={<WaterDrop />} label={`${Math.round(water)} m`} sx={{ bgcolor: '#e8eaf6', color: '#3949ab', fontWeight: 700, '& .MuiChip-icon': { color: '#3949ab' } }} />
+                    </Tooltip>
+                  )}
+                  <Typography variant="caption" color="text.secondary">{p.verified ? 'zweryfikowane' : 'niezweryfikowane'}</Typography>
+                  <Tooltip title="Pokaż na mapie">
+                    <IconButton component={Link} to={`/mapa?place=${encodeURIComponent(name)}`} size="small" sx={{ ml: 'auto', color: 'primary.main' }} aria-label="Pokaż na mapie"><Map /></IconButton>
+                  </Tooltip>
                 </Box>
               </Card>
             )

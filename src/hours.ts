@@ -10,21 +10,25 @@ const minutes = (t: string) => {
   return h * 60 + m
 }
 
-// day: 0 = Monday … 6 = Sunday, time: minutes since midnight. No hours = never open (SPEC 5).
-export function isOpen(hours: string | null | undefined, day: number, time: number): boolean {
-  if (!hours) return false
-  return hours.split(';').some((rule) => {
+// Opening ranges on one day as [from, to] minutes; day: 0 = Monday … 6 = Sunday. No hours = never open (SPEC 5).
+export function rangesOn(hours: string | null | undefined, day: number): [number, number][] {
+  if (!hours) return []
+  return hours.split(';').flatMap((rule) => {
     const [days, range] = rule.trim().split(' ')
-    if (!range) return false
+    if (!range) return []
     const onDay = days.split(',').some((part) => {
       const [a, b = a] = part.split('-').map((d) => codes.indexOf(d))
       return a <= b ? day >= a && day <= b : day >= a || day <= b // ranges like Sa-Mo wrap around
     })
     const [from, to] = range.split('-').map(minutes)
     // ponytail: "18:00-02:00" counts as open until midnight only; no venue in our data opens past it
-    return onDay && time >= from && time < (to <= from ? 24 * 60 : to)
+    return onDay ? [[from, to <= from ? 24 * 60 : to] as [number, number]] : []
   })
 }
+
+// time: minutes since midnight
+export const isOpen = (hours: string | null | undefined, day: number, time: number) =>
+  rangesOn(hours, day).some(([from, to]) => time >= from && time < to)
 
 // Day and time in Łódź, whatever the viewer's timezone (grill Q7)
 export function warsawNow(date = new Date()) {

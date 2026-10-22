@@ -1,54 +1,24 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { FeatureCollection, LineString } from 'geojson'
-import { Box, Button, Card, CardActionArea, Chip, Link as MuiLink, Typography } from '@mui/material'
-import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, WbSunny } from '@mui/icons-material'
+import { Box, Button, Card, CardActionArea, Chip, Typography } from '@mui/material'
+import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, Museum, WbSunny } from '@mui/icons-material'
 import { QRCodeSVG } from 'qrcode.react'
-import { pct, useData } from './shared'
+import { pct, placeIcon, useData } from './shared'
+import { CountUp, GrowBar, HeatFacts, Reveal } from './ui'
 
 // ponytail: set when the mobile team publishes the APK; until then the card says "wkrótce"
 const apkUrl = ''
 
 // One idea per card; the long version lives on /o-projekcie
 const howTo = [
-  { to: '/mapa', icon: <Map />, title: 'Sprawdź cień', text: 'Mapa pokazuje, który chodnik jest w cieniu o wybranej godzinie.' },
-  { to: '/trasa', icon: <DirectionsWalk />, title: 'Wybierz trasę', text: 'Porównaj drogę najkrótszą z zacienioną i zobacz, ile to kosztuje minut.' },
-  { to: '/miejsca-chlodu', icon: <AcUnit />, title: 'Odpocznij w chłodzie', text: 'Znajdź otwartą bibliotekę, muzeum albo punkt z wodą pitną.' },
-]
-
-const facts = [
-  { value: '75 %', text: 'nocy w roku z miejską wyspą ciepła w Łodzi', href: 'https://nowa.mapa.lodz.pl/wp-content/uploads/pdf/the_lodz_atlas/en-10R.pdf' },
-  { value: '10–11', text: 'dni upalnych w roku w centralnej Polsce, coraz więcej', href: 'https://demagog.org.pl/wypowiedzi/dni-upalne-w-miastach-czy-2022-rok-byl-rekordowy/' },
-  { value: '61 tys.', text: 'zgonów związanych z upałem w Europie latem 2022', href: 'https://www.nature.com/articles/s41591-023-02419-z' },
+  { to: '/mapa', icon: <Map />, title: 'Sprawdź cień', text: 'Który chodnik jest w cieniu o wybranej godzinie.' },
+  { to: '/trasa', icon: <DirectionsWalk />, title: 'Wybierz trasę', text: 'Zacieniona droga zamiast najkrótszej, zwykle tylko minuta dłużej.' },
+  { to: '/miejsca-chlodu', icon: <AcUnit />, title: 'Odpocznij w chłodzie', text: 'Otwarta biblioteka, muzeum albo woda pitna w pobliżu.' },
 ]
 
 const amber = '#f4b942'
 const white = { bgcolor: 'common.white', color: 'primary.main', '&:hover': { bgcolor: '#e6f4f8' } }
-
-// Fades and slides its content in the first time it scrolls into view (native IntersectionObserver)
-function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [shown, setShown] = useState(false)
-  useEffect(() => {
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setShown(true), { threshold: 0.15 })
-    io.observe(ref.current!)
-    return () => io.disconnect()
-  }, [])
-  return (
-    <Box
-      ref={ref}
-      sx={{
-        height: '100%',
-        opacity: shown ? 1 : 0,
-        transform: shown ? 'none' : 'translateY(40px)',
-        transition: `opacity .8s ease ${delay}s, transform .8s cubic-bezier(.2,.7,.2,1) ${delay}s`,
-        '@media (prefers-reduced-motion: reduce)': { opacity: 1, transform: 'none', transition: 'none' },
-      }}
-    >
-      {children}
-    </Box>
-  )
-}
 
 // A big rounded panel, roughly one screen of the scroll story
 function Section({ id, dark, children }: { id?: string; dark?: boolean; children: ReactNode }) {
@@ -97,13 +67,40 @@ function Preview() {
             <b>{label}</b>
             <span>{pct(p!.sun_share)} słońca · {Math.round(p!.time_min)} min</span>
           </Box>
-          <Box sx={{ mt: 1, height: 12, borderRadius: 6, bgcolor: '#edf1f2', overflow: 'hidden' }}>
-            <Box sx={{ width: pct(p!.sun_share).replace(' ', ''), height: '100%', borderRadius: 6, bgcolor: color }} />
-          </Box>
+          <Box sx={{ mt: 1 }}><GrowBar share={p!.sun_share} color={color} height={12} /></Box>
         </Box>
       ))}
       <Chip icon={<AcUnit />} color="primary" sx={{ mt: 3 }} label={`${Math.round((rows[0].p.sun_share - rows[1].p.sun_share) * 100)} p.p. mniej słońca za +${Math.round(rows[1].p.extra_min)} min`} />
     </Card>
+  )
+}
+
+// What is on the maps right now, counted from the data files
+function OnTheMap() {
+  const places = useData('/data/places.geojson')
+  const tours = useData<{ items: unknown[] }>('/data/tours.json')
+  const count = (type: string) => places?.features.filter((f) => f.properties?.type === type).length ?? 0
+  const tiles = [
+    { icon: <img src={placeIcon('cool')} alt="" width={40} height={40} />, n: count('cool'), label: 'miejsc chłodu', to: '/miejsca-chlodu' },
+    { icon: <img src={placeIcon('water')} alt="" width={40} height={40} />, n: count('water'), label: 'punktów z wodą', to: '/mapa' },
+    { icon: <img src={placeIcon('bench')} alt="" width={40} height={40} />, n: count('bench'), label: 'ławek', to: '/mapa' },
+    { icon: <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: '#7b4fb3', color: 'common.white', display: 'grid', placeItems: 'center' }}><Museum /></Box>, n: tours?.items.length ?? 0, label: 'trasy turystyczne', to: '/trasy-turystyczne' },
+  ]
+  if (!places) return null
+  return (
+    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, mt: { xs: 5, md: 8 } }}>
+      {tiles.map(({ icon, n, label, to }, i) => (
+        <Reveal key={label} delay={i * 0.1}>
+          <CardActionArea component={Link} to={to} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 1.5, p: 2, borderRadius: '20px', bgcolor: '#f4f7f8', height: '100%' }}>
+            {icon}
+            <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+              <Typography sx={{ fontSize: 28, fontWeight: 800, lineHeight: 1 }}><CountUp to={n} /></Typography>
+              <Typography variant="body2" color="text.secondary">{label}</Typography>
+            </Box>
+          </CardActionArea>
+        </Reveal>
+      ))}
+    </Box>
   )
 }
 
@@ -221,21 +218,12 @@ export default function Home() {
             )
           })}
         </Box>
+        <OnTheMap />
       </Section>
 
       <Section dark>
         <Title plain="Upał w mieście" accent="to realny problem" color={amber} sub="Zwarta zabudowa nagrzewa się w dzień i oddaje ciepło w nocy." />
-        <Box sx={{ display: 'grid', gap: { xs: 2.5, md: 4 }, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, mt: { xs: 5, md: 8 } }}>
-          {facts.map(({ value, text, href }, i) => (
-            <Reveal key={value} delay={i * 0.15}>
-              <Box sx={{ height: '100%', p: { xs: 3.5, md: 4.5 }, borderRadius: '28px', bgcolor: 'rgb(255 255 255 / 0.08)', border: 1, borderColor: 'rgb(255 255 255 / 0.12)' }}>
-                <Typography sx={{ fontSize: { xs: 48, md: 60 }, fontWeight: 700, color: amber, lineHeight: 1 }}>{value}</Typography>
-                <Typography sx={{ mt: 2, fontSize: 18 }}>{text}</Typography>
-                <MuiLink href={href} target="_blank" rel="noopener" variant="body2" sx={{ display: 'inline-block', mt: 2, color: 'rgb(255 255 255 / 0.65)' }}>źródło</MuiLink>
-              </Box>
-            </Reveal>
-          ))}
-        </Box>
+        <Box sx={{ mt: { xs: 5, md: 8 } }}><HeatFacts dark /></Box>
         <Reveal>
           <Box sx={{ textAlign: 'center', mt: { xs: 5, md: 7 } }}>
             <Button component={Link} to="/o-projekcie" variant="outlined" endIcon={<ArrowForward />} sx={{ color: 'common.white', borderColor: 'rgb(255 255 255 / 0.5)', px: 3 }}>
