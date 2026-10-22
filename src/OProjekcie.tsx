@@ -25,7 +25,7 @@ const lambdas = [
 const status = [
   { icon: <Public />, color: '#5b6b72', label: 'OpenStreetMap, niezweryfikowane', note: 'Prawdziwe punkty z mapy społeczności, niesprawdzone na miejscu.', items: ['Woda pitna', 'Ławki', 'Miejsca chłodu'] },
   { icon: <Calculate />, color: '#1e88c9', label: 'Szacunek', note: 'Nasze obliczenia na danych OSM, tylko z budynków, bez drzew.', items: ['Cień', 'Trasy', 'Luki cienia', 'Kandydaci', 'Trasy turystyczne'] },
-  { icon: <Science />, color: '#ef6c00', label: 'Dane symulowane', note: 'Przykłady wpisane ręcznie. Prawdziwy ranking powstanie w aplikacji.', items: ['Baner upału', 'Ranking dzielnic'] },
+  { icon: <Science />, color: '#ef6c00', label: 'Dane symulowane', note: 'Przykłady wpisane ręcznie. Prawdziwy ranking powstanie w aplikacji.', items: ['Baner upału', 'Ranking dzielnic', 'Miejsca testowe 1–10'] },
 ]
 
 const limits = [
