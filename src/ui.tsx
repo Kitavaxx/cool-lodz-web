@@ -60,8 +60,30 @@ export function CountUp({ to }: { to: number }) {
 export function GrowBar({ share, color, height = 10 }: { share: number; color: string; height?: number }) {
   const [ref, shown] = useInView<HTMLDivElement>()
   return (
-    <Box ref={ref} sx={{ height, borderRadius: height, bgcolor: '#edf1f2', overflow: 'hidden' }}>
+    <Box ref={ref} sx={{ height, borderRadius: height, bgcolor: 'var(--track, #edf1f2)', overflow: 'hidden' }}>
       <Box sx={{ width: shown ? `${share * 100}%` : 0, height: '100%', borderRadius: height, bgcolor: color, transition: 'width 1.2s cubic-bezier(.2,.7,.2,1)' }} />
+    </Box>
+  )
+}
+
+// Twinkling stars filling their parent, faded in by --night (0 by day, 1 at night; set on the start page)
+const stars = Array.from({ length: 70 }, (_, i) => {
+  const r = (k: number) => (Math.sin(i * 12.9898 + k * 78.233) * 43758.5453) % 1
+  return { x: Math.abs(r(1)) * 100, y: Math.abs(r(2)) * 100, size: 1 + (i % 3), delay: (i % 7) * 0.5 }
+})
+export function Stars() {
+  return (
+    <Box aria-hidden sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 'var(--night, 0)', '@keyframes twinkle': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.25 } } }}>
+      {stars.map(({ x, y, size, delay }, i) => (
+        <Box
+          key={i}
+          sx={{
+            position: 'absolute', left: `${x}%`, top: `${y}%`, width: `${size}px`, height: `${size}px`, borderRadius: '50%', bgcolor: '#fff',
+            boxShadow: size > 2 ? '0 0 6px 1px rgb(255 255 255 / 0.8)' : 'none',
+            animation: `twinkle 3s ease-in-out ${delay}s infinite`, '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+          }}
+        />
+      ))}
     </Box>
   )
 }

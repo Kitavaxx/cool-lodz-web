@@ -10,6 +10,7 @@ import Bezpieczenstwo from './Bezpieczenstwo'
 import TrasyTurystyczne from './TrasyTurystyczne'
 import Ranking from './Ranking'
 import OProjekcie from './OProjekcie'
+import { Stars } from './ui'
 
 // Firebase only loads on /panel, so the public pages never depend on it
 const Panel = lazy(() => import('./Panel'))
@@ -112,7 +113,13 @@ function SiteBackground() {
       cancelAnimationFrame(frame)
     }
   }, [])
-  return <Box ref={ref} sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '125%', willChange: 'transform', backgroundImage: 'url(/img/bg-park.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+  // Night sky and stars over the photo follow the hour picked on the start page (--night, 0 by day)
+  return (
+    <Box ref={ref} sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '125%', willChange: 'transform', backgroundImage: 'url(/img/bg-park.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #040b1e, #0b2233)', opacity: 'calc(var(--night, 0) * 0.82)' }} />
+      <Stars />
+    </Box>
+  )
 }
 
 export default function App() {
