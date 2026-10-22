@@ -1,10 +1,10 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { FeatureCollection, LineString } from 'geojson'
-import { Box, Button, Card, CardActionArea, Chip, Typography } from '@mui/material'
+import { Box, Button, Card, CardActionArea, Chip, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, WbSunny } from '@mui/icons-material'
 import { QRCodeSVG } from 'qrcode.react'
-import { pct, useData } from './shared'
+import { hourPills, hours, pct, useData } from './shared'
 import { GrowBar, HeatFacts, Reveal } from './ui'
 
 // ponytail: set when the mobile team publishes the APK; until then the card says "wkrótce"
@@ -48,19 +48,22 @@ function Title({ plain, accent, color = 'primary.main', sub }: { plain: string; 
   )
 }
 
-// Real numbers from routes.geojson: what walking in the shade costs on the first route at 14:00
-function Preview() {
+// Real numbers from routes.geojson: what walking in the shade costs on the first route at the chosen hour
+function Preview({ hour, onHour }: { hour: number; onHour: (h: number) => void }) {
   const routes = useData<FeatureCollection<LineString>>('/data/routes.geojson')
-  const pick = (variant: string) => routes?.features.find((f) => f.properties!.route_id === 1 && f.properties!.hour === 14 && f.properties!.variant === variant)?.properties
+  const pick = (variant: string) => routes?.features.find((f) => f.properties!.route_id === 1 && f.properties!.hour === hour && f.properties!.variant === variant)?.properties
   const rows = [
     { label: 'Najkrótsza', color: '#e4572e', p: pick('shortest') },
     { label: 'Zacieniona', color: '#0e5f74', p: pick('shaded') },
   ]
   if (!rows[0].p || !rows[1].p) return null
+  const extra = Math.round(rows[1].p.extra_min)
   return (
     <Card sx={{ p: 3, borderRadius: '24px', boxShadow: '0 30px 60px rgb(0 0 0 / 0.3)', color: 'text.primary', width: { xs: '100%', md: 400, xl: 460 }, maxWidth: '100%' }}>
-      <Typography variant="body2" color="text.secondary">Przykład o 14:00</Typography>
       <Typography sx={{ fontWeight: 700, fontSize: 18 }}>{rows[0].p.route_name}</Typography>
+      <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && onHour(h)} aria-label="Godzina" sx={{ ...hourPills, mt: 1.5 }}>
+        {hours.map((h) => <ToggleButton key={h} value={h}>{h}:00</ToggleButton>)}
+      </ToggleButtonGroup>
       {rows.map(({ label, color, p }) => (
         <Box key={label} sx={{ mt: 2.5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', typography: 'body2' }}>
@@ -70,8 +73,30 @@ function Preview() {
           <Box sx={{ mt: 1 }}><GrowBar share={p!.sun_share} color={color} height={12} /></Box>
         </Box>
       ))}
-      <Chip icon={<AcUnit />} color="primary" sx={{ mt: 3 }} label={`${Math.round((rows[0].p.sun_share - rows[1].p.sun_share) * 100)} p.p. mniej słońca za +${Math.round(rows[1].p.extra_min)} min`} />
+      <Chip icon={<AcUnit />} color="primary" sx={{ mt: 3 }} label={`${Math.round((rows[0].p.sun_share - rows[1].p.sun_share) * 100)} p.p. mniej słońca ${extra > 0 ? `za +${extra} min` : 'w tym samym czasie'}`} />
     </Card>
+  )
+}
+
+// The sun on a dotted arc along the top of the hero, at the chosen hour (sunrise ~5:00, sunset ~21:00 in July).
+// Desktop only: on phones the text starts at the very top, so there is no room above it.
+function SunArc({ hour }: { hour: number }) {
+  const a = (Math.PI * (hour - 5)) / 16
+  const x = 50 - 44 * Math.cos(a)
+  const y = 30 - 24 * Math.sin(a)
+  const move = 'left 1.2s cubic-bezier(.4,0,.2,1), top 1.2s cubic-bezier(.4,0,.2,1)'
+  return (
+    <Box aria-hidden sx={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      <Box component="svg" viewBox="0 0 100 100" preserveAspectRatio="none" sx={{ display: { xs: 'none', md: 'block' }, position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+        <path d="M6 30 A44 24 0 0 1 94 30" fill="none" stroke="rgb(255 255 255 / 0.4)" strokeWidth="2" strokeDasharray="2 8" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+      </Box>
+      {/* Warmer light towards the hottest hours */}
+      <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgb(244 120 40 / 0.35), rgb(244 120 40 / 0) 70%)', opacity: Math.max(0, 1 - Math.abs(hour - 15) / 5), transition: 'opacity 1.2s' }} />
+      <Box sx={{ display: { xs: 'none', md: 'block' }, position: 'absolute', left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)', transition: move, textAlign: 'center' }}>
+        <Box sx={{ width: 48, height: 48, borderRadius: '50%', mx: 'auto', background: 'radial-gradient(circle, #fff3c4 0%, #f4b942 55%, #f29a2e 100%)', boxShadow: '0 0 40px 16px rgb(244 185 66 / 0.45), 0 0 120px 40px rgb(244 185 66 / 0.2)' }} />
+        <Box sx={{ mt: 1, fontWeight: 700, fontSize: 14, color: amber, textShadow: '0 1px 4px rgb(0 0 0 / 0.4)' }}>{hour}:00</Box>
+      </Box>
+    </Box>
   )
 }
 
@@ -111,6 +136,14 @@ function ParallaxPhoto() {
 }
 
 export default function Home() {
+  const [hour, setHour] = useState(14)
+  const [auto, setAuto] = useState(() => !matchMedia('(prefers-reduced-motion: reduce)').matches)
+  useEffect(() => {
+    if (!auto) return
+    const t = setInterval(() => setHour((h) => hours[(hours.indexOf(h) + 1) % hours.length]), 2500)
+    return () => clearInterval(t)
+  }, [auto])
+
   return (
     <Box sx={{ maxWidth: 1680, mx: 'auto', pb: 4 }}>
       {/* Hero: the whole first screen */}
@@ -123,7 +156,7 @@ export default function Home() {
         }}
       >
         <ParallaxPhoto />
-        <WbSunny sx={{ position: 'absolute', right: -80, top: -90, fontSize: 320, color: amber, opacity: 0.14 }} />
+        <SunArc hour={hour} />
         <Box sx={{ position: 'relative' }}>
           <Reveal>
             <Chip icon={<WbSunny />} label="Upał 2. stopnia, do 33 °C · dane symulowane" sx={{ bgcolor: 'rgb(255 255 255 / 0.15)', color: 'common.white', '& .MuiChip-icon': { color: amber } }} />
@@ -142,7 +175,7 @@ export default function Home() {
           </Reveal>
         </Box>
         <Box sx={{ position: 'relative', display: 'flex', justifyContent: { md: 'flex-end' } }}>
-          <Reveal delay={0.2}><Preview /></Reveal>
+          <Reveal delay={0.2}><Preview hour={hour} onHour={(h) => { setAuto(false); setHour(h) }} /></Reveal>
         </Box>
         <Button
           onClick={() => document.getElementById('jak')?.scrollIntoView({ behavior: 'smooth' })}
