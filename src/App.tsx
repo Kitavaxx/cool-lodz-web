@@ -1,7 +1,7 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
 import { AppBar, Box, ButtonBase, CircularProgress, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
-import { AcUnit, DirectionsWalk, HealthAndSafety, Home, Info, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
+import { AccountBalance, AcUnit, DirectionsWalk, HealthAndSafety, Home, Info, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
 import Mapa from './Mapa'
 import HomePage from './Home'
 import MiejscaChlodu from './MiejscaChlodu'
@@ -14,13 +14,13 @@ import OProjekcie from './OProjekcie'
 // Firebase only loads on /panel, so the public pages never depend on it
 const Panel = lazy(() => import('./Panel'))
 
-// /panel is moderator-only, so it is linked from the home page, not the menu.
-// Optional pages (more: true) sit under "Więcej" so the phone bar keeps 5 slots.
+// Optional pages and /panel ("Dla miasta", the login) sit under "Więcej" (more: true) so the phone bar keeps 5 slots.
 const pages = [
   { to: '/', label: 'Start', icon: <Home />, element: <HomePage /> },
   { to: '/mapa', label: 'Mapa', icon: <Map />, element: <Mapa /> },
   { to: '/trasa', label: 'Trasa', icon: <DirectionsWalk />, element: <Trasa /> },
   { to: '/miejsca-chlodu', label: 'Chłód', icon: <AcUnit />, element: <MiejscaChlodu /> },
+  { to: '/panel', label: 'Dla miasta', icon: <AccountBalance />, element: <Suspense fallback={<CircularProgress sx={{ display: 'block', mx: 'auto', mt: 8 }} />}><Panel /></Suspense>, more: true },
   { to: '/trasy-turystyczne', label: 'Trasy turystyczne', icon: <Museum />, element: <TrasyTurystyczne />, more: true },
   { to: '/bezpieczenstwo', label: 'Bezpieczeństwo w upał', icon: <HealthAndSafety />, element: <Bezpieczenstwo />, more: true },
   { to: '/ranking', label: 'Ranking dzielnic', icon: <Leaderboard />, element: <Ranking />, more: true },
@@ -86,7 +86,37 @@ function Nav() {
   )
 }
 
+// Blurred street photo behind the home page. The page scrolls inside <main>, so the photo is slid by the scroll progress:
+// from its top to its bottom over the whole page, which is slower than the content whatever the page length.
+// The layer is only 25% taller than the screen, so the photo is barely scaled up. The blur is baked into the file.
+function SiteBackground() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current!
+    const scroller = el.parentElement!.querySelector('main')
+    if (!scroller || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let frame = 0
+    const move = () => {
+      frame = 0
+      const max = scroller.scrollHeight - scroller.clientHeight
+      const spare = el.offsetHeight - scroller.clientHeight
+      el.style.transform = `translate3d(0, ${-(max > 0 ? scroller.scrollTop / max : 0) * spare}px, 0)`
+    }
+    const onScroll = () => { frame ||= requestAnimationFrame(move) }
+    scroller.addEventListener('scroll', onScroll, { passive: true })
+    addEventListener('resize', onScroll)
+    move()
+    return () => {
+      scroller.removeEventListener('scroll', onScroll)
+      removeEventListener('resize', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
+  return <Box ref={ref} sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '125%', willChange: 'transform', backgroundImage: 'url(/img/bg-park.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+}
+
 export default function App() {
+  const home = useLocation().pathname === '/' // the photo is only for the home page, other pages stay plain
   // Screen-high column, so pages like /mapa can fill the space between the bars
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
@@ -98,11 +128,13 @@ export default function App() {
           <Box sx={{ display: { xs: 'none', md: 'block' } }}><Nav /></Box>
         </Toolbar>
       </AppBar>
-      <Box component="main" sx={{ flex: 1, overflow: 'auto', position: 'relative', p: { xs: 2, md: 3 } }}>
-        <Routes>
-          {pages.map(({ to, element }) => <Route key={to} path={to} element={element} />)}
-          <Route path="/panel" element={<Suspense fallback={<CircularProgress sx={{ display: 'block', mx: 'auto', mt: 8 }} />}><Panel /></Suspense>} />
-        </Routes>
+      <Box sx={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
+        {home && <SiteBackground />}
+        <Box component="main" sx={{ position: 'absolute', inset: 0, overflow: 'auto', p: { xs: 2, md: 3 } }}>
+          <Routes>
+            {pages.map(({ to, element }) => <Route key={to} path={to} element={element} />)}
+          </Routes>
+        </Box>
       </Box>
       <Box sx={{ display: { md: 'none' } }}><Nav /></Box>
     </Box>

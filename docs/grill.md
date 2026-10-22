@@ -6,7 +6,7 @@ Stress test of `specyfikacja_strona_webowa` v0.3 (18.10.2026). Self-answered on 
 
 **Q1. Login only, or login plus registration?**
 Spec 7.1 says one moderator account is created by hand.
-➡️ **Login only, for moderators.** Regular users never sign in: every public page works without an account. Moderator accounts are created by hand in the Firebase console, and sign-up is disabled there (Authentication → Settings → User actions), so nobody can create an account through the API. The panel is not in the main menu. It is linked from the home page, as spec 6.1 says. *(Revised 19.10.2026: the first answer allowed self-registration.)*
+➡️ **Login only, as a demonstration of the access flow.** Regular users never sign in: every public page works without an account. The demo account is created by hand in the Firebase console. The website has no registration screen. The Firebase project is shared with the mobile app, so sign-up is not disabled in the console (that would block the app) and the user pool is shared. Every signed-in account sees the panel. This is a hackathon demo: the real version protects panel data with database rules and a moderator role. The panel is in the menu as "Dla miasta" under "Więcej" and linked from the home page. *(Revised 20.10.2026: the 19.10 answer disabled sign-up in the console, which does not work with a project shared with the mobile app.)*
 
 **Q2. Where does auth state live?**
 Options: a React context for the whole app, or a listener only in the panel.
@@ -30,7 +30,7 @@ Options: a React context for the whole app, or a listener only in the panel.
 ## Round 2: depends on round 1
 
 **Q8. Login UI (from Q1)?**
-➡️ **One card with e-mail, password, a "Tylko dla moderatorów" label and a short offer for the city.** No registration and no "forgot password": the team resets moderator passwords in the console.
+➡️ **One card with e-mail, password, a "Wersja demonstracyjna" label, a short offer for the city and the demo account shown under the form (Q11).** No registration and no "forgot password": the team resets the demo password in the console. No autofill button, since the site must also work on phones.
 
 **Q9. Error messages (from Q1, Q3)?**
 ➡️ **Map the few Firebase error codes we expect to Polish:** wrong credentials, invalid e-mail, too many attempts. Anything else shows a general message. We never show raw Firebase errors.
@@ -39,7 +39,7 @@ Options: a React context for the whole app, or a listener only in the panel.
 ➡️ `localhost`, `coollodz.web.app`, `coollodz.firebaseapp.com`. PR preview channels (`coollodz--pr-*.web.app`) must be added by hand if we test login on a preview.
 
 **Q11. Demo credentials (from Q1)?**
-➡️ Only in the documentation and the hackathon submission, never in the repository. `.env.local` stays ignored by git.
+➡️ **Shown on the login card of `/panel`** so judges can try the panel without asking for access. The login is a demo of the access flow and the panel files are public anyway (SPEC 7). The password is a throwaway one, because the Firebase project is shared with the mobile app. *(Revised 20.10.2026: the first answer kept credentials out of the repository.)*
 
 **Q12. Data file contract (from Q5, Q6)?**
 ➡️ Fixed in `docs/SPEC.md`, section 5. Python writes these files and the website only reads them, so the property names are the only interface between the two.
@@ -60,5 +60,11 @@ Options: a React context for the whole app, or a listener only in the panel.
 
 **Q17. Design library?**
 ➡️ **MUI (Material UI)** with Material icons. The mobile app uses Material 3 (chips, pill navigation indicator, Material icons), so MUI gives the closest match with the least custom CSS. Navigation copies the app: a bottom bar with a pill around the active icon on phones, and pills in the top bar on desktop. Font: Roboto, as in the app.
+
+**Q18. Photos on the site?** *(added 20.10.2026)*
+➡️ **Home page only.** Hero: a park photo (Park Źródliska, CC0) under a teal wash. Behind the page: a blurred photo of Piotrkowska with a slow parallax. Other pages stay plain, because the photo behind plain text looked heavy and hurt readability. The blur is baked into the file (no CSS filter, so scrolling stays cheap) and parallax is off with reduced motion. Both photos are credited under "Źródła" on `/o-projekcie` (hero: Rakoon, CC0; background: lodz.pl).
+
+**Q19. Missing addresses of cool places?** *(added 20.10.2026)*
+➡️ **Filled by hand** in `ADDRESS_FIXES` in `scripts/places.py`, in OSM's "Street 12" style. `source` stays `OpenStreetMap`. Unverified status stays too.
 
 Frontier empty. Q16 is an open data task, not a website decision.

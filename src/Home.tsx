@@ -107,18 +107,54 @@ function Preview() {
   )
 }
 
+// Park photo behind the hero that scrolls slower than the content. The page scrolls inside <main>, not the window.
+// It sits taller than the hero (-35% top, -5% bottom) so the shift never shows a gap.
+function ParallaxPhoto() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current!
+    const scroller = el.closest('main')
+    if (!scroller || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let frame = 0
+    const move = () => {
+      frame = 0
+      el.style.transform = `translate3d(0, ${Math.min(scroller.scrollTop, 1500) * 0.3}px, 0)`
+    }
+    const onScroll = () => { frame ||= requestAnimationFrame(move) }
+    scroller.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      scroller.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
+  return (
+    <>
+      <Box
+        ref={ref}
+        sx={{
+          position: 'absolute', inset: '-35% 0 -5% 0', willChange: 'transform', backgroundSize: 'cover', backgroundPosition: 'center',
+          backgroundImage: { xs: 'url(/img/park-zrodliska-small.webp)', md: 'url(/img/park-zrodliska.webp)' },
+        }}
+      />
+      {/* Dark teal wash: keeps the white text readable and the page in its brand colours */}
+      <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgb(11 74 92 / 0.9) 0%, rgb(14 95 116 / 0.75) 50%, rgb(27 138 166 / 0.5) 100%)' }} />
+    </>
+  )
+}
+
 export default function Home() {
   return (
     <Box sx={{ maxWidth: 1680, mx: 'auto', pb: 4 }}>
       {/* Hero: the whole first screen */}
       <Box
         sx={{
-          position: 'relative', overflow: 'hidden', borderRadius: { xs: '28px', md: '40px' }, color: 'common.white',
+          position: 'relative', overflow: 'hidden', isolation: 'isolate', borderRadius: { xs: '28px', md: '40px' }, color: 'common.white',
           px: { xs: 3, md: 8, xl: 16 }, pt: { xs: 5, md: 8 }, pb: { xs: 9, md: 8 }, minHeight: { md: 'calc(100dvh - 64px - 48px)' },
-          background: 'linear-gradient(135deg, #0b4a5b 0%, #0e5f74 45%, #1b8aa6 100%)',
+          bgcolor: '#0b4a5b',
           display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.15fr 1fr' }, gap: { xs: 5, md: 6 }, alignItems: 'center',
         }}
       >
+        <ParallaxPhoto />
         <WbSunny sx={{ position: 'absolute', right: -80, top: -90, fontSize: 320, color: amber, opacity: 0.14 }} />
         <Box sx={{ position: 'relative' }}>
           <Reveal>
@@ -234,7 +270,7 @@ export default function Home() {
         </Box>
       </Section>
 
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 4 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 4, mx: 'auto', width: 'fit-content', maxWidth: '100%', px: 2, py: 0.75, borderRadius: 999, bgcolor: 'rgb(255 255 255 / 0.85)' }}>
         <Info sx={{ fontSize: 16 }} /> Cień szacujemy z budynków, bez drzew. Dane mapy © autorzy OpenStreetMap.
       </Typography>
     </Box>

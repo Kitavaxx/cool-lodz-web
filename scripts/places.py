@@ -10,6 +10,20 @@ from common import BBOX, ox, write
 
 COOL = {"amenity": ["library", "arts_centre"], "tourism": ["museum", "gallery"]}
 OFFICES = {"amenity": ["townhall", "community_centre"], "office": ["government"]}
+# Addresses OSM lacks for these places (no addr:street or addr:housenumber), added by hand in OSM's "Street 12" style.
+# The EC1 buildings have no separate addresses, so they all get the complex's.
+ADDRESS_FIXES = {
+    "Planetarium EC1": "Targowa 1/3",
+    "Narodowe Centrum Kultury Filmowej EC1": "Targowa 1/3",
+    "Centrum Komiksu i Narracji Interaktywnej EC1": "Targowa 1/3",
+    "Ulica Żywiołów EC1": "Targowa 1/3",
+    "Galeria Re:Medium": "Piotrkowska 113",
+    "Galerie Miejskie w Łodzi": "Piotrkowska 113",
+    "Galeria Odlot": "Eliasza Chaima Majzela 8",
+    "Muzeum dzieci polskich": "Piotrkowska 90",
+    "Muzeum Kanału „Dętka”": "Plac Wolności 10",
+    "Muzeum Sportu i Turystyki": "Księdza Ignacego Skorupki 21",
+}
 DAY = r"(Mo|Tu|We|Th|Fr|Sa|Su)(-(Mo|Tu|We|Th|Fr|Sa|Su))?"
 RULE = re.compile(rf"{DAY}(,{DAY})* \d\d:\d\d-\d\d:\d\d")
 OFF = re.compile(rf"{DAY}(,{DAY})* off")
@@ -49,7 +63,7 @@ def public_buildings():
     gdf = fetch(COOL)
     gdf = gdf[gdf["name"].notna()].copy()
     gdf["hours"] = gdf["opening_hours"].map(hours) if "opening_hours" in gdf else None
-    gdf["address"] = gdf.apply(address, axis=1)
+    gdf["address"] = gdf.apply(address, axis=1).fillna(gdf["name"].map(ADDRESS_FIXES))
     offices = fetch(OFFICES)
     # Spec 7.2 asks for "urzędy": skip courts, prosecutors, police and similar government offices
     office = offices["amenity"].isna() if "amenity" in offices else True

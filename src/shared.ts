@@ -50,8 +50,12 @@ async function addPlaceIcons(map: MapLibre) {
 }
 
 
-export const placeLines = (p: NonNullable<GeoJsonProperties>) =>
-  [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', p.verified ? 'Zweryfikowane' : 'Niezweryfikowane', `Źródło: ${p.source}`]
+// Water and bench points have no address or hours in OSM, so say what they are instead of "Brak godzin otwarcia". Their unverified status is in the map caption.
+export const placeLines = (p: NonNullable<GeoJsonProperties>) => {
+  const status = [p.verified ? 'Zweryfikowane' : 'Niezweryfikowane', `Źródło: ${p.source}`]
+  if (p.type === 'cool') return [p.name, p.address, p.hours ? polishDays(p.hours) : 'Brak godzin otwarcia', ...status]
+  return [p.type === 'water' ? 'Miejsce, w którym można napić się wody' : p.name, p.address, `Źródło: ${p.source}`]
+}
 
 // Text only (no HTML), one line per entry
 export function showPopup(map: MapLibre, at: LngLatLike, lines: string[]) {
