@@ -22,7 +22,7 @@ Options: a React context for the whole app, or a listener only in the panel.
 ➡️ **Fixed list `[10, 12, 14, 16, 18]`, date 15.07.2026, Europe/Warsaw time.** Properties are keyed by hour, for example `s14` for sun share at 14:00.
 
 **Q6. Area bounds?**
-➡️ **bbox `[19.43, 51.74, 19.48, 51.78]`** (W, S, E, N). Python and the map read the same values. Tourist routes may extend the bbox later.
+➡️ **bbox `[19.43, 51.74, 19.48, 51.78]`** (W, S, E, N). Python and the map read the same values. Tourist routes may extend the bbox later. *(Revised 23.10.2026: this stays the area of routes and the panel. Shade and places now cover the whole city, see Q20.)*
 
 **Q7. Timezone for "open now"?**
 ➡️ **Always Europe/Warsaw** through `Intl.DateTimeFormat`, regardless of the viewer's timezone.
@@ -66,5 +66,11 @@ Options: a React context for the whole app, or a listener only in the panel.
 
 **Q19. Missing addresses of cool places?** *(added 20.10.2026)*
 ➡️ **Filled by hand** in `ADDRESS_FIXES` in `scripts/places.py`, in OSM's "Street 12" style. `source` stays `OpenStreetMap`. Unverified status stays too.
+
+**Q20. Shade and places for the whole city?** *(added 23.10.2026)*
+➡️ **Yes, for the map; routes and the panel stay in Śródmieście.** The goal is a demo that looks like a whole-city product. Measured on 12 cores: 190 thousand street segments and 158 thousand buildings, about 18 minutes for 5 hours, and a 39 MB GeoJSON. A browser should not load that, so `/mapa` reads vector tiles (812 tiles, 12.6 MB, `scripts/tiles.py`) instead. The panel stays on the Śródmieście `edges.geojson`: "sunniest streets" for the whole city would point at roads outside the built-up area. The map says the shade is less accurate outside the centre (no trees, guessed heights).
+
+**Q21. Other dates than 15 July?** *(added 23.10.2026)*
+➡️ **Not in the demo.** The design is worked out: geometry once plus one small shade file per date (about 400 KB), colours read from it with a map expression. It needs a nightly run of `shade.py` (an estimated 3–6 hours for the whole summer) and is listed under next steps.
 
 Frontier empty. Q16 is an open data task, not a website decision.

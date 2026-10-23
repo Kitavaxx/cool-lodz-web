@@ -4,7 +4,7 @@ Based on `specyfikacja_strona_webowa` v0.3 and the decisions in [grill.md](grill
 
 ## 1. Goal
 
-A hackathon demo that shows shaded walking routes, cool places and shade gaps in Śródmieście, Łódź. It must look good in the presentation and video and be honest about what we calculate. No backend: Python precomputes static files, and React displays them.
+A hackathon demo that shows shade on the walking network and cool places across the whole of Łódź, and shaded routes, shade gaps and the city panel in Śródmieście. It must look good in the presentation and video and be honest about what we calculate. No backend: Python precomputes static files, and React displays them.
 
 ## 2. Glossary
 
@@ -45,7 +45,9 @@ Python writes these files and the website only reads them. All files are in `pub
 
 | File | Feature / item | Properties |
 | --- | --- | --- |
-| `edges.geojson` | LineString | `id`, `s10`, `s12`, `s14`, `s16`, `s18` (0–1) |
+| `edges.geojson` | LineString, Śródmieście only (read by the panel) | `id`, `r` (street rank), `s10`, `s12`, `s14`, `s16`, `s18` (0–1) |
+| `tiles/{z}/{x}/{y}.pbf` | Vector tiles of the whole city (layer `edges`), zoom 9–15, sidewalks and paths from zoom 14. `tiles/empty.pbf` is the empty tile served for missing ones | `s10`, `s12`, `s14`, `s16`, `s18` as whole percents (0–100) |
+| `shares.json` | `{ items: [...] }` | `hour`, `shares` (share of street length in shade, half-shade and sun, summing to 1) |
 | `routes.geojson` | LineString | `route_id`, `route_name`, `hour`, `variant`, `distance_m`, `time_min`, `sun_share`, `extra_min` |
 | `places.geojson` | Point | `type` (`cool`, `water`, `bench`), `name`, `address`, `hours`, `source`, `verified` |
 | `panel_gaps.json` | `{ items: [...] }` | `id`, `name`, `length_m`, `s14`, `geometry` (GeoJSON LineString) |
@@ -66,7 +68,7 @@ Walking time: 4.5 km/h. `extra_min` is the time difference compared with the `sh
 | --- | --- | --- |
 | `/` | Short start page, one idea per card: headline with "Otwórz mapę" and a live route preview with hour buttons that plays the day by itself until a visitor picks an hour, a sun moving along an arc to that hour (desktop) warmer light at the hottest hours, and the whole page blending from a day theme (10–12) to a night theme with a starry sky (18:00), heat banner ("dane symulowane"), 3 steps linking to the pages, 3 facts with source links, APK and panel cards. A park photo in the hero and a blurred photo of Piotrkowska behind the page that scrolls slower than the content (parallax, home page only, off with reduced motion). The long text lives on `/o-projekcie` | A visitor gets the idea at a glance, details are one click away |
 | `/o-projekcie` | Problem with sources, methodology, limitations (section 9), data sources. Under "Więcej" in the menu | All sections present, sources and limits described |
-| `/mapa` | Full-screen MapLibre. Line layer from `edges.geojson`, coloured by `s{hour}`, hidden until the user picks sun-share ranges (Cień / Półcień / Słońce, several at once, or "Wszystkie"). Point layers (icon badges) for cool places, water, benches with toggles. Hour buttons 10–18. Range buttons with icons and percentages, a bar with the share of street length per range; accuracy in the street popup | Layers toggle without errors, changing the hour recolours segments |
+| `/mapa` | Full-screen MapLibre. Opens on the whole city. Line layer from the shade vector tiles (the city GeoJSON would be about 39 MB), coloured by `s{hour}`, hidden until the user picks sun-share ranges (Cień / Półcień / Słońce, several at once, or "Wszystkie"). Point layers (icon badges) for cool places, water, benches with toggles. Hour buttons 10–18. Range buttons with icons and percentages, a bar with the share of street length per range; accuracy in the street popup | Layers toggle without errors, changing the hour recolours segments |
 | `/trasa` | Route select and hour buttons. Filter `routes.geojson` by route and hour, draw 3 variants in different colours and dash styles, comparison card. Cool places and water within 200 m of the route | Manufaktura → Piotrkowska shows at least 2 variants with different sun share |
 | `/miejsca-chlodu` | List and mini map of `type=cool`, open-now ring and "Tylko otwarte" switch, today's opening hours on each place, nearest water (straight-line distance, a dashed line to it on the map when a place is selected, water points are clickable), "Pokaż na mapie" link to `/mapa?place=<name>`, verified label | The "open now" filter follows the hours in the data |
 | `/panel` | Moderator login card with a short offer for the city. In the menu as "Dla miasta" (under "Więcej") and linked from `/`. After login: shade gaps (map and table), cool place reach (400 m circles), candidates (table with visible weights, "rekomendacja, nie decyzja") | Views are hidden until the user logs in |
@@ -104,7 +106,8 @@ Fallback cuts and extras follow spec section 8.
 ## 9. Limitations to publish
 
 - Shade from building footprints only, with estimated heights. No trees in the base version.
+- Shade covers the whole city, but it is less accurate outside the centre: more detached houses and industrial buildings with a guessed 12 m height, and open ground where trees would give most of the shade. `/mapa` says so under the sun range buttons. Across the city about 88 % of street length is in the sun at 14:00 (almost all of it sidewalks and paths), which is higher than the centre because trees are missing.
 - One summer day and 5 hours.
-- 4 precomputed routes, no free A to B.
+- 4 precomputed routes in Śródmieście, no free A to B. The panel and the tourist routes are also Śródmieście only.
 - Panel data is static files, readable without logging in by anyone who knows the URL. A database with rules comes in the next steps.
 - Heat banner, ranking and 10 always-open test cool places ("Miejsce testowe 1–10", source `dane symulowane`, for testing the open state) use simulated data. Nothing else is simulated: shade, routes and panel views are our calculations on OSM data (`szacunek`), and cool places, water and benches are unverified OSM points. `/o-projekcie` ("Skąd są dane na stronie") explains the three kinds, and every place popup says its source and that it is unverified. Popups for water and benches say what the point is.
