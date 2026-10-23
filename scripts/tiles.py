@@ -22,6 +22,7 @@ from pyproj import Transformer
 from common import OUT, city, write
 
 REACH = 400  # m, walking distance to a cool place that counts as reachable. Same as REACH in src/Panel.tsx
+NEAR_M = 25  # m, sidewalks and paths this close to a street give it its sun share in the tiles
 PLACES = Path(__file__).resolve().parent.parent / "public" / "data" / "places.geojson"
 HOURS = [10, 12, 14, 16, 18]
 ZOOMS = range(9, 16)  # the map overzooms beyond 15
@@ -67,6 +68,20 @@ def main():
     write("shares.json", {"items": shares})
 
     lines = shapely.transform(lines, lambda c: np.column_stack(to_merc.transform(c[:, 0], c[:, 1])))
+
+    # Streets (rank 0-1) are drawn from zoom 10, sidewalks and paths only from zoom 14. The centre line of a street is almost
+    # never in a building's shadow (98.6 % sun at 14:00), so at city zoom "Cień" showed next to nothing. Give each street the
+    # length-weighted average of the sidewalks and paths within NEAR_M, which is what a pedestrian on it gets.
+    street, walk = np.flatnonzero(rank < 2), np.flatnonzero(rank == 2)
+    si, wi = shapely.STRtree(lines[walk]).query(lines[street], predicate="dwithin", distance=NEAR_M / np.cos(np.radians(51.76)))
+    weight = metres[walk[wi]]
+    den = np.bincount(si, weights=weight, minlength=len(street))
+    has = den > 0
+    for k in range(len(HOURS)):
+        num = np.bincount(si, weights=weight * pct[walk[wi], k], minlength=len(street))
+        pct[street[has], k] = np.round(num[has] / den[has]).astype(int)
+    print(f"{has.sum()} of {len(street)} streets take the shade of the sidewalks beside them ({time.time() - t0:.0f} s)")
+
     minx, miny, maxx, maxy = shapely.bounds(lines).T
 
     tiles_dir = OUT / "tiles"
