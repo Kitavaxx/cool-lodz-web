@@ -213,7 +213,7 @@ export default function Home() {
               Przejdź przez Łódź <Box component="span" sx={{ color: amber }}>w{' '}cieniu</Box>
             </Typography>
             <Typography sx={{ mt: 2.5, fontSize: { xs: 18, md: 21, xl: 24 }, opacity: 0.9 }}>
-              Cień, woda i miejsca chłodu w Śródmieściu, godzina po godzinie.
+              Cień, woda i miejsca chłodu w całej Łodzi, godzina po godzinie.
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 5 }}>
               <Button component={Link} to="/mapa" size="large" variant="contained" startIcon={<Map />} sx={{ ...white, px: 3, py: 1.25 }}>Otwórz mapę</Button>
