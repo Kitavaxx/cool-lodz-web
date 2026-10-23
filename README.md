@@ -90,9 +90,10 @@ The public Overpass server can answer "retry later" when two downloads run at on
 
 | File | Contents | Script |
 | --- | --- | --- |
-| `edges.geojson` | Śródmieście walking network (sidewalks included) with sun share for 5 hours, from building shadows. Read by the panel | `shade.py` |
+| `edges.geojson` | Śródmieście walking network (sidewalks included) with sun share for 5 hours, from building shadows. The site no longer reads it (the tiles replaced it); `routes.py` and `panel.py` need a default-area run of `shade.py` first | `shade.py` |
 | `tiles/{z}/{x}/{y}.pbf` | The same for the whole city as vector tiles (layer `edges`, `s10`…`s18` in whole percents), zoom 9–15. `tiles/empty.pbf` is the empty tile Firebase serves for missing ones | `tiles.py` |
 | `shares.json` | Share of street length in shade, half-shade and sun per hour, for the bar on `/mapa` | `tiles.py` |
+| `reach.json` | Share of street length in the whole city farther than 400 m from every cool place (the panel's reach view). Each tile segment also carries `d`, its distance to the nearest cool place | `tiles.py` |
 | `routes.geojson` | 4 routes × 5 hours × 3 variants | `routes.py` |
 | `places.geojson` | Cool places (OSM libraries, culture centres, museums, galleries with known opening hours, plus 10 simulated always-open ones), drinking water, benches, for the whole city | `places.py` |
 | `lodz.geojson` | Łódź city boundary: maps stay inside it and dim the outside | `boundary.py` |

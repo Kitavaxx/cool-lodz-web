@@ -62,7 +62,7 @@ Python (lokalnie, scripts/)
         |
         v
 Pliki statyczne (public/data)
-  tiles/ (cień całego miasta), shares.json, edges.geojson (Śródmieście),
+  tiles/ (cień całego miasta), shares.json, reach.json, edges.geojson (Śródmieście),
   routes.geojson, places.geojson,
   panel_gaps.json, panel_candidates.json,
   tours.json, ranking.json, lodz.geojson
@@ -107,8 +107,8 @@ Dla każdego wariantu zapisujemy geometrię, dystans, czas (4,5 km/h), udział s
 
 ### 5.3. Miejsca
 
-- **Woda i ławki:** z OSM (`amenity=drinking_water`, `amenity=bench`), źródło "OpenStreetMap". W danych dla całej Łodzi: 49 punktów wody i 7666 ławek.
-- **Miejsca chłodu:** 95 miejsc w całej Łodzi (85 z OSM: biblioteki, domy kultury, muzea, galerie, oraz 10 symulowanych "Miejsce testowe 1–10", zawsze otwartych, do sprawdzania filtra "Otwarte teraz"). Dane z OSM, bez ręcznej weryfikacji, więc na stronie są oznaczone jako niezweryfikowane. Dla 10 miejsc bez adresu w OSM (m.in. budynki EC1, galerie i muzea) adresy dodaliśmy ręcznie w `scripts/places.py` (`ADDRESS_FIXES`), a budynki EC1 mają wspólny adres Targowa 1/3. Źródło tych miejsc pozostaje "OpenStreetMap".
+- **Woda i ławki:** z OSM (`amenity=drinking_water`, `amenity=bench`), źródło "OpenStreetMap". W danych dla całej Łodzi: 49 punktów wody i 7518 ławek (punkty spoza granicy miasta, np. z Zgierza i Konstantynowa Łódzkiego, są odrzucane).
+- **Miejsca chłodu:** 91 miejsc w całej Łodzi (81 z OSM: biblioteki, domy kultury, muzea, galerie, oraz 10 symulowanych "Miejsce testowe 1–10", zawsze otwartych, do sprawdzania filtra "Otwarte teraz"). Dane z OSM, bez ręcznej weryfikacji, więc na stronie są oznaczone jako niezweryfikowane. Dla 10 miejsc bez adresu w OSM (m.in. budynki EC1, galerie i muzea) adresy dodaliśmy ręcznie w `scripts/places.py` (`ADDRESS_FIXES`), a budynki EC1 mają wspólny adres Targowa 1/3. Źródło tych miejsc pozostaje "OpenStreetMap".
 
 ### 5.4. Pliki
 
@@ -116,6 +116,7 @@ Dla każdego wariantu zapisujemy geometrię, dystans, czas (4,5 km/h), udział s
 | --- | --- |
 | `tiles/{z}/{x}/{y}.pbf` | Cień całej Łodzi jako kafelki wektorowe (812 kafelków, 12,6 MB): 175 tys. odcinków sieci pieszej z udziałem słońca dla 5 godzin. Plik GeoJSON całego miasta ma 39 MB, więc przeglądarka czyta kafelki |
 | `shares.json` | Udział długości ulic w cieniu, półcieniu i słońcu dla każdej godziny (pasek na `/mapa`) |
+| `reach.json` | Udział długości ulic w całej Łodzi dalej niż 400 m od najbliższego miejsca chłodu (ok. 75 %), do panelu. Odległość każdego odcinka jest w kafelkach (pole `d`) |
 | `edges.geojson` | 25 945 odcinków sieci pieszej w Śródmieściu z udziałem słońca dla 5 godzin (czyta go panel) |
 | `routes.geojson` | 4 trasy × 5 godzin × 3 warianty z parametrami |
 | `places.geojson` | Miejsca chłodu, woda, ławki (`type`, `name`, `address`, `hours`, `source`, `verified`) |
@@ -189,7 +190,7 @@ W demie pliki panelu leżą w `public/data/`, więc każdy, kto zna adres (np. `
 | Widok | Co pokazuje |
 | --- | --- |
 | **Luki cienia** | 20 odcinków z największym udziałem słońca o 14:00, na mapie i w tabeli |
-| **Dostępność miejsc chłodu** | Koła 400 m wokół miejsc chłodu, obszar poza nimi jako "biała plama" |
+| **Dostępność miejsc chłodu** | Dla całej Łodzi: koła 400 m wokół miejsc chłodu, ulice poza nimi jako "biała plama" (czerwone linie). Ok. 75 % długości ulic miasta leży dalej niż 400 m od miejsca chłodu |
 | **Kandydaci na nowe miejsca chłodu** | Tabela budynków publicznych z wynikiem i rozbiciem na kryteria (brak cienia w promieniu 200 m, odległość do najbliższego miejsca chłodu, godziny otwarcia latem), wagi widoczne w tabeli. Wynik opisany jako "rekomendacja, nie decyzja" |
 
 ---
@@ -216,7 +217,8 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 - Cień liczony tylko z obrysów budynków z szacowanymi wysokościami, bez drzew. Etykieta: "szacunek".
 - Cień obejmuje całą Łódź, ale poza centrum jest mniej dokładny: więcej domów jednorodzinnych i obiektów przemysłowych z przyjętą wysokością 12 m oraz więcej otwartego terenu, gdzie większość cienia dałyby drzewa. W całym mieście ok. 88 % długości ulic jest o 14:00 w słońcu (prawie wszystko to chodniki i ścieżki), czyli więcej niż w centrum, bo nie liczymy drzew.
 - Jeden letni dzień (15.07.2026) i 5 godzin.
-- 4 trasy policzone wcześniej w Śródmieściu, bez wyboru dowolnych punktów A i B. Panel miasta i trasy turystyczne także dotyczą tylko Śródmieścia.
+- 4 trasy policzone wcześniej w Śródmieściu, bez wyboru dowolnych punktów A i B. W panelu miasta tylko widok "Dostępność miejsc chłodu" obejmuje całą Łódź, a luki cienia i kandydaci dotyczą Śródmieścia. Trasy turystyczne także tylko Śródmieścia.
+- Ulice, które mapa rysuje przy widoku całego miasta, dostają udział słońca jako średnią z chodników i ścieżek w promieniu 25 m. Sam środek jezdni prawie nigdy nie leży w cieniu budynków (o 14:00 98,6 % długości w słońcu), a mapa pokazuje to, co czeka pieszego. W lipcu o 14:00 cienia jest mało na całej mapie, o 18:00 wyraźnie więcej.
 - Logowanie do panelu służy tylko do demonstracji. Dane panelu to pliki statyczne dostępne bez logowania, a w wersji docelowej będą chronione (sekcja 7.2).
 - Strona i aplikacja mają wspólną pulę kont Firebase Auth i w demie nie ma sprawdzania roli moderatora. Każde zalogowane konto widzi panel.
 - Baner upału i ranking dzielnic używają danych symulowanych.
