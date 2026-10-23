@@ -4,7 +4,7 @@ Based on `specyfikacja_strona_webowa` v0.3 and the decisions in [grill.md](grill
 
 ## 1. Goal
 
-A hackathon demo that shows shade on the walking network and cool places across the whole of Łódź, and shaded routes, shade gaps and the city panel in Śródmieście. It must look good in the presentation and video and be honest about what we calculate. No backend: Python precomputes static files, and React displays them.
+A hackathon demo that shows shade on the walking network and cool places across the whole of Łódź, and the city panel (all three views), and shaded routes in Śródmieście. It must look good in the presentation and video and be honest about what we calculate. No backend: Python precomputes static files, and React displays them.
 
 ## 2. Glossary
 
@@ -72,7 +72,7 @@ Walking time: 4.5 km/h. `extra_min` is the time difference compared with the `sh
 | `/mapa` | Full-screen MapLibre. Opens on the whole city. Line layer from the shade vector tiles (the city GeoJSON would be about 39 MB), coloured by `s{hour}`, hidden until the user picks sun-share ranges (Cień / Półcień / Słońce, several at once, or "Wszystkie"). Point layers (icon badges) for cool places, water, benches with toggles. Hour buttons 10–18. Range buttons with icons and percentages, a bar with the share of street length per range; accuracy in the street popup | Layers toggle without errors, changing the hour recolours segments |
 | `/trasa` | Route select and hour buttons. Filter `routes.geojson` by route and hour, draw 3 variants in different colours and dash styles, comparison card. Cool places and water within 200 m of the route | Manufaktura → Piotrkowska shows at least 2 variants with different sun share |
 | `/miejsca-chlodu` | List and mini map of `type=cool`, open-now ring and "Tylko otwarte" switch, today's opening hours on each place, nearest water (straight-line distance, a dashed line to it on the map when a place is selected, water points are clickable), "Pokaż na mapie" link to `/mapa?place=<name>`, verified label | The "open now" filter follows the hours in the data |
-| `/panel` | Moderator login card with a short offer for the city. In the menu as "Dla miasta" (under "Więcej") and linked from `/`. After login: shade gaps (map and table), cool place reach for the whole city (400 m circles, streets coloured by `d` from the shade tiles, the share from `reach.json`), candidates (table with visible weights, "rekomendacja, nie decyzja") | Views are hidden until the user logs in |
+| `/panel` | Moderator login card with a short offer for the city. In the menu as "Dla miasta" (under "Więcej") and linked from `/`. After login, all three views for the whole city: shade gaps (map and table), cool place reach for the whole city (400 m circles, streets coloured by `d` from the shade tiles, the share from `reach.json`), candidates (table with visible weights, "rekomendacja, nie decyzja") | Views are hidden until the user logs in |
 
 ### Optional, in this order
 
@@ -110,7 +110,8 @@ Fallback cuts and extras follow spec section 8.
 - Shade from building footprints only, with estimated heights. No trees in the base version.
 - Shade covers the whole city, but it is less accurate outside the centre: more detached houses and industrial buildings with a guessed 12 m height, and open ground where trees would give most of the shade. `/mapa` says so under the sun range buttons. Across the city about 88 % of street length is in the sun at 14:00 (almost all of it sidewalks and paths), which is higher than the centre because trees are missing.
 - One summer day and 5 hours.
-- 4 precomputed routes in Śródmieście, no free A to B. Of the panel views only the reach view covers the whole city, shade gaps and candidates are Śródmieście. The tourist routes too.
+- 4 precomputed routes in Śródmieście, no free A to B. The tourist routes too. All three panel views cover the whole city.
+- Shade gaps: in a field the sun is 100 % at 14:00, so "the sunniest street" would always be a country road. Only streets with at least 6 km of walkway within 300 m (built-up areas) count, and since many segments tie at 100 %, the longest win. These are mostly streets of the outer housing estates without trees, which is useful for the panel but not the city centre. Gaps and candidates are limited to the city boundary (a segment counts when its midpoint is inside Łódź).
 - The streets drawn at city zoom show the average of the sidewalks beside them (their own centre line is 98.6 % in the sun at 14:00). In July at 14:00 there is little shade anywhere, at 18:00 much more.
 - Panel data is static files, readable without logging in by anyone who knows the URL. A database with rules comes in the next steps.
 - Heat banner, ranking and 10 always-open test cool places ("Miejsce testowe 1–10", source `dane symulowane`, for testing the open state) use simulated data. Nothing else is simulated: shade, routes and panel views are our calculations on OSM data (`szacunek`), and cool places, water and benches are unverified OSM points. `/o-projekcie` ("Skąd są dane na stronie") explains the three kinds, and every place popup says its source and that it is unverified. Popups for water and benches say what the point is.
