@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router'
-import { AppBar, Box, ButtonBase, CircularProgress, ListItemIcon, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, ButtonBase, CircularProgress, ListItemIcon, Menu, MenuItem, Toolbar } from '@mui/material'
 import { AccountBalance, AcUnit, DirectionsWalk, HealthAndSafety, Home, Info, Leaderboard, Map, MoreHoriz, Museum } from '@mui/icons-material'
 import Mapa from './Mapa'
 import HomePage from './Home'
@@ -129,9 +129,10 @@ export default function App() {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
       <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Toolbar sx={{ gap: 2 }}>
-          <Typography variant="h6" component={Link} to="/" sx={{ color: 'primary.main', fontWeight: 700, textDecoration: 'none', flexGrow: 1 }}>
-            Cool Łódź
-          </Typography>
+          {/* The logo is the link to the start page; the name stays as text for screen readers */}
+          <Box component={Link} to="/" aria-label="Cool Łódź, strona główna" sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <Box component="img" src="/img/logo.png" alt="" width={268} height={182} sx={{ display: 'block', height: { xs: 44, md: 52 }, width: 'auto', my: 0.5 }} />
+          </Box>
           <Box sx={{ display: { xs: 'none', md: 'block' } }}><Nav /></Box>
         </Toolbar>
       </AppBar>
