@@ -213,7 +213,7 @@ export default function Panel() {
 // Segments with the most sun at 14:00 (source spec 7.2), on a map and in a table
 function ShadeGaps() {
   const gaps = useData<Gaps>('/data/panel_gaps.json')
-  const [container, map] = useMap()
+  const [container, map] = useMap(cityBounds)
   const [selected, setSelected] = useState(0)
 
   useEffect(() => {
@@ -244,7 +244,7 @@ function ShadeGaps() {
   return (
     <>
       <Typography sx={lead}>
-        20 odcinków ulic o długości co najmniej 80 m z największym udziałem słońca o 14:00 (najwyżej jeden na ulicę). Kliknij wiersz, aby pokazać odcinek na mapie. To miejsca, gdzie drzewa, zadaszenia lub kurtyny wodne dadzą najwięcej.
+        20 odcinków ulic w całej Łodzi o długości co najmniej 80 m z największym udziałem słońca o 14:00 (najwyżej jeden na ulicę, tylko w zabudowanej części miasta). Kliknij wiersz, aby pokazać odcinek na mapie. To miejsca, gdzie drzewa, zadaszenia lub kurtyny wodne dadzą najwięcej.
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2.5, mt: 2.5, alignItems: 'start' }}>
         <Box ref={container} sx={{ ...card, overflow: 'hidden', height: { xs: 'clamp(320px, 55dvh, 560px)', md: 560 }, position: { md: 'sticky' }, top: 0 }} />
