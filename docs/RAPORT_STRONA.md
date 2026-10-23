@@ -2,8 +2,6 @@
 
 Wersja 0.4 z 20.10.2026, następca specyfikacji 0.3 z 18.10.2026. Przygotowali: Aliaksandr Yurusau, Dmytro Malinovskyi. Dla: Mikita Kutsenka.
 
-Punkty oznaczone ⚠️ uzupełnimy na koniec prac.
-
 ---
 
 ## 1. W skrócie
@@ -128,9 +126,11 @@ Dla każdego wariantu zapisujemy geometrię, dystans, czas (4,5 km/h), udział s
 
 Każdy plik ma pola `accuracy` i `computed_at`, więc data i dokładność obliczeń są widoczne w danych. Jeśli plik jest uszkodzony lub go brakuje, strona pokazuje "Brak danych" i się nie wysypuje.
 
-### 5.5. Dane, których nadal szukamy
+### 5.5. Dane, na które czekamy
 
-Budynki LoD1 i drzewa z Geoportalu, Mapa Drzew Łodzi, drzewa z OSM (`natural=tree`) oraz zweryfikowana lista miejsc chłodu z godzinami. Jeśli je znajdziemy, poprawiamy model i zmieniamy etykietę z "szacunek" na "model". ⚠️ Status do uzupełnienia.
+Potrzebujemy dokładnych wysokości budynków, drzew, zweryfikowanej listy miejsc chłodu z godzinami i pozostałych zbiorów z dokumentu "Cool Łódź: zakres danych potrzebnych do aplikacji".
+
+**Status:** na mentoringu z Urzędem Miasta (23.10.2026) ustalono, że miasto udostępni dane przez portal otwartych danych (otwarte-miasto-lodz.pl), a urzędnicy nie będą logować się do panelu. Zakres i format (CSV) przekazujemy mentorce z urzędu, a odpowiedź, co da się zdobyć, mamy dostać do przyszłego tygodnia, bez gwarancji pełnego zakresu. Miasto ma przeskanowane wszystkie ulice (chmura punktów, w której widać drzewa) i planuje jej publikację, ale termin jest niepewny, raczej nie przed listopadem. Do tego czasu demo opiera się na OpenStreetMap, a cień ma etykietę "szacunek". Po otrzymaniu danych poprawiamy model i zmieniamy etykietę na "model".
 
 ### 5.6. Status danych: co jest prawdziwe, a co symulowane
 
@@ -152,7 +152,7 @@ Etykieta "dane symulowane" jest więc tylko przy rankingu i banerze, bo tylko ta
 
 | Adres | Zawartość |
 | --- | --- |
-| `/` | Krótka strona startowa: hasło i przycisk "Otwórz mapę" z podglądem trasy, baner upału (przykład, "dane symulowane"), 3 kroki, 3 fakty ze źródłami, karta pobrania APK, wejście do panelu dla miasta. Zdjęcie parku w nagłówku i rozmyte zdjęcie Piotrkowskiej w tle z efektem paralaksy (tylko na stronie głównej, bez ruchu przy włączonym "ogranicz animacje"). Do czasu publikacji APK karta pokazuje "APK wkrótce" ⚠️ |
+| `/` | Krótka strona startowa: hasło i przycisk "Otwórz mapę" z podglądem trasy, baner upału (przykład, "dane symulowane"), 3 kroki, 3 fakty ze źródłami, karta pobrania APK, wejście do panelu dla miasta. Zdjęcie parku w nagłówku i rozmyte zdjęcie Piotrkowskiej w tle z efektem paralaksy (tylko na stronie głównej, bez ruchu przy włączonym "ogranicz animacje"). Karta aplikacji ma przycisk "Pobierz aplikację" i kod QR. Oba prowadzą na stronę wydań aplikacji (`github.com/mikita672/cool-lodz-app/releases`), gdzie najnowsza wersja ma plik APK. Na razie link do strony, a nie bezpośrednie pobranie |
 | `/o-projekcie` | Problem ze źródłami, metodyka, ograniczenia, źródła danych |
 | `/mapa` | Mapa pełnoekranowa, otwiera się na całej Łodzi. Cień (odcinki kolorowane według udziału słońca, trzy przedziały: Cień, Półcień, Słońce; pod przyciskami podpis, że poza centrum wyniki mogą być mniej dokładne), miejsca chłodu, woda, ławki. Przełącznik godziny 10 do 18, legenda z procentami, etykieta dokładności, atrybucja OSM |
 | `/trasa` | Wybór trasy i godziny, trzy warianty na mapie w różnych kolorach i stylach linii, karta porównania (dystans, czas, udział słońca, ile dłużej niż najkrótsza), miejsca chłodu i woda w promieniu 200 m od trasy |
@@ -197,7 +197,7 @@ W demie pliki panelu leżą w `public/data/`, więc każdy, kto zna adres (np. `
 
 ## 8. Definition of Done: stan
 
-Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia na koniec.
+Odznaczamy po sprawdzeniu na działającym adresie.
 
 - [x] Publiczny adres HTTPS działa: https://coollodz.web.app. Wdrożenie z całą Łodzią (kafelki, miejsca, panel) przeszło przez CI bez błędów.
 - [x] 5 obowiązkowych stron dostępnych z menu (panel jako "Dla miasta" w "Więcej").
@@ -205,7 +205,7 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 - [x] Trasa Manufaktura do Piotrkowskiej pokazuje co najmniej 2 warianty z różnym udziałem słońca. Są wszystkie 4 trasy (a nie 2 z planu awaryjnego), każda w 3 wariantach i 5 godzinach. Przykład, trasa 1 o 14:00: najkrótsza 81 % słońca, kompromis 31 %, zacieniona 25 %.
 - [x] Miejsca chłodu: lista z godzinami i działający filtr "otwarte teraz" (logikę godzin sprawdza `npm run check`).
 - [x] Etykieta dokładności przy wartościach cienia.
-- [ ] Strona główna z opisem problemu, metodyki, źródłami, ograniczeniami i linkiem do APK. Gotowe: problem, 3 kroki, fakty ze źródłami i wejście do `/o-projekcie` (metodyka, ograniczenia, źródła). Brakuje tylko linku do APK.
+- [x] Strona główna z opisem problemu, metodyki, źródłami, ograniczeniami i linkiem do APK: problem, 3 kroki, fakty ze źródłami, wejście do `/o-projekcie` (metodyka, ograniczenia, źródła) i przycisk "Pobierz aplikację" z kodem QR (strona wydań aplikacji).
 - [x] Panel: logowanie i 3 widoki (luki cienia, dostępność miejsc chłodu, kandydaci). Dane panelu to nasze obliczenia z etykietą "szacunek", symulowane są tylko baner upału i ranking dzielnic.
 - [x] Wyniki tras referencyjnych (dystans, czas, udział słońca, data i godzina obliczenia): tabele w Aneksie A na końcu tego dokumentu.
 - [ ] Zrzuty ekranu: strona główna, mapa z warstwami, wynik trasy, miejsca chłodu, panel (luki cienia, kandydaci).
