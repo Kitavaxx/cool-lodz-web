@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 're
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth'
 import { LngLatBounds } from 'maplibre-gl'
 import type { Feature, LineString, Point } from 'geojson'
-import { Alert, Box, Button, Card, CardActionArea, Chip, CircularProgress, IconButton, LinearProgress, Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardActionArea, Chip, CircularProgress, IconButton, LinearProgress, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { AcUnit, AddLocationAlt, AdminPanelSettings, Check, ContentCopy, WbSunny } from '@mui/icons-material'
 import { auth } from './firebase'
 import { polishDays } from './hours'
@@ -118,7 +118,7 @@ function Kpis({ onPick }: { onPick: (tab: number) => void }) {
   ]
   return (
     // A row you swipe on phones, so the three numbers do not push the tabs off the first screen
-    <Box sx={{ display: { xs: 'flex', md: 'grid' }, gridTemplateColumns: { md: 'repeat(3, 1fr)' }, gap: 2, mt: 3, overflowX: { xs: 'auto', md: 'visible' }, scrollSnapType: 'x mandatory', scrollPaddingLeft: 16, scrollbarWidth: 'none', mx: { xs: -2, md: 0 }, px: { xs: 2, md: 0 }, pb: { xs: 1.5, md: 0 }, '& > *': { flex: { xs: '0 0 82%', sm: '0 0 56%', md: 'initial' }, scrollSnapAlign: 'start' } }}>
+    <Box sx={{ display: { xs: 'flex', sm: 'grid' }, gridTemplateColumns: { sm: 'repeat(auto-fit, minmax(260px, 1fr))' }, gap: 2, mt: 3, overflowX: { xs: 'auto', sm: 'visible' }, scrollSnapType: 'x mandatory', scrollPaddingLeft: 16, scrollbarWidth: 'none', '@media (hover: hover)': { scrollbarWidth: 'thin' }, mx: { xs: -2, sm: 0 }, px: { xs: 2, sm: 0 }, pb: { xs: 1.5, sm: 0 }, '& > *': { flex: { xs: '0 0 82%', sm: 'initial' }, scrollSnapAlign: 'start' } }}>
       {kpis.map(({ tab, color, icon, value, label, note, bar }) => (
         <Card key={tab} elevation={0} sx={{ ...card, transition: 'transform .2s, box-shadow .2s', '&:hover': { transform: 'translateY(-3px)', boxShadow: `0 14px 32px ${color}33` } }}>
           <CardActionArea onClick={() => onPick(tab)} sx={{ p: 2.5, height: '100%', display: 'flex', alignItems: 'flex-start', gap: 2 }}>
@@ -191,20 +191,22 @@ export default function Panel() {
         <Button variant="outlined" size="small" onClick={() => signOut(auth!)}>Wyloguj</Button>
       </PageHeader>
       <Kpis onPick={setTab} />
-      <Tabs
-        value={tab}
-        onChange={(_, t) => setTab(t)}
-        variant="scrollable"
-        scrollButtons={false}
-        sx={{
-          mt: 3, minHeight: 0,
-          '& .MuiTabs-indicator': { display: 'none' },
-          '& .MuiTabs-flexContainer': { gap: 1 },
-          '& .MuiTab-root': { minHeight: 44, borderRadius: 999, px: 2.5, bgcolor: 'action.hover', color: 'text.secondary', fontWeight: 700, '&.Mui-selected': { bgcolor: 'primary.main', color: 'common.white' } },
-        }}
-      >
-        {views.map(({ label, icon }) => <Tab key={label} icon={icon} iconPosition="start" label={label} />)}
-      </Tabs>
+      {/* Plain buttons that wrap onto another line on a narrow screen: a scrolling strip cannot be moved with a mouse */}
+      <Box role="tablist" aria-label="Widoki panelu" sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 3 }}>
+        {views.map(({ label, icon }, i) => (
+          <Button
+            key={label}
+            role="tab"
+            aria-selected={tab === i}
+            startIcon={icon}
+            onClick={() => setTab(i)}
+            variant={tab === i ? 'contained' : 'text'}
+            sx={{ minHeight: 44, px: 2.5, fontWeight: 700, ...(tab === i ? {} : { bgcolor: 'action.hover', color: 'text.secondary' }) }}
+          >
+            {label}
+          </Button>
+        ))}
+      </Box>
       <Box sx={{ mt: 3 }}>{views[tab].view}</Box>
     </Box>
   )
