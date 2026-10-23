@@ -128,7 +128,7 @@ export default function App() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
       <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Toolbar sx={{ gap: 2 }}>
+        <Toolbar sx={{ gap: 2, pl: { xs: 2.4, sm: 3.6 } }}>
           {/* The logo is the link to the start page; the name stays as text for screen readers */}
           <Box component={Link} to="/" aria-label="Cool Łódź, strona główna" sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <Box component="img" src="/img/logo.png" alt="" width={268} height={182} sx={{ display: 'block', height: { xs: 44, md: 52 }, width: 'auto', my: 0.5 }} />
