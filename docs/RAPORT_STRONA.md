@@ -13,7 +13,7 @@ Punkty oznaczone ⚠️ uzupełnimy na koniec prac.
 - **5 stron obowiązkowych** (strona główna, mapa, trasa, miejsca chłodu, panel miasta) i **3 dodatkowe** (trasy turystyczne, bezpieczeństwo w upał, ranking) są zbudowane. Dodatkowo `/o-projekcie` zbiera metodykę, źródła i ograniczenia.
 - Technologia: **React 19 + Vite + TypeScript, MUI, MapLibre GL JS** (kafelki OpenFreeMap), logowanie **Firebase Auth**, hosting **Firebase Hosting**, wdrożenie przez GitHub Actions (merge do `main` publikuje stronę, pull request tworzy adres podglądu).
 - **Bez serwera.** Cień, trasy i dane panelu liczymy wcześniej w Pythonie (`scripts/`) i publikujemy jako pliki GeoJSON/JSON w `public/data`. Strona tylko je wyświetla.
-- Obszar: **Śródmieście** (prostokąt 19,43 do 19,48 E i 51,74 do 51,78 N). To plan awaryjny z briefu, mówimy to wprost na stronie. Mapy nie pozwalają wyjść poza granice Łodzi.
+- Obszar: **cień i miejsca na mapie obejmują całą Łódź** (ok. 190 tys. odcinków sieci pieszej i 158 tys. budynków). **Trasy, panel miasta i trasy turystyczne zostają w Śródmieściu** (prostokąt 19,43 do 19,48 E i 51,74 do 51,78 N). Poza centrum cień jest mniej dokładny i mówimy o tym wprost na mapie. Mapy nie pozwalają wyjść poza granice Łodzi.
 - Cień liczymy **uproszczonym modelem** (rzut cienia obrysów budynków z OSM). Dokładność oznaczamy w interfejsie jako **"szacunek"**.
 
 ---
@@ -27,7 +27,7 @@ Punkty oznaczone ⚠️ uzupełnimy na koniec prac.
 | Osobny projekt Firebase strony (spec 0.3) | **Wspólny projekt Firebase ze stroną i aplikacją** | Decyzja z 20.10.2026: możliwość późniejszej synchronizacji. Strona używa tylko Auth |
 | Biblioteka interfejsu nieokreślona | MUI z ikonami Material | Zgodność wizualna z aplikacją mobilną (Material 3) |
 | Wariant "kompromis": λ ok. 1 | **λ = 0,3** | Przy λ = 1 kompromis w praktyce pokrywał się z trasą zacienioną (kalibracja na prawdziwej sieci) |
-| Cała Łódź | Śródmieście | Plan awaryjny z briefu |
+| Cała Łódź | **Cień i miejsca: cała Łódź. Trasy i panel: Śródmieście** | Cień dla całego miasta daje pełniejszy obraz na demie. Trasy i panel w centrum, bo "najbardziej nasłonecznione ulice" dla całego miasta wskazywałyby drogi poza zabudową |
 | Cień: bryły 3D | Rzut cienia obrysu budynku (Shapely) | Prostsze, wystarczające dla zwartej zabudowy |
 | Cień co 30 min | 5 godzin (10, 12, 14, 16, 18), jeden dzień (15.07.2026) | Wystarcza do pokazania zmian w ciągu dnia |
 | Trasa z dowolnego A do B | 4 gotowe trasy, policzone wcześniej | Gwarantowany wynik na demie |
@@ -62,7 +62,8 @@ Python (lokalnie, scripts/)
         |
         v
 Pliki statyczne (public/data)
-  edges.geojson, routes.geojson, places.geojson,
+  tiles/ (cień całego miasta), shares.json, reach.json, edges.geojson (Śródmieście),
+  routes.geojson, places.geojson,
   panel_gaps.json, panel_candidates.json,
   tours.json, ranking.json, lodz.geojson
         |
@@ -106,14 +107,17 @@ Dla każdego wariantu zapisujemy geometrię, dystans, czas (4,5 km/h), udział s
 
 ### 5.3. Miejsca
 
-- **Woda i ławki:** z OSM (`amenity=drinking_water`, `amenity=bench`), źródło "OpenStreetMap". W danych: 18 punktów wody i 2777 ławek.
-- **Miejsca chłodu:** 33 miejsca (biblioteki, domy kultury, galerie, urzędy). Dane z OSM, bez ręcznej weryfikacji, więc na stronie są oznaczone jako niezweryfikowane. Dla 10 miejsc bez adresu w OSM (m.in. budynki EC1, galerie i muzea) adresy dodaliśmy ręcznie w `scripts/places.py` (`ADDRESS_FIXES`), a budynki EC1 mają wspólny adres Targowa 1/3. Źródło tych miejsc pozostaje "OpenStreetMap".
+- **Woda i ławki:** z OSM (`amenity=drinking_water`, `amenity=bench`), źródło "OpenStreetMap". W danych dla całej Łodzi: 49 punktów wody i 7518 ławek (punkty spoza granicy miasta, np. z Zgierza i Konstantynowa Łódzkiego, są odrzucane).
+- **Miejsca chłodu:** 91 miejsc w całej Łodzi (81 z OSM: biblioteki, domy kultury, muzea, galerie, oraz 10 symulowanych "Miejsce testowe 1–10", zawsze otwartych, do sprawdzania filtra "Otwarte teraz"). Dane z OSM, bez ręcznej weryfikacji, więc na stronie są oznaczone jako niezweryfikowane. Dla 10 miejsc bez adresu w OSM (m.in. budynki EC1, galerie i muzea) adresy dodaliśmy ręcznie w `scripts/places.py` (`ADDRESS_FIXES`), a budynki EC1 mają wspólny adres Targowa 1/3. Źródło tych miejsc pozostaje "OpenStreetMap".
 
 ### 5.4. Pliki
 
 | Plik | Zawartość |
 | --- | --- |
-| `edges.geojson` | 25 945 odcinków sieci pieszej z udziałem słońca dla 5 godzin |
+| `tiles/{z}/{x}/{y}.pbf` | Cień całej Łodzi jako kafelki wektorowe (812 kafelków, 12,6 MB): 175 tys. odcinków sieci pieszej z udziałem słońca dla 5 godzin. Plik GeoJSON całego miasta ma 39 MB, więc przeglądarka czyta kafelki |
+| `shares.json` | Udział długości ulic w cieniu, półcieniu i słońcu dla każdej godziny (pasek na `/mapa`) |
+| `reach.json` | Udział długości ulic w całej Łodzi dalej niż 400 m od najbliższego miejsca chłodu (ok. 75 %), do panelu. Odległość każdego odcinka jest w kafelkach (pole `d`) |
+| `edges.geojson` | 25 945 odcinków sieci pieszej w Śródmieściu z udziałem słońca dla 5 godzin (czyta go panel) |
 | `routes.geojson` | 4 trasy × 5 godzin × 3 warianty z parametrami |
 | `places.geojson` | Miejsca chłodu, woda, ławki (`type`, `name`, `address`, `hours`, `source`, `verified`) |
 | `panel_gaps.json` | 20 odcinków z największym udziałem słońca o 14:00 |
@@ -150,7 +154,7 @@ Etykieta "dane symulowane" jest więc tylko przy rankingu i banerze, bo tylko ta
 | --- | --- |
 | `/` | Krótka strona startowa: hasło i przycisk "Otwórz mapę" z podglądem trasy, baner upału (przykład, "dane symulowane"), 3 kroki, 3 fakty ze źródłami, karta pobrania APK, wejście do panelu dla miasta. Zdjęcie parku w nagłówku i rozmyte zdjęcie Piotrkowskiej w tle z efektem paralaksy (tylko na stronie głównej, bez ruchu przy włączonym "ogranicz animacje"). Do czasu publikacji APK karta pokazuje "APK wkrótce" ⚠️ |
 | `/o-projekcie` | Problem ze źródłami, metodyka, ograniczenia, źródła danych |
-| `/mapa` | Mapa pełnoekranowa. Cień (odcinki kolorowane według udziału słońca, trzy przedziały: Cień, Półcień, Słońce), miejsca chłodu, woda, ławki. "Cisza" i "Powietrze" jako nieaktywne przyciski "w przygotowaniu". Przełącznik godziny 10 do 18, legenda z procentami, etykieta dokładności, atrybucja OSM |
+| `/mapa` | Mapa pełnoekranowa, otwiera się na całej Łodzi. Cień (odcinki kolorowane według udziału słońca, trzy przedziały: Cień, Półcień, Słońce; pod przyciskami podpis, że poza centrum wyniki mogą być mniej dokładne), miejsca chłodu, woda, ławki. "Cisza" i "Powietrze" jako nieaktywne przyciski "w przygotowaniu". Przełącznik godziny 10 do 18, legenda z procentami, etykieta dokładności, atrybucja OSM |
 | `/trasa` | Wybór trasy i godziny, trzy warianty na mapie w różnych kolorach i stylach linii, karta porównania (dystans, czas, udział słońca, ile dłużej niż najkrótsza), miejsca chłodu i woda w promieniu 200 m od trasy |
 | `/miejsca-chlodu` | Lista i mini-mapa, filtr "Otwarte teraz" (czas Europe/Warsaw), najbliższa woda (odległość w linii prostej, po wybraniu miejsca przerywana linia na mapie do tej wody, punkty wody są klikalne), "Pokaż na mapie", etykieta weryfikacji |
 | `/panel` | Logowanie z krótkim opisem oferty dla miasta, po zalogowaniu 3 widoki (sekcja 7). W menu jako "Dla miasta" (w "Więcej") i linkowany ze strony głównej |
@@ -186,7 +190,7 @@ W demie pliki panelu leżą w `public/data/`, więc każdy, kto zna adres (np. `
 | Widok | Co pokazuje |
 | --- | --- |
 | **Luki cienia** | 20 odcinków z największym udziałem słońca o 14:00, na mapie i w tabeli |
-| **Dostępność miejsc chłodu** | Koła 400 m wokół miejsc chłodu, obszar poza nimi jako "biała plama" |
+| **Dostępność miejsc chłodu** | Dla całej Łodzi: koła 400 m wokół miejsc chłodu, ulice poza nimi jako "biała plama" (czerwone linie). Ok. 75 % długości ulic miasta leży dalej niż 400 m od miejsca chłodu |
 | **Kandydaci na nowe miejsca chłodu** | Tabela budynków publicznych z wynikiem i rozbiciem na kryteria (brak cienia w promieniu 200 m, odległość do najbliższego miejsca chłodu, godziny otwarcia latem), wagi widoczne w tabeli. Wynik opisany jako "rekomendacja, nie decyzja" |
 
 ---
@@ -211,8 +215,10 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 ## 9. Ograniczenia (do publikacji)
 
 - Cień liczony tylko z obrysów budynków z szacowanymi wysokościami, bez drzew. Etykieta: "szacunek".
+- Cień obejmuje całą Łódź, ale poza centrum jest mniej dokładny: więcej domów jednorodzinnych i obiektów przemysłowych z przyjętą wysokością 12 m oraz więcej otwartego terenu, gdzie większość cienia dałyby drzewa. W całym mieście ok. 88 % długości ulic jest o 14:00 w słońcu (prawie wszystko to chodniki i ścieżki), czyli więcej niż w centrum, bo nie liczymy drzew.
 - Jeden letni dzień (15.07.2026) i 5 godzin.
-- 4 trasy policzone wcześniej, bez wyboru dowolnych punktów A i B.
+- 4 trasy policzone wcześniej w Śródmieściu, bez wyboru dowolnych punktów A i B. W panelu miasta tylko widok "Dostępność miejsc chłodu" obejmuje całą Łódź, a luki cienia i kandydaci dotyczą Śródmieścia. Trasy turystyczne także tylko Śródmieścia.
+- Ulice, które mapa rysuje przy widoku całego miasta, dostają udział słońca jako średnią z chodników i ścieżek w promieniu 25 m. Sam środek jezdni prawie nigdy nie leży w cieniu budynków (o 14:00 98,6 % długości w słońcu), a mapa pokazuje to, co czeka pieszego. W lipcu o 14:00 cienia jest mało na całej mapie, o 18:00 wyraźnie więcej.
 - Logowanie do panelu służy tylko do demonstracji. Dane panelu to pliki statyczne dostępne bez logowania, a w wersji docelowej będą chronione (sekcja 7.2).
 - Strona i aplikacja mają wspólną pulę kont Firebase Auth i w demie nie ma sprawdzania roli moderatora. Każde zalogowane konto widzi panel.
 - Baner upału i ranking dzielnic używają danych symulowanych.
@@ -226,7 +232,7 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 1. Przenieść dane panelu do Firestore z regułami dostępu dla roli moderatora (custom claim lub lista dozwolonych adresów e-mail) i dodać sprawdzenie roli w panelu.
 2. Rozdzielić konta moderatorów od kont użytkowników aplikacji (rola moderatora zamiast wspólnej puli kont).
 3. Poprawić model cienia: wysokości budynków z Geoportalu (LoD1) i drzewa, zmiana etykiety na "model".
-4. Dowolne punkty A i B, dłuższy dzień obliczeń (co 30 minut) i wybór daty (kolejne dni lata, a nie tylko 15.07).
+4. Dowolne punkty A i B, dłuższy dzień obliczeń (co 30 minut) i wybór daty (kolejne dni lata, a nie tylko 15.07). Pomysł: geometria raz plus mały plik z cieniem na każdą datę (ok. 400 KB), liczone w nocy (szacunkowo kilka godzin na całe lato). Trasy i panel na całą Łódź.
 5. Alerty z IMGW zamiast statycznego przykładu, profile komfortu, wersja angielska, PWA.
 6. Prawdziwy ranking dzielnic z danych aplikacji (po połączeniu danych strony i aplikacji w jednym projekcie).
 7. Statystyki odwiedzin panelu, scenariusz inwestycji, eksport, `/zgloszenia`.

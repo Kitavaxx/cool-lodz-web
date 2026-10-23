@@ -12,7 +12,8 @@ setWorkerUrl(workerUrl)
 // Data files carry accuracy and computed_at next to the features or items (SPEC 5)
 export type Data<T = FeatureCollection> = T & { accuracy: string; computed_at: string }
 
-export const bounds: [number, number, number, number] = [19.43, 51.74, 19.48, 51.78]
+export const bounds: [number, number, number, number] = [19.43, 51.74, 19.48, 51.78] // Śródmieście: routes, panel
+export const cityBounds: [number, number, number, number] = [19.321, 51.686, 19.64, 51.86] // the whole city: shade tiles
 export const hours = [10, 12, 14, 16, 18]
 export const pct = (s: number) => `${Math.round(s * 100)} %`
 
@@ -29,8 +30,9 @@ export const steps = [
   { color: '#f4b942', label: '34–66 %' },
   { color: '#e4572e', label: '67–100 %' },
 ]
+// The shade tiles hold the sun share as whole percents (0–100)
 export const sunColor = (hour: number) =>
-  ['step', ['get', `s${hour}`], steps[0].color, 0.335, steps[1].color, 0.665, steps[2].color] as ExpressionSpecification
+  ['step', ['get', `s${hour}`], steps[0].color, 33.5, steps[1].color, 66.5, steps[2].color] as ExpressionSpecification
 
 // icon: 24×24 SVG path (snowflake and drop from Material Icons, bench drawn by hand)
 export const placeTypes = [
@@ -98,12 +100,14 @@ async function maskOutsideCity(map: MapLibre) {
   map.addLayer({ id: 'city-line', type: 'line', source: 'city', paint: { 'line-color': '#0e5f74', 'line-width': 2, 'line-opacity': 0.5 } }, labels)
 }
 
-// Base map of Śródmieście; the map is returned once its style (with the city mask and place icons) has loaded
-export function useMap() {
+// Base map, opening on `start` (Śródmieście by default, the whole city for /mapa); the map is returned once its style
+// (with the city mask and place icons) has loaded
+export function useMap(start: [number, number, number, number] = bounds) {
   const ref = useRef<HTMLDivElement>(null)
+  const first = useRef(start) // the map opens once, a later change of `start` does not move it
   const [map, setMap] = useState<MapLibre>()
   useEffect(() => {
-    const m = new MapLibre({ container: ref.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds, maxBounds: city })
+    const m = new MapLibre({ container: ref.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds: first.current, maxBounds: city })
     // On narrow screens MapLibre opens the attribution text as soon as the style data arrives, over the panels. Fold it to the "i" button
     // (a tap still opens it). Its own listeners run before ours in the same event, so it never gets painted open. Only until load.
     const fold = () => m.getContainer().querySelector('.maplibregl-ctrl-attrib.maplibregl-compact')?.classList.remove('maplibregl-compact-show')

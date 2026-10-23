@@ -2,6 +2,12 @@
   "hosting": {
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    "headers": [
+      { "source": "/data/tiles/**", "headers": [{ "key": "Content-Type", "value": "application/x-protobuf" }] }
+    ],
+    "rewrites": [
+      { "source": "/data/tiles/**", "destination": "/data/tiles/empty.pbf" },
+      { "source": "**", "destination": "/index.html" }
+    ]
   }
 }

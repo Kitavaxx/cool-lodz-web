@@ -1,25 +1,26 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import type { ExpressionSpecification, MapMouseEvent } from 'maplibre-gl'
-import type { LineString } from 'geojson'
 import { Alert, Box, Chip, Collapse, IconButton, Paper, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material'
 import { BeachAccess, FilterDrama, KeyboardArrowDown, KeyboardArrowUp, Visibility, VisibilityOff, WbSunny } from '@mui/icons-material'
-import { hourPills, hours, metres, pct, placeIcon, placeLines, placeTypes, showPopup, steps, sunColor, useData, useMap } from './shared'
+import { cityBounds, hourPills, hours, pct, placeIcon, placeLines, placeTypes, showPopup, steps, sunColor, useData, useMap } from './shared'
 
 const placeLayers = placeTypes.map(({ type }) => `places-${type}`)
 
-// Sun-share ranges the user switches on one by one; cut-offs match the colour steps
+// Sun-share ranges the user switches on one by one, in whole percents like the shade tiles; cut-offs match the colour steps
 const ranges = [
-  { name: 'Cień', cut: [0, 0.335], Icon: BeachAccess },
-  { name: 'Półcień', cut: [0.335, 0.665], Icon: FilterDrama },
-  { name: 'Słońce', cut: [0.665, 1.01], Icon: WbSunny },
+  { name: 'Cień', cut: [0, 33.5], Icon: BeachAccess },
+  { name: 'Półcień', cut: [33.5, 66.5], Icon: FilterDrama },
+  { name: 'Słońce', cut: [66.5, 101], Icon: WbSunny },
 ]
 const inRange = (hour: number, i: number): ExpressionSpecification =>
   ['all', ['>=', ['get', `s${hour}`], ranges[i].cut[0]], ['<', ['get', `s${hour}`], ranges[i].cut[1]]]
 
+type Shares = { items: { hour: number; shares: number[] }[] }
+
 export default function Mapa() {
-  const [container, map] = useMap()
-  const edges = useData('/data/edges.geojson')
+  const [container, map] = useMap(cityBounds)
+  const shareData = useData<Shares>('/data/shares.json') // share of street length per range and hour, worked out with the tiles
   const places = useData('/data/places.geojson')
   const [hour, setHour] = useState(14)
   const [picked, setPicked] = useState<number[]>([]) // no streets coloured until the user picks a range
@@ -28,33 +29,24 @@ export default function Mapa() {
   const [shown, setShown] = useState<Record<string, boolean>>({ cool: true, water: true, bench: false })  // thousands of benches, opt-in
   const placeName = useSearchParams()[0].get('place')
 
-  // Share of street length in each range at this hour, for the bar above the range buttons
-  const lengths = useMemo(() => edges?.features.map((f) => {
-    const c = (f.geometry as LineString).coordinates
-    return c.slice(1).reduce((sum, p, i) => sum + metres(c[i], p), 0)
-  }), [edges])
-  const shares = useMemo(() => {
-    if (!edges || !lengths) return
-    const sum = [0, 0, 0]
-    edges.features.forEach((f, i) => {
-      const s = f.properties![`s${hour}`]
-      sum[ranges.findIndex(({ cut }) => s >= cut[0] && s < cut[1])] += lengths[i]
-    })
-    const total = sum[0] + sum[1] + sum[2]
-    return sum.map((x) => x / total)
-  }, [edges, lengths, hour])
+  const shares = shareData?.items.find((i) => i.hour === hour)?.shares // for the bar above the range buttons
 
+  // The whole city's walking network comes as vector tiles (scripts/tiles.py): the GeoJSON would be far too big
   useEffect(() => {
-    if (!map || !edges) return
+    if (!map) return
     if (!map.getSource('edges')) {
-      map.addSource('edges', { type: 'geojson', data: edges })
+      map.addSource('edges', { type: 'vector', tiles: [`${location.origin}/data/tiles/{z}/{x}/{y}.pbf`], minzoom: 9, maxzoom: 15 })
       // Keep segments under the points if places loaded first
-      map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: { 'line-cap': 'round' }, paint: { 'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 15, 2.5, 17, 6] } }, map.getLayer('places-bench') ? 'places-bench' : undefined)
+      map.addLayer({
+        id: 'edges', type: 'line', source: 'edges', 'source-layer': 'edges', layout: { 'line-cap': 'round' },
+        paint: { 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.4, 12, 2.2, 14, 2.4, 15, 2.8, 17, 6] }, // thick at city zoom, or a few shaded streets get lost
+      }, map.getLayer('places-bench') ? 'places-bench' : undefined)
     }
     map.setPaintProperty('edges', 'line-color', sunColor(hour))
     map.setLayoutProperty('edges', 'visibility', picked.length ? 'visible' : 'none')
-    map.setFilter('edges', ['any', ...picked.map((i) => inRange(hour, i))])
-  }, [map, edges, hour, picked])
+    // Opacity, not a filter: a new filter makes MapLibre re-parse every tile of the city, which is slow and left the streets blank for a moment
+    map.setPaintProperty('edges', 'line-opacity', ['case', ['any', ...picked.map((i) => inRange(hour, i))], 1, 0] as ExpressionSpecification)
+  }, [map, hour, picked])
 
   useEffect(() => {
     if (!map || !places) return
@@ -83,11 +75,11 @@ export default function Mapa() {
       const f = map.queryRenderedFeatures([[x - 6, y - 6], [x + 6, y + 6]], { layers })[0]
       if (!f) return
       const p = f.properties
-      showPopup(map, e.lngLat, f.layer.id === 'edges' ? [`${pct(p[`s${hour}`])} w słońcu`, `o ${hour}:00 · ${edges?.accuracy}`] : placeLines(p))
+      showPopup(map, e.lngLat, f.layer.id === 'edges' ? [`${p[`s${hour}`]} % w słońcu`, `o ${hour}:00 · ${shareData?.accuracy}`] : placeLines(p))
     }
     map.on('click', onClick)
     return () => void map.off('click', onClick)
-  }, [map, edges, hour])
+  }, [map, shareData, hour])
 
   // /mapa?place=<name>, linked from /miejsca-chlodu
   useEffect(() => {
@@ -128,8 +120,7 @@ export default function Mapa() {
       </Paper>
       {/* The bottom bar is outside the map box, so the panel only needs a small margin */}
       <Paper sx={{ position: 'absolute', bottom: { xs: 8, sm: 32 }, left: { xs: 8, sm: 16 }, right: { xs: 8, sm: 'auto' }, p: { xs: 1, sm: 1.5 }, width: { sm: 340 } }}>
-        {edges === null ? <Alert severity="warning">Brak danych</Alert> : (
-          <>
+        <>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <WbSunny sx={{ color: steps[1].color }} />
               <Typography sx={{ fontWeight: 700, flex: 1 }}>Słońce na ulicach · {hour}:00</Typography>
@@ -148,7 +139,7 @@ export default function Mapa() {
             {/* How much of the street length falls in each range at this hour */}
             <Box sx={{ display: 'flex', gap: '3px', height: 8, mt: 1, borderRadius: 4, overflow: 'hidden', bgcolor: 'action.hover' }}>
               {shares?.map((share, i) => (
-                <Tooltip key={i} title={`${ranges[i].name}: ${pct(share)} długości ulic (${edges?.accuracy})`}>
+                <Tooltip key={i} title={`${ranges[i].name}: ${pct(share)} długości ulic (${shareData?.accuracy})`}>
                   <Box sx={{ width: `${share * 100}%`, bgcolor: steps[i].color, opacity: !picked.length || picked.includes(i) ? 1 : 0.3, transition: 'all .3s' }} />
                 </Tooltip>
               ))}
@@ -170,9 +161,11 @@ export default function Mapa() {
                 )
               })}
             </ToggleButtonGroup>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              Szacunek z budynków OSM, bez drzew. Poza centrum miasta wyniki mogą być mniej dokładne.
+            </Typography>
             </Collapse>
-          </>
-        )}
+        </>
       </Paper>
     </Box>
   )

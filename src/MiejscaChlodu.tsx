@@ -5,7 +5,7 @@ import type { Feature, Point } from 'geojson'
 import { Alert, Box, Card, CardActionArea, Chip, CircularProgress, FormControlLabel, IconButton, Stack, Switch, Tooltip, Typography } from '@mui/material'
 import { AccessTime, AcUnit, Map, Place, WaterDrop } from '@mui/icons-material'
 import { isOpen, rangesOn, warsawNow } from './hours'
-import { metres, placeIcon, placeLines, showPopup, useData, useMap } from './shared'
+import { cityBounds, metres, placeIcon, placeLines, showPopup, useData, useMap } from './shared'
 import { PageHeader, Ring } from './ui'
 
 const dayNames = ['pn', 'wt', 'śr', 'czw', 'pt', 'sob', 'nd']
@@ -15,7 +15,7 @@ const green = '#2e7d32'
 
 export default function MiejscaChlodu() {
   const places = useData('/data/places.geojson')
-  const [container, map] = useMap()
+  const [container, map] = useMap(cityBounds)
   const [now, setNow] = useState(warsawNow)
   const [onlyOpen, setOnlyOpen] = useState(false)
   const [selected, setSelected] = useState('')

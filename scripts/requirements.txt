@@ -2,3 +2,4 @@ osmnx
 shapely
 geopandas
 astral
+mapbox-vector-tile

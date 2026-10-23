@@ -70,17 +70,32 @@ python -m venv .venv
 .venv\Scripts\activate        # Windows (macOS/Linux: source .venv/bin/activate)
 pip install -r scripts/requirements.txt
 python scripts/places.py      # run from the repo root; OSM downloads are cached in cache/
-python scripts/shade.py       # ~3–5 min: buildings, sun position, sun share per segment
+python scripts/shade.py       # ~3–5 min for Śródmieście: buildings, sun position, sun share per segment
 python scripts/routes.py      # needs shade.py first: 4 routes × 5 hours × 3 variants, and 3 tourist routes
 python scripts/panel.py       # needs shade.py first: shade gaps and candidates
 python scripts/boundary.py    # Łódź city boundary for the map mask
 ```
 
+The default area is Śródmieście (routes, panel). The map shows the **whole city**, so shade tiles and places are built for the city bbox. Two variables switch the area: `COOL_BBOX="W,S,E,N"` and `COOL_OUT=<folder>`. **Always set `COOL_OUT` for a city run**, or the 39 MB city `edges.geojson` replaces the Śródmieście one the panel reads.
+
+```sh
+CITY="19.321,51.686,19.64,51.86"
+COOL_BBOX=$CITY COOL_OUT=tmp/city python scripts/shade.py   # ~18 min on 12 cores, writes tmp/city/edges.geojson (39 MB)
+COOL_OUT=tmp/city python scripts/tiles.py                   # tmp/city/tiles/ and tmp/city/shares.json, ~15 s
+COOL_BBOX=$CITY python scripts/places.py                    # places of the whole city into public/data
+# then copy tmp/city/tiles to public/data/tiles and tmp/city/shares.json to public/data/
+```
+
+The public Overpass server can answer "retry later" when two downloads run at once. Run `places.py` again after a minute: finished queries come from the cache.
+
 | File | Contents | Script |
 | --- | --- | --- |
-| `edges.geojson` | Walking network segments (sidewalks included) with sun share for 5 hours, from building shadows | `shade.py` |
+| `edges.geojson` | Śródmieście walking network (sidewalks included) with sun share for 5 hours, from building shadows. The site no longer reads it (the tiles replaced it); `routes.py` and `panel.py` need a default-area run of `shade.py` first | `shade.py` |
+| `tiles/{z}/{x}/{y}.pbf` | The same for the whole city as vector tiles (layer `edges`, `s10`…`s18` in whole percents), zoom 9–15. `tiles/empty.pbf` is the empty tile Firebase serves for missing ones | `tiles.py` |
+| `shares.json` | Share of street length in shade, half-shade and sun per hour, for the bar on `/mapa` | `tiles.py` |
+| `reach.json` | Share of street length in the whole city farther than 400 m from every cool place (the panel's reach view). Each tile segment also carries `d`, its distance to the nearest cool place | `tiles.py` |
 | `routes.geojson` | 4 routes × 5 hours × 3 variants | `routes.py` |
-| `places.geojson` | Cool places (OSM libraries, culture centres, museums, galleries with known opening hours), drinking water, benches | `places.py` |
+| `places.geojson` | Cool places (OSM libraries, culture centres, museums, galleries with known opening hours, plus 10 simulated always-open ones), drinking water, benches, for the whole city | `places.py` |
 | `lodz.geojson` | Łódź city boundary: maps stay inside it and dim the outside | `boundary.py` |
 | `ranking.json` | Simulated district ranking, written by hand (no script) | |
 | `tours.json` | 3 tourist routes through Manufaktura, Piotrkowska, EC1 and Księży Młyn (shaded variant at 14:00) | `routes.py` |
