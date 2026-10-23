@@ -174,7 +174,7 @@ export default function Trasa() {
 
         <Box
           ref={container}
-          sx={{ order: { xs: -1, md: 0 }, gridRow: { xs: 'auto', md: '1' }, gridColumn: { md: 2 }, height: { xs: 340, md: 'calc(100dvh - 200px)' }, minHeight: 340, position: { md: 'sticky' }, top: 0, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }}
+          sx={{ order: { xs: -1, md: 0 }, gridRow: { xs: 'auto', md: '1' }, gridColumn: { md: 2 }, height: { xs: 'clamp(340px, 58dvh, 600px)', md: 'calc(100dvh - 200px)' }, minHeight: 340, position: { md: 'sticky' }, top: 0, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }}
         />
       </Box>
     </Box>

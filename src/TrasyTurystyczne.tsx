@@ -75,7 +75,7 @@ export default function TrasyTurystyczne() {
       <Box sx={{ display: tours ? 'grid' : 'none', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: '440px minmax(0, 1fr)' }, gap: 2, mt: 3, alignItems: 'start' }}>
         <Box
           ref={container}
-          sx={{ order: { md: 2 }, height: { xs: 340, md: 'calc(100dvh - 200px)' }, minHeight: 340, position: { md: 'sticky' }, top: 0, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }}
+          sx={{ order: { md: 2 }, height: { xs: 'clamp(340px, 58dvh, 600px)', md: 'calc(100dvh - 200px)' }, minHeight: 340, position: { md: 'sticky' }, top: 0, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }}
         />
         <Stack spacing={2}>
           {tours?.items.map((t) => {
