@@ -24,6 +24,20 @@ ADDRESS_FIXES = {
     "Muzeum Kanału „Dętka”": "Plac Wolności 10",
     "Muzeum Sportu i Turystyki": "Księdza Ignacego Skorupki 21",
 }
+# Simulated always-open cool places in the centre, so the "open now" filter can be tried at any hour. They are not in OSM,
+# and the file is rebuilt from OSM, so they are added here (name, address, lon, lat).
+SIMULATED = [
+    ("Miejsce testowe 1", "Piotrkowska 12", 19.456, 51.7745),
+    ("Miejsce testowe 2", "Piotrkowska 74", 19.4573, 51.769),
+    ("Miejsce testowe 3", "Piotrkowska 138", 19.459, 51.762),
+    ("Miejsce testowe 4", "Piotrkowska 203", 19.4602, 51.7565),
+    ("Miejsce testowe 5", "Zielona 8", 19.4495, 51.771),
+    ("Miejsce testowe 6", "Narutowicza 40", 19.465, 51.7712),
+    ("Miejsce testowe 7", "Kościuszki 50", 19.4525, 51.764),
+    ("Miejsce testowe 8", "Sienkiewicza 60", 19.464, 51.7655),
+    ("Miejsce testowe 9", "Traugutta 10", 19.461, 51.768),
+    ("Miejsce testowe 10", "Struga 22", 19.452, 51.76),
+]
 DAY = r"(Mo|Tu|We|Th|Fr|Sa|Su)(-(Mo|Tu|We|Th|Fr|Sa|Su))?"
 RULE = re.compile(rf"{DAY}(,{DAY})* \d\d:\d\d-\d\d:\d\d")
 OFF = re.compile(rf"{DAY}(,{DAY})* off")
@@ -88,6 +102,14 @@ def feature(type_: str, name: str, row) -> dict:
 def main():
     cool, _ = public_buildings()
     features = [feature("cool", row["name"], row) for _, row in cool.iterrows()]
+    features += [
+        {
+            "type": "Feature",
+            "properties": {"type": "cool", "name": name, "address": address, "hours": "Mo-Su 00:00-24:00", "source": "dane symulowane", "verified": False},
+            "geometry": {"type": "Point", "coordinates": [lon, lat]},
+        }
+        for name, address, lon, lat in SIMULATED
+    ]
     misc = fetch({"amenity": ["drinking_water", "bench"]})
     for _, row in misc.iterrows():
         if row["amenity"] == "drinking_water":

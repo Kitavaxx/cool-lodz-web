@@ -30,6 +30,16 @@ def sun(hour: int) -> tuple[float, float]:
     return azimuth(LODZ, t), elevation(LODZ, t)
 
 
+MAJOR = {"motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link"}
+STREETS = {"tertiary", "tertiary_link", "unclassified", "residential", "living_street"}
+
+
+def rank(highway) -> int:
+    """0 main roads, 1 ordinary streets, 2 footpaths, service roads and the rest. tiles.py shows the lower ranks at lower zooms."""
+    kinds = set(highway) if isinstance(highway, list) else {highway}
+    return 0 if kinds & MAJOR else 1 if kinds & STREETS else 2
+
+
 def heights(b) -> np.ndarray:
     """height tag, else building:levels × 3 m, else 12 m (4 storeys)."""
     num = lambda col: pd.to_numeric(b[col].astype(str).str.extract(r"([\d.]+)")[0], errors="coerce") if col in b else np.nan
@@ -56,6 +66,7 @@ def main():
     t0 = time.time()
     G = ox.graph_from_bbox(BBOX, network_type="walk")
     edges = ox.convert.graph_to_gdfs(G, nodes=False).to_crs(CRS)
+    edges["r"] = edges["highway"].map(rank)
     lines = edges.geometry.to_numpy()
     length = shapely.length(lines)
     print(f"{len(edges)} directed edges ({time.time() - t0:.0f} s)")
@@ -88,7 +99,7 @@ def main():
     features = [
         {
             "type": "Feature",
-            "properties": {"id": i, **{c: float(row[c]) for c in cols}},
+            "properties": {"id": i, "r": int(row["r"]), **{c: float(row[c]) for c in cols}},
             "geometry": {"type": "LineString", "coordinates": np.round(shapely.get_coordinates(g), 5).tolist()},
         }
         for i, ((_, row), g) in enumerate(zip(edges.iterrows(), geo))
