@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { FeatureCollection, LineString } from 'geojson'
 import { Box, Button, Card, CardActionArea, Chip, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
-import { AcUnit, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, WbSunny } from '@mui/icons-material'
+import { AcUnit, AddLocationAlt, AdminPanelSettings, Android, ArrowForward, DirectionsWalk, Info, KeyboardArrowDown, Map, WbSunny } from '@mui/icons-material'
+import type { SvgIconComponent } from '@mui/icons-material'
 import { QRCodeSVG } from 'qrcode.react'
 import { hourPills, hours, pct, useData } from './shared'
 import { GrowBar, HeatRows, Reveal, Stars } from './ui'
@@ -10,6 +11,13 @@ import { GrowBar, HeatRows, Reveal, Stars } from './ui'
 // The releases page of the mobile app, where the newest build has the APK. For now a page rather than a direct download
 // (agreed with the team); the direct link would be .../releases/latest/download/cool-lodz.apk. Empty: the card says "wkrótce"
 const apkUrl = 'https://github.com/mikita672/cool-lodz-app/releases'
+
+// The three views of the city panel, as chips on its card
+const panelViews: [SvgIconComponent, string][] = [
+  [WbSunny, 'Luki cienia'],
+  [AcUnit, 'Dostępność miejsc chłodu'],
+  [AddLocationAlt, 'Kandydaci na nowe miejsca'],
+]
 
 // One idea per card, each with a picture of the real thing (screenshots of the site, public/img); the long version lives on /o-projekcie
 const howTo = [
@@ -303,26 +311,25 @@ export default function Home() {
         <Title plain="Cool Łódź" accent="dla każdego" sub="Dla mieszkańców w telefonie, dla urzędników w panelu miasta." />
         <Box sx={{ display: 'grid', gap: { xs: 2.5, md: 4 }, gridTemplateColumns: { xs: '1fr', md: '7fr 5fr' }, mt: { xs: 5, md: 8 } }}>
           <Reveal>
-            {/* The city panel, with a real screenshot of it in a browser frame */}
+            {/* The city panel: a real screenshot filling the top of the card, and what the panel holds */}
             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '28px', overflow: 'hidden', bgcolor: v('card'), border: 1, borderColor: v('line') }}>
-              <Box sx={{ m: { xs: 2, md: 3 }, mb: 0, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: v('line'), bgcolor: v('surface'), boxShadow: '0 16px 40px rgb(0 0 0 / 0.14)' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1.5, py: 1, bgcolor: v('line') }}>
-                  {['#ee6a5e', '#f5be4f', '#61c554'].map((c) => <Box key={c} sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: c }} />)}
-                  <Typography variant="caption" sx={{ ml: 1.5, color: v('muted') }}>coollodz.web.app/panel</Typography>
-                </Box>
-                <Box sx={{ position: 'relative' }}>
-                  <Box component="img" src="/img/panel-reach.webp" alt="Panel miasta: ulice Łodzi dalej niż 400 m od miejsca chłodu na czerwono" loading="lazy" sx={{ display: 'block', width: '100%' }} />
-                  {reach && (
-                    <Chip icon={<AcUnit />} label={`${pct(reach.items[0].uncovered)} ulic dalej niż 400 m od miejsca chłodu`} sx={{ position: 'absolute', left: 12, bottom: 12, fontWeight: 700, bgcolor: 'rgb(255 255 255 / 0.92)', color: '#1b2a30', boxShadow: '0 4px 14px rgb(0 0 0 / 0.2)', '& .MuiChip-icon': { color: '#e4572e' } }} />
-                  )}
-                </Box>
+              <Box sx={{ position: 'relative', aspectRatio: { xs: '4 / 3', md: '16 / 9' }, overflow: 'hidden', bgcolor: v('line') }}>
+                <Box component="img" src="/img/panel-reach.webp" alt="Panel miasta: ulice Łodzi dalej niż 400 m od miejsca chłodu na czerwono" loading="lazy" sx={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 45%' }} />
+                {reach && (
+                  <Chip icon={<AcUnit />} label={`${pct(reach.items[0].uncovered)} ulic dalej niż 400 m od miejsca chłodu`} sx={{ position: 'absolute', left: 16, bottom: 16, fontWeight: 700, bgcolor: 'rgb(255 255 255 / 0.94)', color: '#1b2a30', boxShadow: '0 4px 14px rgb(0 0 0 / 0.2)', '& .MuiChip-icon': { color: '#e4572e' } }} />
+                )}
               </Box>
               <Box sx={{ p: { xs: 3.5, md: 4.5 }, display: 'flex', flexDirection: 'column', alignItems: { xs: 'center', sm: 'flex-start' }, textAlign: { xs: 'center', sm: 'left' } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
                   <AdminPanelSettings sx={{ fontSize: 36, color: v('accent') }} />
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700 }}>Panel miasta</Typography>
                 </Box>
-                <Typography sx={{ mt: 1, color: v('muted') }}>Luki cienia, zasięg miejsc chłodu i kandydaci na nowe.</Typography>
+                <Typography sx={{ mt: 1, color: v('muted') }}>Trzy widoki dla urzędników: gdzie brakuje cienia, gdzie brakuje miejsc chłodu i gdzie otworzyć nowe.</Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+                  {panelViews.map(([Icon, label]) => (
+                    <Chip key={label} icon={<Icon />} label={label} size="small" variant="outlined" sx={{ borderColor: v('line'), color: v('ink'), fontWeight: 600, '& .MuiChip-icon': { color: v('accent') } }} />
+                  ))}
+                </Box>
                 <Button component={Link} to="/panel" variant="outlined" endIcon={<ArrowForward />} sx={{ mt: 3, color: v('accent'), borderColor: v('accent') }}>Zaloguj się</Button>
               </Box>
             </Box>
