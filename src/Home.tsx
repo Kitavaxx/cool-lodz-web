@@ -39,6 +39,7 @@ const palette: Record<string, [string, string]> = {
   accent: ['#0e5f74', '#6cc4ee'],
   track: ['#edf1f2', '#2b414b'], // read by GrowBar
 }
+const textColour = new Set(['ink', 'muted', 'accent']) // switched, not blended, so they never sit grey on grey
 // A page colour as a CSS variable, with the day colour until the first frame sets it
 const v = (name: string) => `var(--${name}, ${palette[name][0]})`
 const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
@@ -56,8 +57,12 @@ function useNight(hour: number) {
       const k = Math.min(1, (now - start) / 1200)
       const t = from + (to - from) * k * k * (3 - 2 * k)
       shown.current = t
-      root.setProperty('--night', String(t))
-      for (const [name, [day, dark]] of Object.entries(palette)) root.setProperty(`--${name}`, mix(day, dark, t))
+      root.setProperty('--night', String(t)) // the hero sky follows the hour smoothly
+      // The panels of the page are light or dark, never grey: blended halfway, text and background meet (at 16:00 it was grey
+      // on grey). So they blend only in the middle of the range, and the text colours switch at the halfway point.
+      const k2 = Math.min(1, Math.max(0, (t - 0.5) / 0.25))
+      const p = k2 * k2 * (3 - 2 * k2)
+      for (const [name, [day, dark]] of Object.entries(palette)) root.setProperty(`--${name}`, textColour.has(name) ? (p < 0.5 ? day : dark) : mix(day, dark, p))
       if (k < 1) frame = requestAnimationFrame(step)
     }
     frame = requestAnimationFrame(step)
