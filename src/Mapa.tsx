@@ -39,12 +39,13 @@ export default function Mapa() {
       // Keep segments under the points if places loaded first
       map.addLayer({
         id: 'edges', type: 'line', source: 'edges', 'source-layer': 'edges', layout: { 'line-cap': 'round' },
-        paint: { 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.6, 13, 1, 15, 2.5, 17, 6] },
+        paint: { 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.4, 12, 2.2, 14, 2.4, 15, 2.8, 17, 6] }, // thick at city zoom, or a few shaded streets get lost
       }, map.getLayer('places-bench') ? 'places-bench' : undefined)
     }
     map.setPaintProperty('edges', 'line-color', sunColor(hour))
     map.setLayoutProperty('edges', 'visibility', picked.length ? 'visible' : 'none')
-    map.setFilter('edges', ['any', ...picked.map((i) => inRange(hour, i))])
+    // Opacity, not a filter: a new filter makes MapLibre re-parse every tile of the city, which is slow and left the streets blank for a moment
+    map.setPaintProperty('edges', 'line-opacity', ['case', ['any', ...picked.map((i) => inRange(hour, i))], 1, 0] as ExpressionSpecification)
   }, [map, hour, picked])
 
   useEffect(() => {

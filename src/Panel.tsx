@@ -6,7 +6,7 @@ import { Alert, Box, Button, Chip, CircularProgress, IconButton, LinearProgress,
 import { AdminPanelSettings, Check, ContentCopy } from '@mui/icons-material'
 import { auth } from './firebase'
 import { polishDays } from './hours'
-import { metres, pct, steps, useData, useMap } from './shared'
+import { cityBounds, pct, steps, useData, useMap } from './shared'
 
 const REACH = 400 // m, walking distance to a cool place we treat as reachable (source spec 7.2)
 const [covered, uncovered] = ['#4fb3e8', '#e4572e']
@@ -189,44 +189,33 @@ function circle([x, y]: number[], r: number) {
   return Array.from({ length: 65 }, (_, i) => [x + (r * Math.cos((i / 32) * Math.PI)) / k, y + (r * Math.sin((i / 32) * Math.PI)) / 110540])
 }
 
-// 400 m circles around cool places; walking segments outside every circle are the "biała plama"
+// 400 m circles around cool places; walking segments outside every circle are the "biała plama". The whole city: the streets
+// come from the shade tiles, where scripts/tiles.py already stored each segment's distance `d` to the nearest cool place,
+// and the share of street length in white patches is in reach.json (worked out for REACH, keep the two in step)
 function Reach() {
   const places = useData('/data/places.geojson')
-  const edges = useData<{ features: Feature<LineString>[] }>('/data/edges.geojson')
-  const [container, map] = useMap()
+  const reach = useData<{ items: { reach_m: number; uncovered: number; cool_places: number }[] }>('/data/reach.json')
+  const [container, map] = useMap(cityBounds)
 
   const cool = useMemo(() => (places?.features ?? []).filter((f) => f.properties?.type === 'cool') as Feature<Point>[], [places])
-  const [network, share] = useMemo(() => {
-    if (!edges || !cool.length) return [[], 0]
-    let total = 0, outside = 0
-    const marked = edges.features.map((f) => {
-      const c = f.geometry.coordinates
-      const mid = c[Math.floor(c.length / 2)]
-      const len = c.slice(1).reduce((sum, p, i) => sum + metres(c[i], p), 0)
-      const inside = cool.some((p) => metres(mid, p.geometry.coordinates) <= REACH)
-      total += len
-      if (!inside) outside += len
-      return { ...f, properties: { inside } }
-    })
-    return [marked, outside / total]
-  }, [edges, cool])
+  const share = reach?.items[0]?.uncovered
 
   useEffect(() => {
-    if (!map || !network.length) return
+    if (!map || !cool.length || map.getSource('network')) return
     const rings = cool.map((p) => ({ type: 'Feature' as const, properties: {}, geometry: { type: 'Polygon' as const, coordinates: [circle(p.geometry.coordinates, REACH)] } }))
-    map.addSource('network', { type: 'geojson', data: { type: 'FeatureCollection', features: network } })
+    map.addSource('network', { type: 'vector', tiles: [`${location.origin}/data/tiles/{z}/{x}/{y}.pbf`], minzoom: 9, maxzoom: 15 })
     map.addSource('reach', { type: 'geojson', data: { type: 'FeatureCollection', features: rings } })
     map.addSource('cool', { type: 'geojson', data: { type: 'FeatureCollection', features: cool } })
     map.addLayer({ id: 'reach-fill', type: 'fill', source: 'reach', paint: { 'fill-color': covered, 'fill-opacity': 0.08 } })
     map.addLayer({
-      id: 'network', type: 'line', source: 'network',
-      paint: { 'line-color': ['case', ['get', 'inside'], covered, uncovered], 'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 16, 3] },
+      id: 'network', type: 'line', source: 'network', 'source-layer': 'edges', layout: { 'line-cap': 'round' },
+      paint: { 'line-color': ['case', ['<=', ['get', 'd'], REACH], covered, uncovered], 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.6, 13, 1, 16, 3] },
     })
     map.addLayer({ id: 'reach-line', type: 'line', source: 'reach', paint: { 'line-color': '#0e5f74', 'line-width': 1.5, 'line-dasharray': [2, 2] } })
     map.addLayer({ id: 'cool', type: 'circle', source: 'cool', paint: { 'circle-radius': 6, 'circle-color': '#0e5f74', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' } })
-  }, [map, network, cool])
+  }, [map, cool])
 
-  if (places === null || edges === null) return <Alert severity="warning">Brak danych</Alert>
+  if (places === null || reach === null) return <Alert severity="warning">Brak danych</Alert>
   return (
     <>
       <Typography color="text.secondary" sx={{ maxWidth: 800 }}>
@@ -235,7 +224,7 @@ function Reach() {
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 300px' }, gap: 2, mt: 2, alignItems: 'start' }}>
         <Box ref={container} sx={{ height: { xs: 'clamp(360px, 58dvh, 600px)', md: 600 }, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }} />
         <Paper variant="outlined" sx={{ p: 2.5 }}>
-          {!network.length ? <CircularProgress /> : (
+          {share === undefined ? <CircularProgress /> : (
             <>
               <Typography sx={{ fontSize: 44, fontWeight: 700, color: uncovered, lineHeight: 1.1 }}>{pct(share)}</Typography>
               <Typography>długości chodników leży w białych plamach, dalej niż {REACH} m od miejsca chłodu.</Typography>
