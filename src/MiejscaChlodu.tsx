@@ -117,7 +117,7 @@ export default function MiejscaChlodu() {
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: '1fr 1fr' }, gap: 2, mt: 2, alignItems: 'start' }}>
         <Box
           ref={container}
-          sx={{ order: { md: 2 }, height: { xs: 280, md: 'calc(100dvh - 260px)' }, minHeight: 280, position: { md: 'sticky' }, top: 0, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }}
+          sx={{ order: { md: 2 }, height: { xs: 'clamp(320px, 55dvh, 560px)', md: 'calc(100dvh - 260px)' }, minHeight: 320, position: { md: 'sticky' }, top: 0, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }}
         />
         <Stack spacing={1.5}>
           {places === undefined && <CircularProgress sx={{ mx: 'auto', my: 4 }} />}

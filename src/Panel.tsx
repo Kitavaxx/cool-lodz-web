@@ -159,7 +159,7 @@ function ShadeGaps() {
         20 odcinków ulic o długości co najmniej 80 m z największym udziałem słońca o 14:00 (najwyżej jeden na ulicę). Kliknij wiersz, aby pokazać odcinek na mapie. To miejsca, gdzie drzewa, zadaszenia lub kurtyny wodne dadzą najwięcej.
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mt: 2, alignItems: 'start' }}>
-        <Box ref={container} sx={{ height: { xs: 320, md: 560 }, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider', position: { md: 'sticky' }, top: 0 }} />
+        <Box ref={container} sx={{ height: { xs: 'clamp(320px, 55dvh, 560px)', md: 560 }, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider', position: { md: 'sticky' }, top: 0 }} />
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
             <TableHead>
@@ -233,7 +233,7 @@ function Reach() {
         Koła o promieniu {REACH} m (ok. 5 minut pieszo) wokół {cool.length || '…'} miejsc chłodu. Chodniki poza wszystkimi kołami to „białe plamy”: stamtąd do najbliższego miejsca chłodu jest dalej niż {REACH} m.
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 300px' }, gap: 2, mt: 2, alignItems: 'start' }}>
-        <Box ref={container} sx={{ height: { xs: 360, md: 600 }, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }} />
+        <Box ref={container} sx={{ height: { xs: 'clamp(360px, 58dvh, 600px)', md: 600 }, borderRadius: '16px', overflow: 'hidden', border: 1, borderColor: 'divider' }} />
         <Paper variant="outlined" sx={{ p: 2.5 }}>
           {!network.length ? <CircularProgress /> : (
             <>

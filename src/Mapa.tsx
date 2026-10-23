@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import type { ExpressionSpecification, MapMouseEvent } from 'maplibre-gl'
 import type { LineString } from 'geojson'
-import { Alert, Box, Chip, IconButton, Paper, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material'
-import { BeachAccess, FilterDrama, Visibility, VisibilityOff, WbSunny } from '@mui/icons-material'
+import { Alert, Box, Chip, Collapse, IconButton, Paper, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material'
+import { BeachAccess, FilterDrama, KeyboardArrowDown, KeyboardArrowUp, Visibility, VisibilityOff, WbSunny } from '@mui/icons-material'
 import { hourPills, hours, metres, pct, placeIcon, placeLines, placeTypes, showPopup, steps, sunColor, useData, useMap } from './shared'
 
 const placeLayers = placeTypes.map(({ type }) => `places-${type}`)
@@ -23,6 +23,8 @@ export default function Mapa() {
   const places = useData('/data/places.geojson')
   const [hour, setHour] = useState(14)
   const [picked, setPicked] = useState<number[]>([]) // no streets coloured until the user picks a range
+  // The sun panel folds down to its title row. It starts folded on phones (under 600 px, MUI's sm), where it would cover the map
+  const [open, setOpen] = useState(() => matchMedia('(min-width: 600px)').matches)
   const [shown, setShown] = useState<Record<string, boolean>>({ cool: true, water: true, bench: false })  // thousands of benches, opt-in
   const placeName = useSearchParams()[0].get('place')
 
@@ -100,11 +102,11 @@ export default function Mapa() {
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <Box ref={container} sx={{ height: '100%' }} />
-      <Paper sx={{ position: 'absolute', top: 16, left: 16, right: { xs: 16, sm: 'auto' }, p: 1.5 }}>
+      <Paper sx={{ position: 'absolute', top: { xs: 8, sm: 16 }, left: { xs: 8, sm: 16 }, right: { xs: 8, sm: 'auto' }, p: { xs: 1, sm: 1.5 } }}>
         <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && setHour(h)} aria-label="Godzina" sx={hourPills}>
           {hours.map((h) => <ToggleButton key={h} value={h}>{h}:00</ToggleButton>)}
         </ToggleButtonGroup>
-        <Box sx={{ display: 'flex', overflowX: 'auto', scrollbarWidth: 'none', gap: 1, mt: 1.5, '& > *': { flexShrink: 0 } }}>
+        <Box sx={{ display: 'flex', overflowX: 'auto', scrollbarWidth: 'none', gap: 1, mt: { xs: 1, sm: 1.5 }, '& > *': { flexShrink: 0 } }}>
           {places === null && <Alert severity="warning">Brak danych o miejscach</Alert>}
           {places && placeTypes.map(({ type, label, color }) => (
             <Chip
@@ -115,7 +117,7 @@ export default function Mapa() {
               onClick={() => setShown({ ...shown, [type]: !shown[type] })}
               aria-pressed={shown[type]}
               sx={{
-                height: 36, pl: 0.25, fontWeight: 600, borderWidth: 1.5, transition: 'all .15s',
+                height: { xs: 32, sm: 36 }, pl: 0.25, fontWeight: 600, borderWidth: 1.5, transition: 'all .15s',
                 ...(shown[type]
                   ? { borderColor: color, bgcolor: `${color}1a`, '&&:hover': { bgcolor: `${color}2e` } }
                   : { color: 'text.secondary', '& img': { filter: 'grayscale(1)', opacity: 0.45 } }),
@@ -124,7 +126,8 @@ export default function Mapa() {
           ))}
         </Box>
       </Paper>
-      <Paper sx={{ position: 'absolute', bottom: { xs: 64, sm: 32 }, left: 16, right: { xs: 16, sm: 'auto' }, p: 1.5, width: { sm: 340 } }}>
+      {/* The bottom bar is outside the map box, so the panel only needs a small margin */}
+      <Paper sx={{ position: 'absolute', bottom: { xs: 8, sm: 32 }, left: { xs: 8, sm: 16 }, right: { xs: 8, sm: 'auto' }, p: { xs: 1, sm: 1.5 }, width: { sm: 340 } }}>
         {edges === null ? <Alert severity="warning">Brak danych</Alert> : (
           <>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -135,7 +138,13 @@ export default function Mapa() {
                   {picked.length === ranges.length ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               </Tooltip>
+              <Tooltip title={open ? 'Zwiń' : 'Rozwiń'}>
+                <IconButton size="small" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={open ? 'Zwiń panel' : 'Rozwiń panel'}>
+                  {open ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
+                </IconButton>
+              </Tooltip>
             </Box>
+            <Collapse in={open}>
             {/* How much of the street length falls in each range at this hour */}
             <Box sx={{ display: 'flex', gap: '3px', height: 8, mt: 1, borderRadius: 4, overflow: 'hidden', bgcolor: 'action.hover' }}>
               {shares?.map((share, i) => (
@@ -144,7 +153,7 @@ export default function Mapa() {
                 </Tooltip>
               ))}
             </Box>
-            <ToggleButtonGroup value={picked} onChange={(_, v: number[]) => setPicked(v)} size="small" fullWidth aria-label="Zakres słońca" sx={{ mt: 1.5, gap: 1, '& .MuiToggleButtonGroup-grouped': { border: 1.5, borderColor: 'divider', borderRadius: '14px !important', m: 0 } }}>
+            <ToggleButtonGroup value={picked} onChange={(_, v: number[]) => setPicked(v)} size="small" fullWidth aria-label="Zakres słońca" sx={{ mt: { xs: 1, sm: 1.5 }, gap: 1, '& .MuiToggleButtonGroup-grouped': { border: 1.5, borderColor: 'divider', borderRadius: '14px !important', m: 0 } }}>
               {ranges.map(({ name, Icon }, i) => {
                 const { color, label } = steps[i]
                 const on = picked.includes(i)
@@ -152,15 +161,16 @@ export default function Mapa() {
                   <ToggleButton
                     key={name}
                     value={i}
-                    sx={{ flexDirection: 'column', gap: 0.5, py: 1, lineHeight: 1.2, color: 'text.primary', '&.Mui-selected, &.Mui-selected:hover': { bgcolor: `${color}1f`, borderColor: `${color} !important` } }}
+                    sx={{ flexDirection: 'column', gap: { xs: 0.25, sm: 0.5 }, py: { xs: 0.5, sm: 1 }, lineHeight: 1.2, color: 'text.primary', '&.Mui-selected, &.Mui-selected:hover': { bgcolor: `${color}1f`, borderColor: `${color} !important` } }}
                   >
-                    <Box sx={{ width: 36, height: 36, borderRadius: '50%', display: 'grid', placeItems: 'center', transition: 'all .2s', bgcolor: on ? color : `${color}1f`, color: on ? '#fff' : color }}><Icon /></Box>
+                    <Box sx={{ width: { xs: 28, sm: 36 }, height: { xs: 28, sm: 36 }, borderRadius: '50%', display: 'grid', placeItems: 'center', transition: 'all .2s', bgcolor: on ? color : `${color}1f`, color: on ? '#fff' : color }}><Icon /></Box>
                     <b>{name}</b>
                     <Box component="span" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Box>
                   </ToggleButton>
                 )
               })}
             </ToggleButtonGroup>
+            </Collapse>
           </>
         )}
       </Paper>
