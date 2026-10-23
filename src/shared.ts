@@ -104,7 +104,17 @@ export function useMap() {
   const [map, setMap] = useState<MapLibre>()
   useEffect(() => {
     const m = new MapLibre({ container: ref.current!, style: 'https://tiles.openfreemap.org/styles/positron', bounds, maxBounds: city })
-    m.on('load', () => Promise.allSettled([maskOutsideCity(m), addPlaceIcons(m)]).then(() => setMap(m))) // no mask is fine, no map is not
+    // On narrow screens MapLibre opens the attribution text as soon as the style data arrives, over the panels. Fold it to the "i" button
+    // (a tap still opens it). Its own listeners run before ours in the same event, so it never gets painted open. Only until load.
+    const fold = () => m.getContainer().querySelector('.maplibregl-ctrl-attrib.maplibregl-compact')?.classList.remove('maplibregl-compact-show')
+    m.on('styledata', fold)
+    m.on('sourcedata', fold)
+    m.on('load', () => {
+      m.off('styledata', fold)
+      m.off('sourcedata', fold)
+      fold()
+      Promise.allSettled([maskOutsideCity(m), addPlaceIcons(m)]).then(() => setMap(m)) // no mask is fine, no map is not
+    })
     return () => m.remove()
   }, [])
   return [ref, map] as const
