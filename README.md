@@ -76,13 +76,14 @@ python scripts/panel.py       # needs shade.py first: shade gaps and candidates
 python scripts/boundary.py    # Łódź city boundary for the map mask
 ```
 
-The default area is Śródmieście (routes, panel). The map shows the **whole city**, so shade tiles and places are built for the city bbox. Two variables switch the area: `COOL_BBOX="W,S,E,N"` and `COOL_OUT=<folder>`. **Always set `COOL_OUT` for a city run**, or the 39 MB city `edges.geojson` replaces the Śródmieście one the panel reads.
+The default area is Śródmieście (routes). The map and the whole panel show the **whole city**, so shade tiles, places and the panel files are built for the city bbox. Two variables switch the area: `COOL_BBOX="W,S,E,N"` and `COOL_OUT=<folder>`. **Always set `COOL_OUT` for a city run**, or the 39 MB city `edges.geojson` replaces the Śródmieście one the panel reads.
 
 ```sh
 CITY="19.321,51.686,19.64,51.86"
 COOL_BBOX=$CITY COOL_OUT=tmp/city python scripts/shade.py   # ~18 min on 12 cores, writes tmp/city/edges.geojson (39 MB)
 COOL_OUT=tmp/city python scripts/tiles.py                   # tmp/city/tiles/ and tmp/city/shares.json, ~15 s
 COOL_BBOX=$CITY python scripts/places.py                    # places of the whole city into public/data
+COOL_BBOX=$CITY python scripts/panel.py                     # panel gaps and candidates for the whole city (~2 min); needs cache/walk.graphml from the city shade.py run
 # then copy tmp/city/tiles to public/data/tiles and tmp/city/shares.json to public/data/
 ```
 
@@ -90,7 +91,7 @@ The public Overpass server can answer "retry later" when two downloads run at on
 
 | File | Contents | Script |
 | --- | --- | --- |
-| `edges.geojson` | Śródmieście walking network (sidewalks included) with sun share for 5 hours, from building shadows. The site no longer reads it (the tiles replaced it); `routes.py` and `panel.py` need a default-area run of `shade.py` first | `shade.py` |
+| `edges.geojson` | Śródmieście walking network (sidewalks included) with sun share for 5 hours, from building shadows. The site no longer reads it (the tiles replaced it). Every `shade.py` run also writes `cache/walk.graphml` (the graph with the sun shares), and the last run wins: `routes.py` works from either a Śródmieście or a city graph, `panel.py` for the whole city needs the city one | `shade.py` |
 | `tiles/{z}/{x}/{y}.pbf` | The same for the whole city as vector tiles (layer `edges`, `s10`…`s18` in whole percents), zoom 9–15. `tiles/empty.pbf` is the empty tile Firebase serves for missing ones | `tiles.py` |
 | `shares.json` | Share of street length in shade, half-shade and sun per hour, for the bar on `/mapa` | `tiles.py` |
 | `reach.json` | Share of street length in the whole city farther than 400 m from every cool place (the panel's reach view). Each tile segment also carries `d`, its distance to the nearest cool place | `tiles.py` |
@@ -99,8 +100,8 @@ The public Overpass server can answer "retry later" when two downloads run at on
 | `lodz.geojson` | Łódź city boundary: maps stay inside it and dim the outside | `boundary.py` |
 | `ranking.json` | Simulated district ranking, written by hand (no script) | |
 | `tours.json` | 3 tourist routes through Manufaktura, Piotrkowska, EC1 and Księży Młyn (shaded variant at 14:00) | `routes.py` |
-| `panel_gaps.json` | 20 sunniest named street segments at 14:00 (at least 80 m, one per street) | `panel.py` |
-| `panel_candidates.json` | Public buildings (museums, libraries, culture centres, city offices) that are not cool places yet, scored by sun within 200 m, distance to the nearest cool place and known hours | `panel.py` |
+| `panel_gaps.json` | 20 sunniest named street segments at 14:00 in the whole city (at least 80 m, one per street, only where at least 6 km of walkway lies within 300 m, so not in fields) | `panel.py` |
+| `panel_candidates.json` | Public buildings of the whole city (inside its boundary: museums, libraries, culture centres, city offices) that are not cool places yet, scored by sun within 200 m, distance to the nearest cool place and known hours | `panel.py` |
 
 Design decisions: [docs/SPEC.md](docs/SPEC.md) and [docs/grill.md](docs/grill.md).
 

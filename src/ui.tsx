@@ -182,3 +182,67 @@ export function HeatFacts({ dark }: { dark?: boolean }) {
     </Box>
   )
 }
+
+// The same three facts for the dark panel of the start page, as rows with a picture each instead of cards:
+// a bar that fills, suns that pop in one after another and a dot for every thousand deaths
+export function HeatRows() {
+  const [suns, sunsShown] = useInView<HTMLDivElement>()
+  const [dots, dotsShown] = useInView<HTMLDivElement>()
+  const row = {
+    display: 'grid', gap: { xs: 1.5, md: 5 }, gridTemplateColumns: { xs: '1fr', md: 'minmax(190px, 240px) 1fr' }, alignItems: 'start',
+    py: { xs: 3, md: 4 }, borderTop: 1, borderColor: 'rgb(255 255 255 / 0.14)',
+  }
+  const big = { fontSize: { xs: 52, md: 68 }, fontWeight: 800, color: amber, lineHeight: 1, whiteSpace: 'nowrap' }
+  const title = { fontSize: { xs: 18, md: 20 }, fontWeight: 700 }
+  const text = { mt: 0.5, opacity: 0.75 }
+  const source = (href: string, name: string) => (
+    <MuiLink href={href} target="_blank" rel="noopener" variant="body2" sx={{ display: 'inline-block', mt: 1.5, color: 'rgb(255 255 255 / 0.6)' }}>{name}</MuiLink>
+  )
+  return (
+    <Box>
+      <Reveal>
+        <Box sx={{ ...row, borderTop: 0, pt: 0 }}>
+          <Typography sx={big}><CountUp to={75} /> %</Typography>
+          <Box>
+            <Typography sx={title}>nocy w roku z miejską wyspą ciepła</Typography>
+            <Typography sx={text}>Centrum Łodzi jest o 3–4 °C cieplejsze niż okolice, rekordowo o 12 °C.</Typography>
+            <Box sx={{ mt: 2, '--track': 'rgb(255 255 255 / 0.16)' }}><GrowBar share={0.75} color={amber} height={12} /></Box>
+            {source('https://nowa.mapa.lodz.pl/wp-content/uploads/pdf/the_lodz_atlas/en-10R.pdf', 'Atlas Miasta Łodzi')}
+          </Box>
+        </Box>
+      </Reveal>
+      <Reveal delay={0.1}>
+        <Box sx={row}>
+          <Typography sx={big}><CountUp to={10} />–<CountUp to={11} /></Typography>
+          <Box>
+            <Typography sx={title}>dni upalnych w roku (≥ 30 °C)</Typography>
+            <Typography sx={text}>Średnio w centralnej Polsce w latach 1991–2022. Jest ich coraz więcej.</Typography>
+            <Box ref={suns} sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25, mt: 2 }} aria-hidden>
+              {Array.from({ length: 11 }, (_, i) => (
+                <WbSunny key={i} sx={{ color: i < 10 ? amber : 'rgb(244 185 66 / 0.45)', fontSize: 26, transform: sunsShown ? 'scale(1)' : 'scale(0)', transition: `transform .4s cubic-bezier(.3,1.6,.5,1) ${i * 0.08}s` }} />
+              ))}
+            </Box>
+            {source('https://demagog.org.pl/wypowiedzi/dni-upalne-w-miastach-czy-2022-rok-byl-rekordowy/', 'Demagog na podstawie IMGW')}
+          </Box>
+        </Box>
+      </Reveal>
+      <Reveal delay={0.2}>
+        <Box sx={row}>
+          <Typography sx={big}><CountUp to={61} /> tys.</Typography>
+          <Box>
+            <Typography sx={title}>zgonów związanych z upałem</Typography>
+            <Typography sx={text}>W Europie latem 2022 roku.</Typography>
+            {/* One dot for every thousand people */}
+            <Box ref={dots} sx={{ display: 'flex', flexWrap: 'wrap', gap: '6px', mt: 2, maxWidth: 520 }} aria-hidden>
+              {Array.from({ length: 61 }, (_, i) => (
+                <Box key={i} sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: amber, opacity: dotsShown ? 0.9 : 0, transform: dotsShown ? 'scale(1)' : 'scale(0)', transition: `opacity .3s ease ${i * 0.02}s, transform .3s cubic-bezier(.3,1.6,.5,1) ${i * 0.02}s` }} />
+              ))}
+            </Box>
+            <Typography variant="caption" sx={{ display: 'block', mt: 1, opacity: 0.6 }}>Jedna kropka to tysiąc osób.</Typography>
+            {source('https://www.nature.com/articles/s41591-023-02419-z', 'Nature Medicine 2023')}
+          </Box>
+        </Box>
+      </Reveal>
+    </Box>
+  )
+}
