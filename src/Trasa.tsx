@@ -115,9 +115,9 @@ export default function Trasa() {
       {routes === undefined && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 6 }} />}
       {routes === null && <Alert severity="warning" sx={{ mt: 3 }}>Brak danych</Alert>}
 
-      <Box sx={{ display: routes ? 'grid' : 'none', gridTemplateColumns: { xs: '1fr', md: '400px 1fr' }, gap: 2, mt: 3, alignItems: 'start' }}>
-        <Stack spacing={2}>
-          <TextField select label="Trasa" value={routeId} onChange={(e) => setRouteId(Number(e.target.value))}>
+      <Box sx={{ display: routes ? 'grid' : 'none', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: '400px minmax(0, 1fr)' }, gap: 2, mt: 3, alignItems: 'start' }}>
+        <Stack spacing={2} sx={{ minWidth: 0 }}>
+          <TextField select fullWidth label="Trasa" value={routeId} onChange={(e) => setRouteId(Number(e.target.value))}>
             {names.map(([id, name]) => <MenuItem key={id} value={id}>{name}</MenuItem>)}
           </TextField>
           <ToggleButtonGroup value={hour} exclusive size="small" fullWidth onChange={(_, h) => h && setHour(h)} aria-label="Godzina" sx={hourPills}>
