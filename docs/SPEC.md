@@ -106,6 +106,7 @@ Fallback cuts and extras follow spec section 8.
 
 ## 9. Limitations to publish
 
+- No medical advice on the site (a city mentor warned that health advice carries liability). `/bezpieczenstwo` gives facts and general rules from the RCB guide "Jak przygotować się na upał", each card names its source, a notice at the top says these are not medical advice, and the page links to IMGW, RCB and GIS. Only claims found in the guide are attributed to it.
 - Shade from building footprints only, with estimated heights. No trees in the base version.
 - Shade covers the whole city, but it is less accurate outside the centre: more detached houses and industrial buildings with a guessed 12 m height, and open ground where trees would give most of the shade. `/mapa` says so under the sun range buttons. Across the city about 88 % of street length is in the sun at 14:00 (almost all of it sidewalks and paths), which is higher than the centre because trees are missing.
 - One summer day and 5 hours.

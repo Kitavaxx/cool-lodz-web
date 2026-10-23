@@ -222,6 +222,8 @@ Odznaczamy po sprawdzeniu na działającym adresie.
 - Logowanie do panelu służy tylko do demonstracji. Dane panelu to pliki statyczne dostępne bez logowania, a w wersji docelowej będą chronione (sekcja 7.2).
 - Strona i aplikacja mają wspólną pulę kont Firebase Auth i w demie nie ma sprawdzania roli moderatora. Każde zalogowane konto widzi panel.
 - Baner upału i ranking dzielnic używają danych symulowanych.
+- Strona nie udziela porad medycznych: mentor z Urzędu Miasta ostrzegł, że porady zdrowotne niosą ryzyko odpowiedzialności. Podajemy fakty (lokalizacja wody, godziny otwarcia, godziny największego UV i temperatury) oraz ogólne zasady z poradnika RCB z podanym źródłem przy każdej karcie, a po więcej odsyłamy do oficjalnych komunikatów (IMGW, RCB, GIS).
+- Kwestie prawne publikacji aplikacji (wydawca, rabaty, kody QR na cudzej infrastrukturze) wymagają jeszcze dopracowania. Miasto nie może wydać aplikacji z częścią komercyjną ani oferować zniżek, rozważamy współpracę z ŁOT i kartą łodzianina.
 - Miejsca chłodu, woda pitna i ławki pochodzą z OpenStreetMap, nie były sprawdzane na miejscu i mogą być nieaktualne.
 - Warstwy "Cisza" i "Powietrze" nie są zaimplementowane i nie ma ich w interfejsie.
 - Szacunek cienia nie uwzględnia drzew, zadaszeń ani zmiennego zachmurzenia.

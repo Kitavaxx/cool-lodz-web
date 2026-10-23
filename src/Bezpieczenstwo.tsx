@@ -1,20 +1,22 @@
 import { Link } from 'react-router'
-import { Box, Button, Card, CardActionArea, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardActionArea, Typography } from '@mui/material'
 import { AcUnit, Campaign, Checkroom, ChildCare, DirectionsWalk, Elderly, HealthAndSafety, LocalDrink, Map, OpenInNew, Science, Thunderstorm, WbSunny } from '@mui/icons-material'
 import { PageHeader, Reveal } from './ui'
 
-// Everyday rules from the RCB guide "Jak przygotować się na upał"; no medical advice (source spec 6.2)
+// General rules as the RCB guide "Jak przygotować się na upał" puts them, no medical advice (a mentor from the city warned that
+// health advice carries liability: facts are fine, advice is not). Each card says where it comes from.
+const RCB = 'Źródło: poradnik RCB'
 const rules = [
-  { icon: <LocalDrink />, color: '#1e88c9', title: 'Pij wodę', text: 'Małymi porcjami, także bez pragnienia. Bez alkoholu i słodkich napojów.' },
-  { icon: <WbSunny />, color: '#e4572e', title: 'Unikaj pełnego słońca', text: 'W najgorętsze godziny ogranicz wysiłek i idź w cieniu.' },
-  { icon: <Checkroom />, color: '#7b4fb3', title: 'Ubierz się lekko', text: 'Jasne, przewiewne ubranie, nakrycie głowy, okulary.' },
-  { icon: <AcUnit />, color: '#0e5f74', title: 'Odpoczywaj w chłodzie', text: 'Biblioteki, muzea i domy kultury to dobre miejsca na przerwę.' },
-  { icon: <ChildCare />, color: '#f2a516', title: 'Nie zostawiaj w aucie', text: 'Dzieci ani zwierząt. Nigdy, nawet na chwilę.' },
-  { icon: <Elderly />, color: '#2e7d32', title: 'Pomyśl o innych', text: 'Zapytaj starszych sąsiadów, jak się czują.' },
+  { icon: <LocalDrink />, color: '#1e88c9', title: 'Pij wodę', text: 'Dużo niegazowanej wody. Zrezygnuj z alkoholu, który odwadnia.', from: RCB },
+  { icon: <WbSunny />, color: '#e4572e', title: 'Ogranicz słońce i wysiłek', text: 'Unikaj pełnego słońca i wysiłku fizycznego, noś nakrycie głowy.', from: RCB },
+  { icon: <Checkroom />, color: '#7b4fb3', title: 'Ubierz się lekko', text: 'Lekka, przewiewna odzież.', from: RCB },
+  { icon: <ChildCare />, color: '#f2a516', title: 'Nie zostawiaj w aucie', text: 'Dzieci ani zwierząt. W nagrzanym samochodzie może być 50–60 °C.', from: RCB },
+  { icon: <Elderly />, color: '#2e7d32', title: 'Pomyśl o innych', text: 'Osoby starsze i dzieci są szczególnie narażone na skutki upału.', from: RCB },
+  { icon: <AcUnit />, color: '#0e5f74', title: 'Miejsca chłodu na mapie', text: 'Pokazujemy otwarte biblioteki, muzea i domy kultury oraz punkty z wodą pitną.', from: 'Dane OpenStreetMap, niezweryfikowane' },
 ]
 
 const links = [
-  { icon: <Thunderstorm />, name: 'IMGW-PIB', text: 'Ostrzeżenia przed upałem dla województwa łódzkiego', href: 'https://meteo.imgw.pl' },
+  { icon: <Thunderstorm />, name: 'IMGW-PIB', text: 'Ostrzeżenia meteorologiczne, w tym przed upałem', href: 'https://meteo.imgw.pl' },
   { icon: <Campaign />, name: 'Rządowe Centrum Bezpieczeństwa', text: 'Alerty RCB i poradniki na upał', href: 'https://www.gov.pl/web/rcb' },
   { icon: <Science />, name: 'Główny Inspektorat Sanitarny', text: 'Komunikaty sanitarne i jakość wody w kąpieliskach', href: 'https://www.gov.pl/web/gis' },
 ]
@@ -51,6 +53,9 @@ function HotDay() {
           ))}
         </Box>
       </Box>
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+        Według poradnika RCB promieniowanie UV jest najsilniejsze około 12–13, a najwyższa temperatura przypada między 15 a 18. Pory „rano” i „wieczorem” to nasza wskazówka na podstawie tych godzin.
+      </Typography>
     </Card>
   )
 }
@@ -59,17 +64,22 @@ export default function Bezpieczenstwo() {
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', pb: 4 }}>
       <PageHeader icon={<HealthAndSafety />} title="Bezpieczeństwo w upał" sub="Proste zasady na upalne dni w mieście." color="#b3261e" />
+      {/* Up top, where it is read: general information from an official source, not medical advice */}
+      <Alert severity="info" sx={{ mt: 3, borderRadius: '16px' }}>
+        Informacje ogólne na podstawie poradnika Rządowego Centrum Bezpieczeństwa „Jak przygotować się na upał”. To nie są porady medyczne.
+      </Alert>
 
       <HotDay />
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, mt: 3 }}>
-        {rules.map(({ icon, color, title, text }, i) => (
+        {rules.map(({ icon, color, title, text, from }, i) => (
           <Reveal key={title} delay={(i % 3) * 0.1}>
             <Card variant="outlined" sx={{ height: '100%', p: 2.5, borderRadius: '24px', display: 'flex', gap: 2, alignItems: 'flex-start', transition: 'transform .2s, box-shadow .2s', '&:hover': { transform: 'translateY(-3px)', boxShadow: `0 12px 28px ${color}26` } }}>
               <Box sx={{ width: 52, height: 52, borderRadius: '16px', flexShrink: 0, display: 'grid', placeItems: 'center', bgcolor: `${color}1a`, color, '& svg': { fontSize: 28 } }}>{icon}</Box>
               <Box>
                 <Typography variant="h6" component="h3" sx={{ fontWeight: 700, lineHeight: 1.25 }}>{title}</Typography>
                 <Typography color="text.secondary" sx={{ mt: 0.5 }}>{text}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, opacity: 0.8 }}>{from}</Typography>
               </Box>
             </Card>
           </Reveal>
@@ -91,9 +101,6 @@ export default function Bezpieczenstwo() {
           </Card>
         ))}
       </Box>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
-        Na podstawie poradnika RCB „Jak przygotować się na upał”. To nie są porady medyczne.
-      </Typography>
 
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mt: 4 }}>
         <Button component={Link} to="/miejsca-chlodu" variant="contained" startIcon={<AcUnit />}>Znajdź miejsce chłodu</Button>
