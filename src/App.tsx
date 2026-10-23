@@ -36,7 +36,7 @@ const item = {
   px: { md: 2 },
   py: { md: 1 },
   color: 'text.secondary',
-  fontFamily: 'inherit', // "Więcej" is a <button>, which doesn't inherit Roboto
+  fontFamily: 'inherit', // "Więcej" is a <button>, which doesn't inherit the page font
   fontSize: { xs: 14, md: 15 },
   fontWeight: 500,
   '& .icon': { display: 'flex', px: { xs: 2.5, md: 0 }, py: { xs: 0.5, md: 0 }, borderRadius: 999 },
