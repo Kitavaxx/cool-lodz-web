@@ -7,8 +7,9 @@ import { QRCodeSVG } from 'qrcode.react'
 import { hourPills, hours, pct, useData } from './shared'
 import { GrowBar, HeatFacts, Reveal, Stars } from './ui'
 
-// ponytail: set when the mobile team publishes the APK; until then the card says "wkrótce"
-const apkUrl = ''
+// The releases page of the mobile app, where the newest build has the APK. For now a page rather than a direct download
+// (agreed with the team); the direct link would be .../releases/latest/download/cool-lodz.apk. Empty: the card says "wkrótce"
+const apkUrl = 'https://github.com/mikita672/cool-lodz-app/releases'
 
 // One idea per card; the long version lives on /o-projekcie
 const howTo = [
@@ -294,7 +295,7 @@ export default function Home() {
                 <Android sx={{ fontSize: 44, color: 'secondary.main' }} />
                 <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mt: 1.5 }}>Aplikacja na Androida</Typography>
                 <Typography sx={{ mt: 1, opacity: 0.85 }}>Cień i miejsca chłodu zawsze pod ręką.</Typography>
-                {apkUrl ? <Button href={apkUrl} variant="contained" sx={{ ...white, mt: 3 }}>Pobierz APK</Button> : <Chip label="APK wkrótce" sx={{ mt: 3, bgcolor: 'rgb(255 255 255 / 0.15)', color: 'common.white' }} />}
+                {apkUrl ? <Button href={apkUrl} target="_blank" rel="noopener" variant="contained" sx={{ ...white, mt: 3 }}>Pobierz aplikację</Button> : <Chip label="APK wkrótce" sx={{ mt: 3, bgcolor: 'rgb(255 255 255 / 0.15)', color: 'common.white' }} />}
               </Box>
               {apkUrl && <Box sx={{ bgcolor: 'common.white', p: 1.5, borderRadius: '16px', display: 'flex' }}><QRCodeSVG value={apkUrl} size={128} /></Box>}
             </Box>

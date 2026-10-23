@@ -22,7 +22,7 @@ Hour buttons 10–18 (default 14). Changing the hour recolours segments from `s{
 
 ## MAP-4 Places layers with toggles ✅
 
-Point layers for `cool`, `water`, `bench` with filter chips to toggle each one. Tapping a point shows name, address, hours and a verified label. "Cisza" and "Powietrze" are disabled chips marked "w przygotowaniu".
+Point layers for `cool`, `water`, `bench` with filter chips to toggle each one. Tapping a point shows name, address, hours and a verified label. (The disabled "Cisza" and "Powietrze" chips this ticket first added were removed on 23.10.2026, they have no data yet.)
 
 **Done when:** each layer toggles without errors.
 

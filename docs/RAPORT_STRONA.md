@@ -2,8 +2,6 @@
 
 Wersja 0.4 z 20.10.2026, następca specyfikacji 0.3 z 18.10.2026. Przygotowali: Aliaksandr Yurusau, Dmytro Malinovskyi. Dla: Mikita Kutsenka.
 
-Punkty oznaczone ⚠️ uzupełnimy na koniec prac.
-
 ---
 
 ## 1. W skrócie
@@ -128,9 +126,11 @@ Dla każdego wariantu zapisujemy geometrię, dystans, czas (4,5 km/h), udział s
 
 Każdy plik ma pola `accuracy` i `computed_at`, więc data i dokładność obliczeń są widoczne w danych. Jeśli plik jest uszkodzony lub go brakuje, strona pokazuje "Brak danych" i się nie wysypuje.
 
-### 5.5. Dane, których nadal szukamy
+### 5.5. Dane, na które czekamy
 
-Budynki LoD1 i drzewa z Geoportalu, Mapa Drzew Łodzi, drzewa z OSM (`natural=tree`) oraz zweryfikowana lista miejsc chłodu z godzinami. Jeśli je znajdziemy, poprawiamy model i zmieniamy etykietę z "szacunek" na "model". ⚠️ Status do uzupełnienia.
+Potrzebujemy dokładnych wysokości budynków, drzew, zweryfikowanej listy miejsc chłodu z godzinami i pozostałych zbiorów z dokumentu "Cool Łódź: zakres danych potrzebnych do aplikacji".
+
+**Status:** na mentoringu z Urzędem Miasta (23.10.2026) ustalono, że miasto udostępni dane przez portal otwartych danych (otwarte-miasto-lodz.pl), a urzędnicy nie będą logować się do panelu. Zakres i format (CSV) przekazujemy mentorce z urzędu, a odpowiedź, co da się zdobyć, mamy dostać do przyszłego tygodnia, bez gwarancji pełnego zakresu. Miasto ma przeskanowane wszystkie ulice (chmura punktów, w której widać drzewa) i planuje jej publikację, ale termin jest niepewny, raczej nie przed listopadem. Do tego czasu demo opiera się na OpenStreetMap, a cień ma etykietę "szacunek". Po otrzymaniu danych poprawiamy model i zmieniamy etykietę na "model".
 
 ### 5.6. Status danych: co jest prawdziwe, a co symulowane
 
@@ -152,9 +152,9 @@ Etykieta "dane symulowane" jest więc tylko przy rankingu i banerze, bo tylko ta
 
 | Adres | Zawartość |
 | --- | --- |
-| `/` | Krótka strona startowa: hasło i przycisk "Otwórz mapę" z podglądem trasy, baner upału (przykład, "dane symulowane"), 3 kroki, 3 fakty ze źródłami, karta pobrania APK, wejście do panelu dla miasta. Zdjęcie parku w nagłówku i rozmyte zdjęcie Piotrkowskiej w tle z efektem paralaksy (tylko na stronie głównej, bez ruchu przy włączonym "ogranicz animacje"). Do czasu publikacji APK karta pokazuje "APK wkrótce" ⚠️ |
+| `/` | Krótka strona startowa: hasło i przycisk "Otwórz mapę" z podglądem trasy, baner upału (przykład, "dane symulowane"), 3 kroki, 3 fakty ze źródłami, karta pobrania APK, wejście do panelu dla miasta. Zdjęcie parku w nagłówku i rozmyte zdjęcie Piotrkowskiej w tle z efektem paralaksy (tylko na stronie głównej, bez ruchu przy włączonym "ogranicz animacje"). Karta aplikacji ma przycisk "Pobierz aplikację" i kod QR. Oba prowadzą na stronę wydań aplikacji (`github.com/mikita672/cool-lodz-app/releases`), gdzie najnowsza wersja ma plik APK. Na razie link do strony, a nie bezpośrednie pobranie |
 | `/o-projekcie` | Problem ze źródłami, metodyka, ograniczenia, źródła danych |
-| `/mapa` | Mapa pełnoekranowa, otwiera się na całej Łodzi. Cień (odcinki kolorowane według udziału słońca, trzy przedziały: Cień, Półcień, Słońce; pod przyciskami podpis, że poza centrum wyniki mogą być mniej dokładne), miejsca chłodu, woda, ławki. "Cisza" i "Powietrze" jako nieaktywne przyciski "w przygotowaniu". Przełącznik godziny 10 do 18, legenda z procentami, etykieta dokładności, atrybucja OSM |
+| `/mapa` | Mapa pełnoekranowa, otwiera się na całej Łodzi. Cień (odcinki kolorowane według udziału słońca, trzy przedziały: Cień, Półcień, Słońce; pod przyciskami podpis, że poza centrum wyniki mogą być mniej dokładne), miejsca chłodu, woda, ławki. Przełącznik godziny 10 do 18, legenda z procentami, etykieta dokładności, atrybucja OSM |
 | `/trasa` | Wybór trasy i godziny, trzy warianty na mapie w różnych kolorach i stylach linii, karta porównania (dystans, czas, udział słońca, ile dłużej niż najkrótsza), miejsca chłodu i woda w promieniu 200 m od trasy |
 | `/miejsca-chlodu` | Lista i mini-mapa, filtr "Otwarte teraz" (czas Europe/Warsaw), najbliższa woda (odległość w linii prostej, po wybraniu miejsca przerywana linia na mapie do tej wody, punkty wody są klikalne), "Pokaż na mapie", etykieta weryfikacji |
 | `/panel` | Logowanie z krótkim opisem oferty dla miasta, po zalogowaniu 3 widoki (sekcja 7). W menu jako "Dla miasta" (w "Więcej") i linkowany ze strony głównej |
@@ -197,17 +197,17 @@ W demie pliki panelu leżą w `public/data/`, więc każdy, kto zna adres (np. `
 
 ## 8. Definition of Done: stan
 
-Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia na koniec.
+Odznaczamy po sprawdzeniu na działającym adresie.
 
-- [x] Publiczny adres HTTPS działa: https://coollodz.web.app (na adresie jest jeszcze starsza wersja, najnowsza po kolejnym wdrożeniu).
+- [x] Publiczny adres HTTPS działa: https://coollodz.web.app. Wdrożenie z całą Łodzią (kafelki, miejsca, panel) przeszło przez CI bez błędów.
 - [x] 5 obowiązkowych stron dostępnych z menu (panel jako "Dla miasta" w "Więcej").
-- [x] Mapa: warstwy cień, miejsca chłodu, woda, ławki włączają się bez błędu, przełącznik godziny zmienia cień. Filtry "Cisza" i "Powietrze" są nieaktywne ("w przygotowaniu").
+- [x] Mapa: warstwy cień, miejsca chłodu, woda, ławki włączają się bez błędu, przełącznik godziny zmienia cień.
 - [x] Trasa Manufaktura do Piotrkowskiej pokazuje co najmniej 2 warianty z różnym udziałem słońca. Są wszystkie 4 trasy (a nie 2 z planu awaryjnego), każda w 3 wariantach i 5 godzinach. Przykład, trasa 1 o 14:00: najkrótsza 81 % słońca, kompromis 31 %, zacieniona 25 %.
 - [x] Miejsca chłodu: lista z godzinami i działający filtr "otwarte teraz" (logikę godzin sprawdza `npm run check`).
 - [x] Etykieta dokładności przy wartościach cienia.
-- [ ] Strona główna z opisem problemu, metodyki, źródłami, ograniczeniami i linkiem do APK. Gotowe: problem, 3 kroki, fakty ze źródłami i wejście do `/o-projekcie` (metodyka, ograniczenia, źródła). Brakuje tylko linku do APK.
+- [x] Strona główna z opisem problemu, metodyki, źródłami, ograniczeniami i linkiem do APK: problem, 3 kroki, fakty ze źródłami, wejście do `/o-projekcie` (metodyka, ograniczenia, źródła) i przycisk "Pobierz aplikację" z kodem QR (strona wydań aplikacji).
 - [x] Panel: logowanie i 3 widoki (luki cienia, dostępność miejsc chłodu, kandydaci). Dane panelu to nasze obliczenia z etykietą "szacunek", symulowane są tylko baner upału i ranking dzielnic.
-- [ ] Wyniki tras referencyjnych (dystans, czas, udział słońca, data i godzina obliczenia)
+- [x] Wyniki tras referencyjnych (dystans, czas, udział słońca, data i godzina obliczenia): tabele w Aneksie A na końcu tego dokumentu.
 - [ ] Zrzuty ekranu: strona główna, mapa z warstwami, wynik trasy, miejsca chłodu, panel (luki cienia, kandydaci).
 
 ---
@@ -222,7 +222,8 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 - Logowanie do panelu służy tylko do demonstracji. Dane panelu to pliki statyczne dostępne bez logowania, a w wersji docelowej będą chronione (sekcja 7.2).
 - Strona i aplikacja mają wspólną pulę kont Firebase Auth i w demie nie ma sprawdzania roli moderatora. Każde zalogowane konto widzi panel.
 - Baner upału i ranking dzielnic używają danych symulowanych.
-- Miejsca chłodu, woda pitna i ławki pochodzą z OpenStreetMap, nie były sprawdzane na miejscu i mogą być nieaktualne.- Filtry "Cisza" i "Powietrze" są nieaktywne.
+- Miejsca chłodu, woda pitna i ławki pochodzą z OpenStreetMap, nie były sprawdzane na miejscu i mogą być nieaktualne.
+- Warstwy "Cisza" i "Powietrze" nie są zaimplementowane i nie ma ich w interfejsie.
 - Szacunek cienia nie uwzględnia drzew, zadaszeń ani zmiennego zachmurzenia.
 
 ---
@@ -237,3 +238,57 @@ Odznaczamy po sprawdzeniu na działającym adresie. ⚠️ Pola do potwierdzenia
 6. Prawdziwy ranking dzielnic z danych aplikacji (po połączeniu danych strony i aplikacji w jednym projekcie).
 7. Statystyki odwiedzin panelu, scenariusz inwestycji, eksport, `/zgloszenia`.
 8. Weryfikacja miejsc chłodu na miejscu (godziny, adresy) i nadanie statusu "zweryfikowane".
+9. Warstwy "Cisza" (mapa akustyczna miasta) i "Powietrze" (stacje GIOŚ, Open-Meteo), do których potrzebne są dane z listy zbiorów dla aplikacji.
+
+
+---
+
+## Aneks A. Wyniki tras referencyjnych
+
+Cztery gotowe trasy w Śródmieściu, każda w trzech wariantach (najkrótsza, kompromis, zacieniona) i dla pięciu godzin. Liczby pochodzą z `public/data/routes.geojson`, policzonego skryptem `scripts/routes.py`.
+
+- **Data obliczenia:** 20.10.2026 (pole `computed_at` w pliku). Dane nie zapisują godziny uruchomienia skryptu.
+- **Data i godziny, dla których liczony jest cień:** 15.07.2026, godziny 10, 12, 14, 16 i 18 (czas Europe/Warsaw).
+- **Dokładność:** "szacunek" (cień tylko z obrysów budynków OSM, bez drzew).
+- **Czas** przy 4,5 km/h. **Udział słońca** to część długości trasy poza cieniem budynków. **Dłużej niż najkrótsza** to różnica czasu względem najkrótszego wariantu tej samej trasy i godziny.
+- Koszt odcinka: długość × (1 + λ × udział słońca), gdzie λ = 0 (najkrótsza), 0,3 (kompromis), 3 (zacieniona).
+
+### A.1. Godzina 14:00
+
+| Trasa | Wariant | Dystans (m) | Czas (min) | Udział słońca | Dłużej niż najkrótsza (min) |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Manufaktura → OFF Piotrkowska | Najkrótsza | 2877 | 38,4 | 81 % | 0 |
+|  | Kompromis | 2897 | 38,6 | 31 % | 0,3 |
+|  | Zacieniona | 2950 | 39,3 | 25 % | 1,0 |
+| Plac Wolności → Pasaż Rubinsteina | Najkrótsza | 1124 | 15,0 | 27 % | 0 |
+|  | Kompromis | 1127 | 15,0 | 25 % | 0,1 |
+|  | Zacieniona | 1127 | 15,0 | 25 % | 0,1 |
+| Manufaktura → Plac Wolności | Najkrótsza | 1017 | 13,6 | 64 % | 0 |
+|  | Kompromis | 1030 | 13,7 | 40 % | 0,2 |
+|  | Zacieniona | 1114 | 14,9 | 34 % | 1,3 |
+| Łódź Fabryczna → Piotrkowska | Najkrótsza | 1345 | 17,9 | 83 % | 0 |
+|  | Kompromis | 1377 | 18,4 | 60 % | 0,4 |
+|  | Zacieniona | 1501 | 20,0 | 40 % | 2,1 |
+
+### A.2. Udział słońca na trasie w ciągu dnia
+
+| Trasa | Wariant | 10:00 | 12:00 | 14:00 | 16:00 | 18:00 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Manufaktura → OFF Piotrkowska | Najkrótsza | 39 % | 91 % | 81 % | 72 % | 26 % |
+|  | Kompromis | 18 % | 55 % | 31 % | 24 % | 16 % |
+|  | Zacieniona | 18 % | 55 % | 25 % | 18 % | 14 % |
+| Plac Wolności → Pasaż Rubinsteina | Najkrótsza | 97 % | 100 % | 27 % | 20 % | 17 % |
+|  | Kompromis | 33 % | 99 % | 25 % | 20 % | 15 % |
+|  | Zacieniona | 22 % | 72 % | 25 % | 17 % | 11 % |
+| Manufaktura → Plac Wolności | Najkrótsza | 72 % | 79 % | 64 % | 64 % | 46 % |
+|  | Kompromis | 50 % | 59 % | 40 % | 46 % | 23 % |
+|  | Zacieniona | 35 % | 42 % | 34 % | 36 % | 21 % |
+| Łódź Fabryczna → Piotrkowska | Najkrótsza | 68 % | 86 % | 83 % | 73 % | 33 % |
+|  | Kompromis | 27 % | 61 % | 60 % | 56 % | 33 % |
+|  | Zacieniona | 20 % | 54 % | 40 % | 29 % | 20 % |
+
+Uwagi do wyników:
+
+- Trasa Manufaktura → OFF Piotrkowska o 14:00: wariant zacieniony ma 25 % słońca zamiast 81 % u najkrótszego, za cenę 73 m i ok. 1 minuty marszu więcej.
+- Trasa Plac Wolności → Pasaż Rubinsteina o 14:00 jest krótka (ok. 1,1 km), a różnice między wariantami są małe (25–27 % słońca, 3 m różnicy w dystansie).
+- Na trasie Manufaktura → OFF Piotrkowska o 10:00 i 12:00 kompromis i zacieniona mają ten sam przebieg i ten sam udział słońca.
