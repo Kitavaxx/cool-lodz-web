@@ -6,7 +6,9 @@ offices, are candidates for new cool places (panel.py reads them with public_bui
 """
 import re
 
-from common import BBOX, ox, write
+import shapely
+
+from common import BBOX, city, ox, write
 
 COOL = {"amenity": ["library", "arts_centre"], "tourism": ["museum", "gallery"]}
 OFFICES = {"amenity": ["townhall", "community_centre"], "office": ["government"]}
@@ -99,9 +101,25 @@ def feature(type_: str, name: str, row) -> dict:
     }
 
 
+def in_city(features: list) -> list:
+    """The bbox is a rectangle: it also holds bits of Zgierz, Konstantynów and others. Keep what lies inside Łódź."""
+    xs, ys = zip(*(f["geometry"]["coordinates"] for f in features))
+    keep = shapely.contains_xy(city(), xs, ys)
+    return [f for f, k in zip(features, keep) if k]
+
+
 def main():
     cool, _ = public_buildings()
     features = [feature("cool", row["name"], row) for _, row in cool.iterrows()]
+    misc = fetch({"amenity": ["drinking_water", "bench"]})
+    for _, row in misc.iterrows():
+        if row["amenity"] == "drinking_water":
+            features.append(feature("water", row.get("name") if isinstance(row.get("name"), str) else "Woda pitna", row))
+        else:
+            features.append(feature("bench", "Ławka", row))
+    before = len(features)
+    features = in_city(features)
+    print(f"{before - len(features)} points outside the city dropped")
     features += [
         {
             "type": "Feature",
@@ -110,12 +128,6 @@ def main():
         }
         for name, address, lon, lat in SIMULATED
     ]
-    misc = fetch({"amenity": ["drinking_water", "bench"]})
-    for _, row in misc.iterrows():
-        if row["amenity"] == "drinking_water":
-            features.append(feature("water", row.get("name") if isinstance(row.get("name"), str) else "Woda pitna", row))
-        else:
-            features.append(feature("bench", "Ławka", row))
     write("places.geojson", {"type": "FeatureCollection", "features": features}, accuracy="szacunek")
 
 

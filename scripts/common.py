@@ -6,6 +6,7 @@ from datetime import date
 from pathlib import Path
 
 import osmnx as ox
+import shapely
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -17,6 +18,13 @@ CACHE = Path(__file__).resolve().parent.parent / "cache"
 
 ox.settings.cache_folder = CACHE / "osm"
 ox.settings.use_cache = True
+
+
+def city():
+    """The Łódź boundary (public/data/lodz.geojson, from boundary.py) as one geometry, to drop what lies in the bbox but outside the city."""
+    path = Path(__file__).resolve().parent.parent / "public" / "data" / "lodz.geojson"
+    features = json.loads(path.read_text(encoding="utf-8"))["features"]
+    return shapely.union_all([shapely.from_geojson(json.dumps(f["geometry"])) for f in features])
 
 
 def write(name: str, data: dict, accuracy: str = "szacunek") -> None:

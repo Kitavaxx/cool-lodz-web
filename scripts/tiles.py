@@ -1,8 +1,10 @@
-"""tiles/ and shares.json: the walking network with its sun share as vector tiles, for /mapa.
+"""tiles/, shares.json and reach.json: the walking network of the whole city as vector tiles, for /mapa and the panel.
 
-edges.geojson of the whole city is far too big for a browser, so /mapa reads tiles instead. Run shade.py first.
-Reads <out>/edges.geojson and writes <out>/tiles/{z}/{x}/{y}.pbf (layer "edges", properties s10..s18 as whole percents)
-and <out>/shares.json (share of street length in the three sun ranges, per hour, for the bar on /mapa).
+edges.geojson of the whole city is far too big for a browser, so the site reads tiles instead. Run shade.py first.
+Reads <out>/edges.geojson (and the cool places from public/data/places.geojson) and writes
+- <out>/tiles/{z}/{x}/{y}.pbf, layer "edges": s10..s18 (sun share, whole percents) and d (metres to the nearest cool place),
+- <out>/shares.json: share of street length in the three sun ranges, per hour, for the bar on /mapa,
+- <out>/reach.json: share of street length farther than REACH from every cool place, for the panel.
 Streets outside the Łódź boundary are dropped. The lower ranks from shade.py (footpaths, service roads) show only from
 higher zooms, so a tile never holds more than a few thousand segments.
 """
@@ -17,8 +19,10 @@ import numpy as np
 import shapely
 from pyproj import Transformer
 
-from common import OUT, write
+from common import OUT, city, write
 
+REACH = 400  # m, walking distance to a cool place that counts as reachable. Same as REACH in src/Panel.tsx
+PLACES = Path(__file__).resolve().parent.parent / "public" / "data" / "places.geojson"
 HOURS = [10, 12, 14, 16, 18]
 ZOOMS = range(9, 16)  # the map overzooms beyond 15
 MIN_ZOOM = {0: 9, 1: 10, 2: 14}  # rank (shade.py) -> first zoom that shows it. Rank 2 (sidewalks, paths) is 90 % of all segments
@@ -26,7 +30,6 @@ CUTS = [0.335, 0.665]  # shade / half-shade / sun, same as src/Mapa.tsx
 EXTENT = 4096
 BUFFER = 64  # tile units drawn beyond the tile edge, so lines do not break at seams
 WORLD = 20037508.342789244  # half the width of the web mercator world, in metres
-CITY = Path(__file__).resolve().parent.parent / "public" / "data" / "lodz.geojson"
 
 
 def main():
@@ -39,15 +42,23 @@ def main():
     print(f"{len(feats)} segments read ({time.time() - t0:.0f} s)")
 
     # Keep what lies in the city: the segment's midpoint is inside the boundary
-    city = shapely.union_all([shapely.from_geojson(json.dumps(f["geometry"])) for f in json.loads(CITY.read_text(encoding="utf-8"))["features"]])
     mid = shapely.line_interpolate_point(lines, 0.5, normalized=True)
-    inside = shapely.contains_xy(city, shapely.get_x(mid), shapely.get_y(mid))
+    inside = shapely.contains_xy(city(), shapely.get_x(mid), shapely.get_y(mid))
     lines, rank, pct = lines[inside], rank[inside], pct[inside]
     print(f"{len(lines)} segments inside Łódź ({time.time() - t0:.0f} s)")
 
     # Real length in metres: web mercator stretches lengths by 1 / cos(latitude)
     to_merc = Transformer.from_crs(4326, 3857, always_xy=True)
-    metres = shapely.length(lines) * 111320 * np.cos(np.radians(shapely.get_y(shapely.line_interpolate_point(lines, 0.5, normalized=True))))
+    mid = shapely.line_interpolate_point(lines, 0.5, normalized=True)
+    metres = shapely.length(lines) * 111320 * np.cos(np.radians(shapely.get_y(mid)))
+
+    # Distance from each segment's midpoint to the nearest cool place (straight line, like the panel always showed it)
+    cool = [f["geometry"]["coordinates"] for f in json.loads(PLACES.read_text(encoding="utf-8"))["features"] if f["properties"]["type"] == "cool"]
+    to_m = lambda xy: np.column_stack([xy[:, 0] * 111320 * np.cos(np.radians(51.76)), xy[:, 1] * 110540])  # lon, lat -> metres, one city
+    m_xy, c_xy = to_m(np.column_stack([shapely.get_x(mid), shapely.get_y(mid)])), to_m(np.array(cool))
+    dist = np.min(np.hypot(m_xy[:, None, 0] - c_xy[None, :, 0], m_xy[:, None, 1] - c_xy[None, :, 1]), axis=1)
+    near = np.minimum(np.round(dist), 9999).astype(int)
+    write("reach.json", {"items": [{"reach_m": REACH, "uncovered": round(float(metres[dist > REACH].sum() / metres.sum()), 4), "cool_places": len(cool)}]})
     shares = []
     for k, h in enumerate(HOURS):
         bins = np.digitize(pct[:, k] / 100, CUTS)  # 0 shade, 1 half-shade, 2 sun
@@ -82,7 +93,7 @@ def main():
             bounds = (west, north - size, west + size, north)
             clipped = shapely.clip_by_rect(lines[idx], bounds[0] - pad, bounds[1] - pad, bounds[2] + pad, bounds[3] + pad)
             features = [
-                {"geometry": g, "properties": {f"s{h}": int(p) for h, p in zip(HOURS, pct[i])}}
+                {"geometry": g, "properties": {**{f"s{h}": int(p) for h, p in zip(HOURS, pct[i])}, "d": int(near[i])}}
                 for g, i in zip(clipped, idx) if not shapely.is_empty(g)
             ]
             if not features:
